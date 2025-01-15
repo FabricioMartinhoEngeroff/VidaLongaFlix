@@ -15,8 +15,8 @@ import java.time.Instant;
 @ControllerAdvice
 public class ResourceExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<StandardError> entityNotFound(ResourceNotFoundException e, HttpServletRequest request) {
+    @ExceptionHandler(ResourceNotFoundExceptions.class)
+    public ResponseEntity<StandardError> entityNotFound(ResourceNotFoundExceptions e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.NOT_FOUND;
         var err = new StandardError(
                 Instant.now(),

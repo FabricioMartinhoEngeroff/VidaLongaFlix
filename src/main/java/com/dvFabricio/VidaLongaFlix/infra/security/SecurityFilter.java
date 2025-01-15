@@ -1,6 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.infra.security;
 
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
+import com.dvFabricio.VidaLongaFlix.infra.exception.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -35,7 +36,7 @@ public class SecurityFilter extends OncePerRequestFilter {
 
             if (email != null) {
                 User user = userRepository.findByEmail(email)
-                        .orElseThrow(() -> new RuntimeException("Usuário associado ao token não encontrado."));
+                        .orElseThrow(() -> new ResourceNotFoundExceptions("Usuário associado ao token não encontrado."));
                 var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
