@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.services;
+package com.dvFabricio.VidaLongaFlix.infra.security;
 
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +17,12 @@ public class AuthorizationService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("Buscando usuário pelo email: " + username);
+
         return repository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com o email: " + username));
+                .orElseThrow(() -> {
+                    System.out.println("Usuário não encontrado: " + username);
+                    return new UsernameNotFoundException("Usuário não encontrado com o email: " + username);
+                });
     }
 }

@@ -3,6 +3,7 @@ package com.dvFabricio.VidaLongaFlix.services;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
+import com.dvFabricio.VidaLongaFlix.infra.exception.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.MissingRequiredFieldException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
@@ -22,7 +23,10 @@ public class UserService {
     }
 
     public List<UserDTO> findAllUsers() {
-        return userRepository.findAll().stream().map(UserDTO::new).toList();
+        return userRepository.findAll()
+                .stream()
+                .map(UserDTO::new)
+                .toList();
     }
 
     public UserDTO findUserById(UUID userId) {
@@ -34,29 +38,28 @@ public class UserService {
     @Transactional
     public UserDTO createUser(UserRequestDTO userRequestDTO) {
         validateUserRequestDTO(userRequestDTO);
-        User user = new User(
-                userRequestDTO.login(),
-                userRequestDTO.email(),
-                userRequestDTO.password()
-        );
-        userRepository.save(user);
+
+        if (userRepository.findByEmail(userRequestDTO.email()).isPresent()) {
+            throw new DuplicateResourceException("email", "Email is already in use.");
+        }
+
+        User user = new User(userRequestDTO.login(), userRequestDTO.email(), userRequestDTO.password());
+        user = userRepository.save(user); // Retorna o objeto salvo com ID
         return new UserDTO(user);
     }
 
     @Transactional
     public UserDTO updateUser(UUID userId, UserRequestDTO userRequestDTO) {
+        validateUserRequestDTO(userRequestDTO);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
-        if (userRequestDTO.login() != null && !userRequestDTO.login().isBlank()) {
-            user.setLogin(userRequestDTO.login());
-        }
-        if (userRequestDTO.email() != null && !userRequestDTO.email().isBlank()) {
-            user.setEmail(userRequestDTO.email());
-        }
-        if (userRequestDTO.password() != null && !userRequestDTO.password().isBlank()) {
-            user.setPassword(userRequestDTO.password());
-        }
-        userRepository.save(user);
+
+        System.out.println("Before update: " + user);
+        updateUserFields(user, userRequestDTO);
+        user = userRepository.save(user);
+        System.out.println("After update: " + user);
+
         return new UserDTO(user);
     }
 
@@ -68,14 +71,31 @@ public class UserService {
     }
 
     private void validateUserRequestDTO(UserRequestDTO userRequestDTO) {
-        if (userRequestDTO.login() == null || userRequestDTO.login().isBlank()) {
+        if (isBlank(userRequestDTO.login())) {
             throw new MissingRequiredFieldException("login", "Login cannot be empty.");
         }
-        if (userRequestDTO.email() == null || userRequestDTO.email().isBlank()) {
+        if (isBlank(userRequestDTO.email())) {
             throw new MissingRequiredFieldException("email", "Email cannot be empty.");
         }
-        if (userRequestDTO.password() == null || userRequestDTO.password().isBlank()) {
+        if (isBlank(userRequestDTO.password())) {
             throw new MissingRequiredFieldException("password", "Password cannot be empty.");
         }
     }
+
+    private void updateUserFields(User user, UserRequestDTO userRequestDTO) {
+        if (!isBlank(userRequestDTO.login())) {
+            user.setLogin(userRequestDTO.login());
+        }
+        if (!isBlank(userRequestDTO.email())) {
+            user.setEmail(userRequestDTO.email());
+        }
+        if (!isBlank(userRequestDTO.password())) {
+            user.setPassword(userRequestDTO.password());
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
 }
+

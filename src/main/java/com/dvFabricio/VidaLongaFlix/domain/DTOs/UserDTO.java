@@ -19,11 +19,12 @@ public record UserDTO(
                 user.getId(),
                 user.getLogin(),
                 user.getEmail(),
-                user.getRoles().stream()
+                user.getRoles() != null && !user.getRoles().isEmpty()
+                        ? user.getRoles().stream()
                         .map(Role::getName)
                         .toList()
+                        : List.of()
         );
     }
-
-
 }
+

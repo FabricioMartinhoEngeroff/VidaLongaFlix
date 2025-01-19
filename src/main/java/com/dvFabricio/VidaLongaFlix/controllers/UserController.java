@@ -2,7 +2,9 @@ package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
+import com.dvFabricio.VidaLongaFlix.infra.exception.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.MissingRequiredFieldException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -21,33 +24,56 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserDTO>> findAllUsers() {
-        List<UserDTO> users = userService.findAllUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(userService.findAllUsers());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> findUserById(@PathVariable UUID id) {
-        UserDTO userDTO = userService.findUserById(id);
-        return ResponseEntity.ok(userDTO);
+    public ResponseEntity<?> findUserById(@PathVariable String id) {
+        try {
+            UUID uuid = UUID.fromString(id);
+            return ResponseEntity.ok(userService.findUserById(uuid));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid ID format");
+        } catch (ResourceNotFoundExceptions e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Void> createUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
-        userService.createUser(userRequestDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<UserDTO> createUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userRequestDTO));
+        } catch (DuplicateResourceException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (MissingRequiredFieldException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(
-            @PathVariable UUID id,
-            @RequestBody @Valid UserRequestDTO userRequestDTO) {
-        UserDTO updatedUser = userService.updateUser(id, userRequestDTO);
-        return ResponseEntity.ok(updatedUser);
+    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody @Valid UserRequestDTO userRequestDTO) {
+        try {
+            UUID uuid = UUID.fromString(id);
+            return ResponseEntity.ok(userService.updateUser(uuid, userRequestDTO));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid ID format");
+        } catch (ResourceNotFoundExceptions e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (DuplicateResourceException e) {
+            return ResponseEntity.badRequest().body("Email is already in use.");
+        }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deleteUser(@PathVariable String id) {
+        try {
+            UUID uuid = UUID.fromString(id);
+            userService.deleteUser(uuid);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid ID format");
+        } catch (ResourceNotFoundExceptions e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }
