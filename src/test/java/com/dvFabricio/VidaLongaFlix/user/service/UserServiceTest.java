@@ -165,9 +165,6 @@ class UserServiceTest {
         then(userRepository).should().save(any(User.class));
     }
 
-
-
-
     @Test
     void naoDeveriaAtualizarUsuarioNaoEncontrado() {
         UUID userId = UUID.randomUUID();
@@ -182,6 +179,7 @@ class UserServiceTest {
         then(userRepository).should().findById(userId);
         then(userRepository).should(never()).save(any(User.class));
     }
+
 
     @Test
     void deveriaDeletarUsuarioExistente() {

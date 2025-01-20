@@ -27,5 +27,6 @@ public record UserDTO(
                 user.getPassword()
         );
     }
+
 }
 

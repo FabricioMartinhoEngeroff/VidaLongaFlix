@@ -19,6 +19,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findByLoginContainingIgnoreCase(String login);
 
-    @Query("SELECT u FROM User u WHERE u.enabled = true")
-    List<User> findActiveUsers();
+
 }

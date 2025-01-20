@@ -29,11 +29,13 @@ public class UserService {
                 .toList();
     }
 
+
     public UserDTO findUserById(UUID userId) {
         return userRepository.findById(userId)
                 .map(UserDTO::new)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
     }
+
 
     @Transactional
     public UserDTO createUser(UserRequestDTO userRequestDTO) {
