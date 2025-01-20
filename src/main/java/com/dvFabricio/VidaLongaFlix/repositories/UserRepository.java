@@ -13,15 +13,11 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
-
     Optional<User> findByEmail(String email);
-
 
     boolean existsByEmail(String email);
 
-
     List<User> findByLoginContainingIgnoreCase(String login);
-
 
     @Query("SELECT u FROM User u WHERE u.enabled = true")
     List<User> findActiveUsers();

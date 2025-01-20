@@ -7,12 +7,12 @@ import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import java.util.List;
 import java.util.UUID;
 
-
 public record UserDTO(
         UUID id,
         String login,
         String email,
-        List<String> roles
+        List<String> roles,
+        String password
 ) {
     public UserDTO(User user) {
         this(
@@ -23,7 +23,8 @@ public record UserDTO(
                         ? user.getRoles().stream()
                         .map(Role::getName)
                         .toList()
-                        : List.of()
+                        : List.of(),
+                user.getPassword()
         );
     }
 }

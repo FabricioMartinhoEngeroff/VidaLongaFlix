@@ -37,20 +37,29 @@ public class UserService {
 
     @Transactional
     public UserDTO createUser(UserRequestDTO userRequestDTO) {
-        validateUserRequestDTO(userRequestDTO);
+        if (isBlank(userRequestDTO.login())) {
+            throw new MissingRequiredFieldException("login", "Login não pode estar vazio");
+        }
+        if (isBlank(userRequestDTO.email())) {
+            throw new MissingRequiredFieldException("email", "Email não pode estar vazio");
+        }
+        if (isBlank(userRequestDTO.password())) {
+            throw new MissingRequiredFieldException("password", "Senha não pode estar vazia");
+        }
 
         if (userRepository.findByEmail(userRequestDTO.email()).isPresent()) {
             throw new DuplicateResourceException("email", "Email is already in use.");
         }
 
         User user = new User(userRequestDTO.login(), userRequestDTO.email(), userRequestDTO.password());
-        user = userRepository.save(user); // Retorna o objeto salvo com ID
+
+        user = userRepository.save(user);
+
         return new UserDTO(user);
     }
 
     @Transactional
     public UserDTO updateUser(UUID userId, UserRequestDTO userRequestDTO) {
-        validateUserRequestDTO(userRequestDTO);
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
@@ -68,18 +77,6 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
         userRepository.delete(user);
-    }
-
-    private void validateUserRequestDTO(UserRequestDTO userRequestDTO) {
-        if (isBlank(userRequestDTO.login())) {
-            throw new MissingRequiredFieldException("login", "Login cannot be empty.");
-        }
-        if (isBlank(userRequestDTO.email())) {
-            throw new MissingRequiredFieldException("email", "Email cannot be empty.");
-        }
-        if (isBlank(userRequestDTO.password())) {
-            throw new MissingRequiredFieldException("password", "Password cannot be empty.");
-        }
     }
 
     private void updateUserFields(User user, UserRequestDTO userRequestDTO) {

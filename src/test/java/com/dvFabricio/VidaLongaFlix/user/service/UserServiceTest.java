@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
+
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
@@ -41,17 +42,13 @@ class UserServiceTest {
 
     @Test
     void deveriaBuscarTodosOsUsuarios() {
-        // Dados de entrada
         User user1 = new User("user1", "user1@example.com", "password1");
         User user2 = new User("user2", "user2@example.com", "password2");
 
-        // Configuração do mock
         given(userRepository.findAll()).willReturn(List.of(user1, user2));
 
-        // Execução do método
         List<UserDTO> result = userService.findAllUsers();
 
-        // Verificações
         assertAll(
                 () -> assertEquals(2, result.size(), "Deve retornar exatamente 2 usuários"),
                 () -> assertEquals("user1", result.get(0).login(), "Login do primeiro usuário deve ser 'user1'"),
@@ -97,7 +94,7 @@ class UserServiceTest {
     @Test
     void deveriaCadastrarNovoUsuario() {
         given(userRepository.findByEmail(userRequestDTO.email())).willReturn(Optional.empty());
-        given(userRepository.save(any(User.class))).willReturn(user); // Mock do retorno do save
+        given(userRepository.save(any(User.class))).willReturn(user);
 
         UserDTO result = userService.createUser(userRequestDTO);
 
@@ -160,12 +157,14 @@ class UserServiceTest {
         assertAll(
                 () -> assertNotNull(result, "O resultado não deve ser nulo"),
                 () -> assertEquals("updatedUser", result.login(), "Login deve ser atualizado para 'updatedUser'"),
-                () -> assertEquals("updated@example.com", result.email(), "Email deve ser atualizado para 'updated@example.com'")
+                () -> assertEquals("updated@example.com", result.email(), "Email deve ser atualizado para 'updated@example.com'"),
+                () -> assertEquals("updatedPassword", result.password(), "Senha deve ser atualizada para 'updatedPassword'")
         );
 
         then(userRepository).should().findById(userId);
         then(userRepository).should().save(any(User.class));
     }
+
 
 
 
@@ -187,7 +186,7 @@ class UserServiceTest {
     @Test
     void deveriaDeletarUsuarioExistente() {
         UUID userId = user.getId();
-        given(userRepository.findById(userId)).willReturn(Optional.of(user)); // Mock do findById
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
         assertDoesNotThrow(() -> userService.deleteUser(userId));
 
