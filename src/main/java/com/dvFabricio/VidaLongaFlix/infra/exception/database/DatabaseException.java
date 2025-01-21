@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.infra.exception;
+package com.dvFabricio.VidaLongaFlix.infra.exception.database;
 
 public class DatabaseException extends RuntimeException {
     public DatabaseException(String message) {

@@ -121,7 +121,7 @@ Update your application's configuration
 2025-01-17T06:40:02.509-03:00  INFO 3256 --- [VidaLongaFlix] [http-nio-8090-exec-3] o.s.web.servlet.DispatcherServlet        : Completed initialization in 4 ms
 2025-01-17T06:44:38.955-03:00 ERROR 3256 --- [VidaLongaFlix] [http-nio-8090-exec-8] o.a.c.c.C.[.[.[.[dispatcherServlet]      : Servlet.service() for servlet [dispatcherServlet] in context with path [/api] threw exception
 
-com.dvFabricio.VidaLongaFlix.infra.exception.ResourceNotFoundExceptions: Usuário associado ao token não encontrado.
+com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions: Usuário associado ao token não encontrado.
 	at com.dvFabricio.VidaLongaFlix.infra.security.SecurityFilter.lambda$doFilterInternal$0(SecurityFilter.java:39) ~[classes/:na]
 	at java.base/java.util.Optional.orElseThrow(Optional.java:403) ~[na:na]
 	at com.dvFabricio.VidaLongaFlix.infra.security.SecurityFilter.doFilterInternal(SecurityFilter.java:39) ~[classes/:na]

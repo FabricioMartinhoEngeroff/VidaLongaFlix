@@ -2,9 +2,9 @@ package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
-import com.dvFabricio.VidaLongaFlix.infra.exception.DuplicateResourceException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.MissingRequiredFieldException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.ResourceNotFoundExceptions;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

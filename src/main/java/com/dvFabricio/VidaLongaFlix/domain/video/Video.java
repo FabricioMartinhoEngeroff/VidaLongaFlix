@@ -4,10 +4,11 @@ import com.dvFabricio.VidaLongaFlix.domain.category.Category;
 import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentDTO;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Table(name = "videos")
@@ -20,27 +21,51 @@ import java.util.stream.Collectors;
 public class Video {
 
     @Id
-    @GeneratedValue
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(nullable = false, length = 200)
+    @Column(nullable = false, unique = true, updatable = false)
+    @Setter(AccessLevel.NONE)
+    private UUID uuid = UUID.randomUUID();
+
+    @Column(nullable = false, length = 150)
+    @NotBlank(message = "The video title cannot be empty.")
+    @Size(max = 150, message = "The video title cannot exceed 150 characters.")
     private String title;
 
-    @Column(length = 1000)
+    @Column(nullable = false)
+    @NotBlank(message = "The video description cannot be empty.")
     private String description;
 
     @Column(nullable = false)
+    @NotBlank(message = "The video URL cannot be empty.")
     private String url;
 
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
-    public String getCategoryName() {
-        return category != null ? category.getName() : "Categoria não disponível";
+    @Builder
+    public Video(String title, String description, String url, Category category) {
+        this.title = title;
+        this.description = description;
+        this.url = url;
+        this.category = category;
+    }
+
+    public void update(String title, String description, String url) {
+        if (title != null && !title.isBlank()) {
+            this.title = title;
+        }
+        if (description != null && !description.isBlank()) {
+            this.description = description;
+        }
+        if (url != null && !url.isBlank()) {
+            this.url = url;
+        }
     }
 
     public List<CommentDTO> getCommentDTOs() {

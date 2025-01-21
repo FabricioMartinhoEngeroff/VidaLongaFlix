@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.infra.exception;
+package com.dvFabricio.VidaLongaFlix.infra.exception.authorization;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

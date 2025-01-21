@@ -1,51 +1,80 @@
-//package com.dvFabricio.VidaLongaFlix.controllers;
-//
-//import com.dvFabricio.VidaLongaFlix.domain.video.Video;
-//import com.dvFabricio.VidaLongaFlix.services.VideoService;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.multipart.MultipartFile;
-//
-//import java.io.IOException;
-//import java.util.List;
-//
-//@RestController
-//@RequestMapping("/api/videos")
-//public class VideoController {
-//
-//    @Autowired
-//    private VideoService videoService;
-//
-//    @PostMapping
-//    public ResponseEntity<Video> createVideo(@RequestPart("video") Video video, @RequestPart("file") MultipartFile file) {
-//        try {
-//            Video createdVideo = videoService.createVideo(video, file);
-//            return ResponseEntity.ok(createdVideo);
-//        } catch (IOException e) {
-//            return ResponseEntity.status(500).build();
-//        }
-//    }
-//
-//    @GetMapping
-//    public ResponseEntity<List<Video>> getAllVideos() {
-//        List<Video> videos = videoService.getAllVideos();
-//        return ResponseEntity.ok(videos);
-//    }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<Video> getVideoById(@PathVariable Long id) {
-//        Video video = videoService.getVideoById(id);
-//        if (video != null) {
-//            return ResponseEntity.ok(video);
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteVideo(@PathVariable Long id) {
-//        videoService.deleteVideo(id);
-//        return ResponseEntity.noContent().build();
-//    }
-//}
+package com.dvFabricio.VidaLongaFlix.controllers;
+
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoDTO;
+import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
+import com.dvFabricio.VidaLongaFlix.services.VideoService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/videos")
+public class VideoController {
+
+    private final VideoService videoService;
+
+    public VideoController(VideoService videoService) {
+        this.videoService = videoService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<VideoDTO>> getAllVideos() {
+        List<VideoDTO> videos = videoService.findAll();
+        return ResponseEntity.ok(videos);
+    }
+
+    @GetMapping("/{uuid}")
+    public ResponseEntity<?> getVideoById(@PathVariable UUID uuid) {
+        try {
+            VideoDTO video = videoService.findById(uuid);
+            return ResponseEntity.ok(video);
+        } catch (ResourceNotFoundExceptions e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createVideo(@RequestBody @Valid VideoDTO videoDTO) {
+        try {
+            VideoDTO createdVideo = videoService.create(videoDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdVideo);
+        } catch (MissingRequiredFieldException | DuplicateResourceException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (DatabaseException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{uuid}")
+    public ResponseEntity<?> updateVideo(@PathVariable UUID uuid, @RequestBody @Valid VideoDTO videoDTO) {
+        try {
+            VideoDTO updatedVideo = videoService.update(uuid, videoDTO);
+            return ResponseEntity.ok(updatedVideo);
+        } catch (ResourceNotFoundExceptions e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (MissingRequiredFieldException | DuplicateResourceException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (DatabaseException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<?> deleteVideo(@PathVariable UUID uuid) {
+        try {
+            videoService.delete(uuid);
+            return ResponseEntity.noContent().build();
+        } catch (ResourceNotFoundExceptions e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (DatabaseException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+}

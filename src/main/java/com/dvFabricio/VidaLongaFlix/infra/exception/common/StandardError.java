@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.infra.exception;
+package com.dvFabricio.VidaLongaFlix.infra.exception.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,5 +1,6 @@
-package com.dvFabricio.VidaLongaFlix.infra.exception;
+package com.dvFabricio.VidaLongaFlix.infra.exception.common;
 
+import com.dvFabricio.VidaLongaFlix.infra.exception.database.FieldMessage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

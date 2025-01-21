@@ -6,21 +6,25 @@ import java.util.List;
 import java.util.UUID;
 
 public record VideoDTO(
-        UUID id,
+        Long id,
+        UUID uuid,
         String title,
         String description,
         String url,
-        String categoryName,
-        List<CommentDTO> comments
+        UUID categoryUuid,
+        List<CommentDTO> comments,
+        int commentCount
 ) {
     public VideoDTO(Video video) {
         this(
                 video.getId(),
+                video.getUuid(),
                 video.getTitle(),
                 video.getDescription(),
                 video.getUrl(),
-                video.getCategoryName(),
-                video.getCommentDTOs()
+                video.getCategory() != null ? video.getCategory().getUuid() : null,
+                video.getCommentDTOs(),
+                video.getCommentCount()
         );
     }
 }

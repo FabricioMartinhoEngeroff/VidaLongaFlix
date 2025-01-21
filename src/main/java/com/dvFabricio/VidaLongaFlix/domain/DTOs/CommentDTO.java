@@ -10,7 +10,7 @@ public record CommentDTO(
         String text,
         UserDTO user,
         LocalDateTime date,
-        UUID videoId
+        UUID videoUuid
 ) {
     public CommentDTO(Comment comment) {
         this(
@@ -18,7 +18,7 @@ public record CommentDTO(
                 comment.getText(),
                 new UserDTO(comment.getUser()),
                 comment.getDate(),
-                comment.getVideoId()
+                comment.getVideo().getUuid()
         );
     }
 }

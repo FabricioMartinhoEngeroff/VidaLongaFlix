@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.infra.exception;
+package com.dvFabricio.VidaLongaFlix.infra.exception.authorization;
 
 public class JwtException extends RuntimeException {
     public JwtException(String message) {

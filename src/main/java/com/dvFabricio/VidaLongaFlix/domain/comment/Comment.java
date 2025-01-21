@@ -21,7 +21,7 @@ public class Comment {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = true, length = 500)
+    @Column(nullable = false, length = 500)
     private String text;
 
     @Column(nullable = false)
@@ -35,8 +35,10 @@ public class Comment {
     @JoinColumn(name = "video_id", nullable = false)
     private Video video;
 
-
-    public UUID getVideoId() {
-        return video != null ? video.getId() : null;
+    public Comment(String text, LocalDateTime date, User user, Video video) {
+        this.text = text;
+        this.date = date;
+        this.user = user;
+        this.video = video;
     }
 }
