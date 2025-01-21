@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,9 @@ class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     private User user;
     private UserRequestDTO userRequestDTO;
@@ -93,7 +97,8 @@ class UserServiceTest {
 
     @Test
     void deveriaCadastrarNovoUsuario() {
-        given(userRepository.findByEmail(userRequestDTO.email())).willReturn(Optional.empty());
+        given(userRepository.existsByEmail(userRequestDTO.email())).willReturn(false);
+        given(passwordEncoder.encode(userRequestDTO.password())).willReturn("encodedPassword");
         given(userRepository.save(any(User.class))).willReturn(user);
 
         UserDTO result = userService.createUser(userRequestDTO);
@@ -104,13 +109,14 @@ class UserServiceTest {
                 () -> assertEquals("user", result.login(), "Login deve ser 'user'")
         );
 
-        then(userRepository).should().findByEmail(userRequestDTO.email());
+        then(userRepository).should().existsByEmail(userRequestDTO.email());
+        then(passwordEncoder).should().encode(userRequestDTO.password());
         then(userRepository).should().save(any(User.class));
     }
 
     @Test
     void naoDeveriaCadastrarUsuarioComEmailDuplicado() {
-        given(userRepository.findByEmail(userRequestDTO.email())).willReturn(Optional.of(user));
+        given(userRepository.existsByEmail(userRequestDTO.email())).willReturn(true);
 
         DuplicateResourceException exception = assertThrows(
                 DuplicateResourceException.class,
@@ -118,7 +124,7 @@ class UserServiceTest {
         );
 
         assertEquals("Email is already in use.", exception.getMessage());
-        then(userRepository).should().findByEmail(userRequestDTO.email());
+        then(userRepository).should().existsByEmail(userRequestDTO.email());
         then(userRepository).should(never()).save(any(User.class));
     }
 
@@ -138,16 +144,13 @@ class UserServiceTest {
         );
     }
 
-
     @Test
     void deveriaAtualizarUsuario() {
         UUID userId = UUID.randomUUID();
         user.setId(userId);
-        user.setLogin("user");
-        user.setEmail("user@example.com");
-        user.setPassword("password");
 
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(passwordEncoder.encode("updatedPassword")).willReturn("encodedUpdatedPassword");
         given(userRepository.save(any(User.class))).willAnswer(invocation -> invocation.getArgument(0, User.class));
 
         UserRequestDTO updateRequest = new UserRequestDTO("updatedUser", "updated@example.com", "updatedPassword");
@@ -157,11 +160,11 @@ class UserServiceTest {
         assertAll(
                 () -> assertNotNull(result, "O resultado não deve ser nulo"),
                 () -> assertEquals("updatedUser", result.login(), "Login deve ser atualizado para 'updatedUser'"),
-                () -> assertEquals("updated@example.com", result.email(), "Email deve ser atualizado para 'updated@example.com'"),
-                () -> assertEquals("updatedPassword", result.password(), "Senha deve ser atualizada para 'updatedPassword'")
+                () -> assertEquals("updated@example.com", result.email(), "Email deve ser atualizado para 'updated@example.com'")
         );
 
         then(userRepository).should().findById(userId);
+        then(passwordEncoder).should().encode("updatedPassword");
         then(userRepository).should().save(any(User.class));
     }
 

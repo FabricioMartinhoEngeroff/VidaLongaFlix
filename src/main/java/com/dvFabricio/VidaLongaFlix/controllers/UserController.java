@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -40,13 +39,13 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
+    public ResponseEntity<?> createUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userRequestDTO));
         } catch (DuplicateResourceException e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body("Email is already in use.");
         } catch (MissingRequiredFieldException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
@@ -59,8 +58,6 @@ public class UserController {
             return ResponseEntity.badRequest().body("Invalid ID format");
         } catch (ResourceNotFoundExceptions e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (DuplicateResourceException e) {
-            return ResponseEntity.badRequest().body("Email is already in use.");
         }
     }
 

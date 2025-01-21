@@ -4,6 +4,7 @@ import com.dvFabricio.VidaLongaFlix.controllers.UserController;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.DuplicateResourceException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.MissingRequiredFieldException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.services.UserService;
 import org.junit.jupiter.api.Assertions;
@@ -76,7 +77,7 @@ public class UserControllerTestUnit {
         UserDTO userDTO = new UserDTO(UUID.randomUUID(), "login1", "email1@test.com", List.of("ROLE_USER"), "password1");
         Mockito.when(userService.createUser(request)).thenReturn(userDTO);
 
-        ResponseEntity<UserDTO> response = userController.createUser(request);
+        ResponseEntity<?> response = userController.createUser(request);
 
         Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
         Assertions.assertEquals(userDTO, response.getBody());
@@ -87,10 +88,22 @@ public class UserControllerTestUnit {
         UserRequestDTO request = new UserRequestDTO("login1", "email1@test.com", "password1");
         Mockito.when(userService.createUser(request)).thenThrow(new DuplicateResourceException("email", "Email is already in use."));
 
-        ResponseEntity<UserDTO> response = userController.createUser(request);
+        ResponseEntity<?> response = userController.createUser(request);
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Assertions.assertNull(response.getBody());
+        Assertions.assertEquals("Email is already in use.", response.getBody());
+    }
+
+    @Test
+    void createUser_ShouldReturnBadRequest_WhenMissingRequiredFields() {
+        UserRequestDTO request = new UserRequestDTO("", "email1@test.com", "password1");
+        Mockito.when(userService.createUser(request))
+                .thenThrow(new MissingRequiredFieldException("login", "Login cannot be empty"));
+
+        ResponseEntity<?> response = userController.createUser(request);
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Assertions.assertTrue(response.getBody().toString().contains("Login cannot be empty"));
     }
 
     @Test
@@ -144,5 +157,4 @@ public class UserControllerTestUnit {
         Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         Assertions.assertEquals("User not found", response.getBody());
     }
-
 }

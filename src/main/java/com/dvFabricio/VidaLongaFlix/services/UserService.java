@@ -8,6 +8,9 @@ import com.dvFabricio.VidaLongaFlix.infra.exception.MissingRequiredFieldExceptio
 import com.dvFabricio.VidaLongaFlix.infra.exception.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +19,14 @@ import java.util.UUID;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-    public UserService(UserRepository userRepository) {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<UserDTO> findAllUsers() {
@@ -39,37 +46,28 @@ public class UserService {
 
     @Transactional
     public UserDTO createUser(UserRequestDTO userRequestDTO) {
-        if (isBlank(userRequestDTO.login())) {
-            throw new MissingRequiredFieldException("login", "Login não pode estar vazio");
-        }
-        if (isBlank(userRequestDTO.email())) {
-            throw new MissingRequiredFieldException("email", "Email não pode estar vazio");
-        }
-        if (isBlank(userRequestDTO.password())) {
-            throw new MissingRequiredFieldException("password", "Senha não pode estar vazia");
-        }
+        validateRequiredFields(userRequestDTO);
 
-        if (userRepository.findByEmail(userRequestDTO.email()).isPresent()) {
+        if (userRepository.existsByEmail(userRequestDTO.email())) {
             throw new DuplicateResourceException("email", "Email is already in use.");
         }
 
-        User user = new User(userRequestDTO.login(), userRequestDTO.email(), userRequestDTO.password());
+        String encodedPassword = passwordEncoder.encode(userRequestDTO.password());
+        User user = new User(userRequestDTO.login(), userRequestDTO.email(), encodedPassword);
 
         user = userRepository.save(user);
-
         return new UserDTO(user);
     }
 
     @Transactional
     public UserDTO updateUser(UUID userId, UserRequestDTO userRequestDTO) {
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
 
-        System.out.println("Before update: " + user);
+        logger.debug("Before update: {}", user);
         updateUserFields(user, userRequestDTO);
         user = userRepository.save(user);
-        System.out.println("After update: " + user);
+        logger.debug("After update: {}", user);
 
         return new UserDTO(user);
     }
@@ -89,9 +87,22 @@ public class UserService {
             user.setEmail(userRequestDTO.email());
         }
         if (!isBlank(userRequestDTO.password())) {
-            user.setPassword(userRequestDTO.password());
+            user.setPassword(passwordEncoder.encode(userRequestDTO.password()));
         }
     }
+
+    private void validateRequiredFields(UserRequestDTO userRequestDTO) {
+        if (isBlank(userRequestDTO.login())) {
+            throw new MissingRequiredFieldException("login", "Login cannot be empty");
+        }
+        if (isBlank(userRequestDTO.email())) {
+            throw new MissingRequiredFieldException("email", "Email cannot be empty");
+        }
+        if (isBlank(userRequestDTO.password())) {
+            throw new MissingRequiredFieldException("password", "Password cannot be empty");
+        }
+    }
+
 
     private boolean isBlank(String value) {
         return value == null || value.isBlank();
