@@ -5,18 +5,20 @@ import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 public record CategoryDTO(
-        Long id,
+        UUID uuid,
         String name,
         Set<String> videoTitles
 ) {
     public CategoryDTO(Category category) {
-        this(category.getId(), category.getName(),
+        this(category.getUuid(), category.getName(),
                 category.getVideos().stream()
                         .filter(video -> video != null && video.getTitle() != null)
-                        .map(Video::getTitle)
+                        .map(video -> video.getTitle())
                         .collect(Collectors.toSet()));
     }
 }

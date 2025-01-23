@@ -2,8 +2,8 @@ package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.services.UserService;
 import jakarta.validation.Valid;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor

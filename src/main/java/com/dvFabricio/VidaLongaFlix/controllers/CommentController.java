@@ -1,6 +1,8 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentDTO;
+import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentNotFoundException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentPostException;
 import com.dvFabricio.VidaLongaFlix.services.CommentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -25,8 +27,10 @@ public class CommentController {
         try {
             CommentDTO createdComment = commentService.createComment(commentDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
-        } catch (Exception e) {
+        } catch (CommentPostException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while creating the comment");
         }
     }
 
@@ -36,7 +40,7 @@ public class CommentController {
             List<CommentDTO> comments = commentService.getCommentsByVideo(videoUuid);
             return ResponseEntity.ok(comments);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while fetching comments");
         }
     }
 
@@ -46,7 +50,7 @@ public class CommentController {
             List<CommentDTO> comments = commentService.getCommentsByUser(userUuid);
             return ResponseEntity.ok(comments);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while fetching comments");
         }
     }
 
@@ -55,8 +59,10 @@ public class CommentController {
         try {
             commentService.deleteComment(commentUuid);
             return ResponseEntity.noContent().build();
+        } catch (CommentNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while deleting the comment");
         }
     }
 }

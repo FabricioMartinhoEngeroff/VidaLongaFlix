@@ -5,6 +5,7 @@ import com.dvFabricio.VidaLongaFlix.domain.DTOs.LoginResponseDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.RegisterRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
 import com.dvFabricio.VidaLongaFlix.repositories.RoleRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
@@ -61,13 +62,13 @@ public class AuthController {
         try {
             User newUser = new User(body.login(), body.email(), passwordEncoder.encode(body.password()));
             Role userRole = roleRepository.findByName("ROLE_USER")
-                    .orElseThrow(() -> new RuntimeException("Role 'ROLE_USER' not found"));
+                    .orElseThrow(() -> new ResourceNotFoundExceptions("Role 'ROLE_USER' not found"));
             newUser.setRoles(List.of(userRole));
             repository.save(newUser);
 
             String token = tokenService.generateToken(newUser);
             return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponseDTO(newUser.getLogin(), token));
-        } catch (RuntimeException e) {
+        } catch (ResourceNotFoundExceptions e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }

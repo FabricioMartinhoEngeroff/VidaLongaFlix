@@ -1,6 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.infra.exception.authorization;
 
-import com.dvFabricio.VidaLongaFlix.infra.exception.common.StandardError;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.StandardError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

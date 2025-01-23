@@ -138,7 +138,6 @@ class AuthControllerTest {
         Assertions.assertEquals(token, responseBody.token());
     }
 
-
     @Test
     void register_ShouldReturnBadRequest_WhenEmailAlreadyExists() {
         String email = "existinguser@example.com";
@@ -167,4 +166,3 @@ class AuthControllerTest {
         Assertions.assertEquals("Role 'ROLE_USER' not found", response.getBody());
     }
 }
-

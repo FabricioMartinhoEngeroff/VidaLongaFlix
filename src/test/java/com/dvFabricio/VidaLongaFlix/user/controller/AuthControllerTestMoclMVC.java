@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;import org.springframework.boot.test.context.SpringBootTest;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @SpringBootTest
@@ -64,12 +64,12 @@ public class AuthControllerTestMoclMVC {
         Mockito.when(tokenService.generateToken(Mockito.any(User.class))).thenReturn(token);
 
         String requestBody = """
-            {
-                "login": "%s",
-                "email": "%s",
-                "password": "%s"
-            }
-            """.formatted(login, email, password);
+                {
+                    "login": "%s",
+                    "email": "%s",
+                    "password": "%s"
+                }
+                """.formatted(login, email, password);
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,17 +81,16 @@ public class AuthControllerTestMoclMVC {
 
     @Test
     void shouldNotRegisterUser_WhenEmailAlreadyExists() throws Exception {
-        // Mock do repositório
+
         Mockito.when(userRepository.existsByEmail("existing@example.com")).thenReturn(true);
 
-        // Requisição simulada
         String requestBody = """
-            {
-                "login": "user",
-                "email": "existing@example.com",
-                "password": "password123"
-            }
-            """;
+                {
+                    "login": "user",
+                    "email": "existing@example.com",
+                    "password": "password123"
+                }
+                """;
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -102,7 +101,7 @@ public class AuthControllerTestMoclMVC {
 
     @Test
     void shouldLoginUser_WhenValidCredentials() throws Exception {
-        // Dados simulados
+
         String email = "user@example.com";
         String password = "password123";
         String encodedPassword = "encodedPassword123";
@@ -110,18 +109,16 @@ public class AuthControllerTestMoclMVC {
 
         User user = new User("user", email, encodedPassword);
 
-        // Mock dos repositórios e serviços
         Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         Mockito.when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true);
         Mockito.when(tokenService.generateToken(Mockito.any(User.class))).thenReturn(token);
 
-        // Requisição simulada
         String requestBody = """
-            {
-                "email": "%s",
-                "password": "%s"
-            }
-            """.formatted(email, password);
+                {
+                    "email": "%s",
+                    "password": "%s"
+                }
+                """.formatted(email, password);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -140,17 +137,15 @@ public class AuthControllerTestMoclMVC {
 
         User user = new User("user", email, encodedPassword);
 
-        // Mock dos repositórios e serviços
         Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         Mockito.when(passwordEncoder.matches(password, encodedPassword)).thenReturn(false);
 
-        // Requisição simulada
         String requestBody = """
-            {
-                "email": "%s",
-                "password": "%s"
-            }
-            """.formatted(email, password);
+                {
+                    "email": "%s",
+                    "password": "%s"
+                }
+                """.formatted(email, password);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

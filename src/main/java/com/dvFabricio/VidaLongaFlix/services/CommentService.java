@@ -35,12 +35,13 @@ public class CommentService {
     public CommentDTO createComment(CommentDTO commentDTO) {
         validateCommentFields(commentDTO);
 
-        User user = userRepository.findById(commentDTO.user().uuid())
-                .orElseThrow(() -> new ResourceNotFoundExceptions("User with UUID " + commentDTO.user().uuid() + " not found."));
+        User user = userRepository.findById(commentDTO.user().id())
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User with UUID " + commentDTO.user().id() + " not found."));
+
         Video video = videoRepository.findByUuid(commentDTO.videoUuid())
                 .orElseThrow(() -> new ResourceNotFoundExceptions("Video with UUID " + commentDTO.videoUuid() + " not found."));
 
-        if (commentRepository.existsByTextAndUserUuidAndVideoUuid(commentDTO.text(), user.getUuid(), video.getUuid())) {
+        if (commentRepository.existsByTextAndUserUuidAndVideoUuid(commentDTO.text(), user.getId(), video.getUuid())) {
             throw new DatabaseException("Duplicate comment: same user, video, and text.");
         }
 
@@ -90,3 +91,4 @@ public class CommentService {
         }
     }
 }
+

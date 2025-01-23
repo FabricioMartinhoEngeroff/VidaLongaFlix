@@ -33,38 +33,27 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         if (token != null) {
             try {
-                // Validação do token
                 String email = tokenService.validateToken(token);
                 if (email != null) {
-                    // Recupera o usuário associado ao token
                     userRepository.findByEmail(email).ifPresent(user -> {
-                        // Comentado a verificação de permissões, pois você deseja deixar o acesso livre
-                        // if (!user.hasPermissionToAccess("ADMIN")) {
-                        //     throw new AccessDeniedException("Acesso negado para o usuário " + email);
-                        // }
-                        // Se o usuário for validado, o sistema deve permitir o acesso independentemente de suas roles
                         var authentication = new UsernamePasswordAuthenticationToken(
                                 user, null, user.getAuthorities());
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     });
                 }
             } catch (JwtException e) {
-                // Se houver um erro relacionado ao token, retorna um status 401
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Token inválido: " + e.getMessage());
                 return;
             } catch (AccessDeniedException e) {
-                // Se o usuário não tiver permissão, retorna um status 403 (Forbidden)
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.getWriter().write("Acesso negado: " + e.getMessage());
                 return;
             }
         }
 
-        // Continuação do filtro, se o token for válido e o usuário autorizado
         filterChain.doFilter(request, response);
     }
-
 
     private String recoverToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");

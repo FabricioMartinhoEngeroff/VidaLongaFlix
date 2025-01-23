@@ -55,11 +55,11 @@ public class User implements UserDetails {
         return roles == null ? new ArrayList<>() : roles;
     }
 
-//    public boolean hasPermissionToAccess(String requiredRole) {
-//        // Verifica se o usuário possui o papel necessário para acessar o recurso
-//        return roles.stream()
-//                .anyMatch(role -> role.getName().equals(requiredRole));
-//    }
+    public boolean hasPermissionToAccess(String requiredRole) {
+       // Verifica se o usuário possui o papel necessário para acessar o recurso
+       return roles.stream()
+               .anyMatch(role -> role.getName().equals(requiredRole));
+   }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

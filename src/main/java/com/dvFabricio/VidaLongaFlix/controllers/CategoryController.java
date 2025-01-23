@@ -1,16 +1,16 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryDTO;
-import com.dvFabricio.VidaLongaFlix.services.CategoryService;
+import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
-import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
+import com.dvFabricio.VidaLongaFlix.services.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
