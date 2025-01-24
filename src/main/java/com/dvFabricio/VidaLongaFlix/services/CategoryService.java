@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -28,70 +27,72 @@ public class CategoryService {
             return categoryRepository.findAll()
                     .stream()
                     .map(CategoryDTO::new)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (Exception e) {
             throw new DatabaseException("Error while fetching all categories.");
         }
     }
 
-    public CategoryDTO findById(UUID uuid) {
-        return categoryRepository.findByUuid(uuid)
-                .map(CategoryDTO::new)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Category with UUID " + uuid + " not found."));
+    public CategoryDTO findById(UUID id) {
+        return new CategoryDTO(findCategoryById(id));
     }
 
     @Transactional
-    public CategoryDTO create(String name) {
+    public void create(String name) {
         validateCategoryName(name);
 
         if (categoryRepository.existsByName(name)) {
             throw new DuplicateResourceException("name", "A category with the name '" + name + "' already exists.");
         }
 
-        try {
-            Category category = new Category(name);
-            category = categoryRepository.save(category);
-            return new CategoryDTO(category);
-        } catch (Exception e) {
-            throw new DatabaseException("Error while creating category '" + name + "': " + e.getMessage());
-        }
+        Category category = new Category(name);
+        saveCategory(category);
     }
 
     @Transactional
-    public CategoryDTO update(UUID uuid, String name) {
+    public void update(UUID id, String name) {
         validateCategoryName(name);
 
-        Category category = categoryRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Category with UUID " + uuid + " not found."));
+        Category category = findCategoryById(id);
 
         if (!category.getName().equalsIgnoreCase(name) && categoryRepository.existsByName(name)) {
             throw new DuplicateResourceException("name", "A category with the name '" + name + "' already exists.");
         }
 
-        try {
-            category.setName(name);
-            return new CategoryDTO(categoryRepository.save(category));
-        } catch (Exception e) {
-            throw new DatabaseException("Error while updating category with UUID " + uuid + ": " + e.getMessage());
-        }
+        category.setName(name);
+        saveCategory(category);
     }
 
     @Transactional
-    public void delete(UUID uuid) {
-        Category category = categoryRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Category with UUID " + uuid + " not found."));
-
+    public void delete(UUID id) {
+        Category category = findCategoryById(id);
         try {
             categoryRepository.delete(category);
         } catch (Exception e) {
-            throw new DatabaseException("Error while deleting category with UUID " + uuid + ".");
+            throw new DatabaseException("Error while deleting category with ID " + id + ".");
         }
+    }
+
+    private void saveCategory(Category category) {
+        try {
+            categoryRepository.save(category);
+        } catch (Exception e) {
+            throw new DatabaseException("Error while saving category: " + e.getMessage());
+        }
+    }
+
+    private Category findCategoryById(UUID id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Category with ID " + id + " not found."));
     }
 
     private void validateCategoryName(String name) {
-        if (name == null || name.isBlank()) {
+        if (isBlank(name)) {
             throw new MissingRequiredFieldException("name", "The category name is required.");
         }
     }
-}
 
+    private boolean isBlank(String field) {
+        return field == null || field.isBlank();
+    }
+}

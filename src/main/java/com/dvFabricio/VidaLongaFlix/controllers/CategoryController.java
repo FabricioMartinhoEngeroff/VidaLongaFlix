@@ -35,10 +35,10 @@ public class CategoryController {
         }
     }
 
-    @GetMapping("/{uuid}")
-    public ResponseEntity<?> getCategoryById(@PathVariable UUID uuid) {
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getCategoryById(@PathVariable UUID id) {
         try {
-            CategoryDTO category = categoryService.findById(uuid);
+            CategoryDTO category = categoryService.findById(id);
             return ResponseEntity.ok(category);
         } catch (ResourceNotFoundExceptions e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -48,8 +48,8 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<?> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
         try {
-            CategoryDTO createdCategory = categoryService.create(categoryDTO.name());
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+            categoryService.create(categoryDTO.name());
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (DuplicateResourceException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (DatabaseException e) {
@@ -57,11 +57,11 @@ public class CategoryController {
         }
     }
 
-    @PutMapping("/{uuid}")
-    public ResponseEntity<?> updateCategory(@PathVariable UUID uuid, @Valid @RequestBody CategoryDTO categoryDTO) {
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateCategory(@PathVariable UUID id, @Valid @RequestBody CategoryDTO categoryDTO) {
         try {
-            CategoryDTO updatedCategory = categoryService.update(uuid, categoryDTO.name());
-            return ResponseEntity.ok(updatedCategory);
+            categoryService.update(id, categoryDTO.name());
+            return ResponseEntity.ok().build();
         } catch (ResourceNotFoundExceptions e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (DuplicateResourceException e) {
@@ -71,10 +71,10 @@ public class CategoryController {
         }
     }
 
-    @DeleteMapping("/{uuid}")
-    public ResponseEntity<?> deleteCategory(@PathVariable UUID uuid) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCategory(@PathVariable UUID id) {
         try {
-            categoryService.delete(uuid);
+            categoryService.delete(id);
             return ResponseEntity.noContent().build();
         } catch (ResourceNotFoundExceptions e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

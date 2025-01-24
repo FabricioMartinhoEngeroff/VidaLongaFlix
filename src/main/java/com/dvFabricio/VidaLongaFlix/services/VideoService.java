@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class VideoService {
@@ -27,84 +26,84 @@ public class VideoService {
     }
 
     @Transactional
-    public VideoDTO create(VideoDTO videoDTO) {
+    public void create(VideoDTO videoDTO) {
         validateVideoFields(videoDTO);
 
-        Category category = categoryRepository.findByUuid(videoDTO.categoryUuid())
-                .orElseThrow(() -> new ResourceNotFoundExceptions(
-                        "Category with UUID " + videoDTO.categoryUuid() + " not found."
-                ));
+        Video video = Video.builder()
+                .title(videoDTO.title())
+                .description(videoDTO.description())
+                .url(videoDTO.url())
+                .category(findCategoryById(videoDTO.categoryId()))
+                .build();
 
-        try {
-            Video video = new Video(
-                    videoDTO.title(),
-                    videoDTO.description(),
-                    videoDTO.url(),
-                    category
-            );
-            video = videoRepository.save(video);
-            return new VideoDTO(video);
-        } catch (Exception e) {
-            throw new DatabaseException("Error while saving video: " + e.getMessage());
-        }
+        saveVideo(video);
     }
 
     @Transactional
-    public VideoDTO update(UUID uuid, VideoDTO videoDTO) {
+    public void update(UUID id, VideoDTO videoDTO) {
         validateVideoFields(videoDTO);
 
-        Video video = videoRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Video with UUID " + uuid + " not found."));
+        Video video = findVideoById(id);
 
-        if (videoDTO.categoryUuid() != null) {
-            Category category = categoryRepository.findByUuid(videoDTO.categoryUuid())
-                    .orElseThrow(() -> new ResourceNotFoundExceptions(
-                            "Category with UUID " + videoDTO.categoryUuid() + " not found."
-                    ));
-            video.setCategory(category);
+        if (videoDTO.categoryId() != null) {
+            video.setCategory(findCategoryById(videoDTO.categoryId()));
         }
 
-        try {
-            video.update(videoDTO.title(), videoDTO.description(), videoDTO.url());
-            video = videoRepository.save(video);
-            return new VideoDTO(video);
-        } catch (Exception e) {
-            throw new DatabaseException("Error while updating video with UUID " + uuid + ": " + e.getMessage());
-        }
+        video.update(videoDTO.title(), videoDTO.description(), videoDTO.url());
+        saveVideo(video);
     }
 
-    public VideoDTO findById(UUID uuid) {
-        Video video = videoRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Video with UUID " + uuid + " not found."));
-        return new VideoDTO(video);
+    public VideoDTO findById(UUID id) {
+        return new VideoDTO(findVideoById(id));
     }
 
     public List<VideoDTO> findAll() {
         return videoRepository.findAll().stream()
                 .map(VideoDTO::new)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional
-    public void delete(UUID uuid) {
-        Video video = videoRepository.findByUuid(uuid)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Video with UUID " + uuid + " not found."));
+    public void delete(UUID id) {
+        Video video = findVideoById(id);
         try {
             videoRepository.delete(video);
         } catch (Exception e) {
-            throw new DatabaseException("Error while deleting video with UUID " + uuid + ": " + e.getMessage());
+            throw new DatabaseException("Error while deleting video with ID " + id + ": " + e.getMessage());
         }
     }
 
+    private void saveVideo(Video video) {
+        try {
+            videoRepository.save(video);
+        } catch (Exception e) {
+            throw new DatabaseException("Error while saving video: " + e.getMessage());
+        }
+    }
+
+    private Video findVideoById(UUID id) {
+        return videoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Video with ID " + id + " not found."));
+    }
+
+    private Category findCategoryById(UUID categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Category with ID " + categoryId + " not found."));
+    }
+
     private void validateVideoFields(VideoDTO videoDTO) {
-        if (videoDTO.title() == null || videoDTO.title().isBlank()) {
+        if (isBlank(videoDTO.title())) {
             throw new MissingRequiredFieldException("title", "The video title is required.");
         }
-        if (videoDTO.description() == null || videoDTO.description().isBlank()) {
+        if (isBlank(videoDTO.description())) {
             throw new MissingRequiredFieldException("description", "The video description is required.");
         }
-        if (videoDTO.url() == null || videoDTO.url().isBlank()) {
+        if (isBlank(videoDTO.url())) {
             throw new MissingRequiredFieldException("url", "The video URL is required.");
         }
+    }
+
+    private boolean isBlank(String field) {
+        return field == null || field.isBlank();
     }
 }

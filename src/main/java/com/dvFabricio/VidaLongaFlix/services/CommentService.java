@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -32,63 +31,83 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentDTO createComment(CommentDTO commentDTO) {
+    public void create(CommentDTO commentDTO) {
         validateCommentFields(commentDTO);
 
-        User user = userRepository.findById(commentDTO.user().id())
-                .orElseThrow(() -> new ResourceNotFoundExceptions("User with UUID " + commentDTO.user().id() + " not found."));
+        User user = findUserById(commentDTO.userId());
+        Video video = findVideoById(commentDTO.videoId());
 
-        Video video = videoRepository.findByUuid(commentDTO.videoUuid())
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Video with UUID " + commentDTO.videoUuid() + " not found."));
-
-        if (commentRepository.existsByTextAndUserUuidAndVideoUuid(commentDTO.text(), user.getId(), video.getUuid())) {
+        if (commentRepository.existsByTextAndUser_IdAndVideo_Id(commentDTO.text(), user.getId(), video.getId())) {
             throw new DatabaseException("Duplicate comment: same user, video, and text.");
         }
 
-        try {
-            Comment comment = new Comment();
-            comment.setText(commentDTO.text());
-            comment.setUser(user);
-            comment.setVideo(video);
-            comment.setDate(LocalDateTime.now());
-            comment = commentRepository.save(comment);
-            return new CommentDTO(comment);
-        } catch (Exception e) {
-            throw new DatabaseException("Error while creating comment: " + e.getMessage());
-        }
+        Comment comment = new Comment();
+        comment.setText(commentDTO.text());
+        comment.setUser(user);
+        comment.setVideo(video);
+        comment.setDate(LocalDateTime.now());
+
+        saveComment(comment);
     }
 
-    public List<CommentDTO> getCommentsByVideo(UUID videoUuid) {
-        List<Comment> comments = commentRepository.findByVideoUuid(videoUuid);
+    public List<CommentDTO> getCommentsByVideo(UUID videoId) {
+        List<Comment> comments = commentRepository.findByVideo_Id(videoId);
         if (comments.isEmpty()) {
-            throw new ResourceNotFoundExceptions("No comments found for video with UUID " + videoUuid);
+            throw new ResourceNotFoundExceptions("No comments found for video with ID " + videoId);
         }
-        return comments.stream().map(CommentDTO::new).collect(Collectors.toList());
+        return comments.stream().map(CommentDTO::new).toList();
     }
 
-    public List<CommentDTO> getCommentsByUser(UUID userUuid) {
-        List<Comment> comments = commentRepository.findByUserUuid(userUuid);
+    public List<CommentDTO> getCommentsByUser(UUID userId) {
+        List<Comment> comments = commentRepository.findByUser_Id(userId);
         if (comments.isEmpty()) {
-            throw new ResourceNotFoundExceptions("No comments found for user with UUID " + userUuid);
+            throw new ResourceNotFoundExceptions("No comments found for user with ID " + userId);
         }
-        return comments.stream().map(CommentDTO::new).collect(Collectors.toList());
+        return comments.stream().map(CommentDTO::new).toList();
     }
 
     @Transactional
-    public void deleteComment(UUID commentUuid) {
-        Comment comment = commentRepository.findById(commentUuid)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Comment with UUID " + commentUuid + " not found."));
+    public void delete(UUID commentId) {
+        Comment comment = findCommentById(commentId);
         try {
             commentRepository.delete(comment);
         } catch (Exception e) {
-            throw new DatabaseException("Error while deleting comment with UUID " + commentUuid + ": " + e.getMessage());
+            throw new DatabaseException("Error while deleting comment with ID " + commentId + ": " + e.getMessage());
         }
     }
 
+    private void saveComment(Comment comment) {
+        try {
+            commentRepository.save(comment);
+        } catch (Exception e) {
+            throw new DatabaseException("Error while saving comment: " + e.getMessage());
+        }
+    }
+
+    private Comment findCommentById(UUID commentId) {
+        return commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Comment with ID " + commentId + " not found."));
+    }
+
+    private Video findVideoById(UUID videoId) {
+        return videoRepository.findById(videoId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Video with ID " + videoId + " not found."));
+    }
+
+    private User findUserById(UUID userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User with ID " + userId + " not found."));
+    }
+
     private void validateCommentFields(CommentDTO commentDTO) {
-        if (commentDTO.text() == null || commentDTO.text().isBlank()) {
+        if (isBlank(commentDTO.text())) {
             throw new MissingRequiredFieldException("text", "The comment text is required.");
         }
     }
+
+    private boolean isBlank(String field) {
+        return field == null || field.isBlank();
+    }
 }
+
 

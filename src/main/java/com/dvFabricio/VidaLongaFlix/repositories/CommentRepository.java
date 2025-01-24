@@ -11,9 +11,10 @@ import java.util.UUID;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
-    List<Comment> findByVideoUuid(UUID videoUuid);
+    List<Comment> findByVideo_Id(UUID videoId);
 
-    List<Comment> findByUserUuid(UUID userUuid);
+    List<Comment> findByUser_Id(UUID userId);
 
-    boolean existsByTextAndUserUuidAndVideoUuid(String text, UUID userUuid, UUID videoUuid);
+    boolean existsByTextAndUser_IdAndVideo_Id(String text, UUID userId, UUID videoId);
+
 }

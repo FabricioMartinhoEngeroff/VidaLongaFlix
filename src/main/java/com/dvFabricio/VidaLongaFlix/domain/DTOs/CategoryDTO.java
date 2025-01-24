@@ -1,7 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.domain.DTOs;
 
 import com.dvFabricio.VidaLongaFlix.domain.category.Category;
-import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 
 
 import java.util.Set;
@@ -15,7 +14,7 @@ public record CategoryDTO(
         Set<String> videoTitles
 ) {
     public CategoryDTO(Category category) {
-        this(category.getUuid(), category.getName(),
+        this(category.getId(), category.getName(),
                 category.getVideos().stream()
                         .filter(video -> video != null && video.getTitle() != null)
                         .map(video -> video.getTitle())

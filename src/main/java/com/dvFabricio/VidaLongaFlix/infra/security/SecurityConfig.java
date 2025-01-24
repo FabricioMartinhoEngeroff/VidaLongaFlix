@@ -27,10 +27,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Desativa CSRF
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless session
                 .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll() // Permite todas as requisições
+                        .anyRequest().permitAll()
                 )
                 .headers(headers -> headers.disable())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);

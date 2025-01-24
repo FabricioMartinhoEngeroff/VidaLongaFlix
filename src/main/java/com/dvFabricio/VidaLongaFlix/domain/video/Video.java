@@ -11,8 +11,8 @@ import lombok.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Table(name = "videos")
 @Entity
+@Table(name = "videos")
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
@@ -21,12 +21,8 @@ import java.util.stream.Collectors;
 public class Video {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true, updatable = false)
-    @Setter(AccessLevel.NONE)
-    private UUID uuid = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(nullable = false, length = 150)
     @NotBlank(message = "The video title cannot be empty.")
@@ -83,4 +79,7 @@ public class Video {
                 .map(comment -> comment.getUser().getLogin())
                 .collect(Collectors.toList());
     }
+
+
 }
+

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+
 @RestController
 @RequestMapping("/videos")
 public class VideoController {
@@ -26,14 +27,18 @@ public class VideoController {
 
     @GetMapping
     public ResponseEntity<List<VideoDTO>> getAllVideos() {
-        List<VideoDTO> videos = videoService.findAll();
-        return ResponseEntity.ok(videos);
+        try {
+            List<VideoDTO> videos = videoService.findAll();
+            return ResponseEntity.ok(videos);
+        } catch (DatabaseException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
-    @GetMapping("/{uuid}")
-    public ResponseEntity<?> getVideoById(@PathVariable UUID uuid) {
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getVideoById(@PathVariable UUID id) {
         try {
-            VideoDTO video = videoService.findById(uuid);
+            VideoDTO video = videoService.findById(id);
             return ResponseEntity.ok(video);
         } catch (ResourceNotFoundExceptions e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -43,8 +48,8 @@ public class VideoController {
     @PostMapping
     public ResponseEntity<?> createVideo(@RequestBody @Valid VideoDTO videoDTO) {
         try {
-            VideoDTO createdVideo = videoService.create(videoDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdVideo);
+            videoService.create(videoDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (MissingRequiredFieldException | DuplicateResourceException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (DatabaseException e) {
@@ -52,11 +57,11 @@ public class VideoController {
         }
     }
 
-    @PutMapping("/{uuid}")
-    public ResponseEntity<?> updateVideo(@PathVariable UUID uuid, @RequestBody @Valid VideoDTO videoDTO) {
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateVideo(@PathVariable UUID id, @RequestBody @Valid VideoDTO videoDTO) {
         try {
-            VideoDTO updatedVideo = videoService.update(uuid, videoDTO);
-            return ResponseEntity.ok(updatedVideo);
+            videoService.update(id, videoDTO);
+            return ResponseEntity.ok().build();
         } catch (ResourceNotFoundExceptions e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (MissingRequiredFieldException | DuplicateResourceException e) {
@@ -66,10 +71,10 @@ public class VideoController {
         }
     }
 
-    @DeleteMapping("/{uuid}")
-    public ResponseEntity<?> deleteVideo(@PathVariable UUID uuid) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteVideo(@PathVariable UUID id) {
         try {
-            videoService.delete(uuid);
+            videoService.delete(id);
             return ResponseEntity.noContent().build();
         } catch (ResourceNotFoundExceptions e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

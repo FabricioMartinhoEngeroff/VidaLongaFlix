@@ -3,6 +3,8 @@ package com.dvFabricio.VidaLongaFlix.domain.comment;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -10,18 +12,20 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "comments")
-@Setter
 @Getter
+@Setter
+@EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "id")
 public class Comment {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false, length = 500)
+    @NotBlank(message = "The comment text cannot be empty.")
+    @Size(max = 500, message = "The comment text cannot exceed 500 characters.")
     private String text;
 
     @Column(nullable = false)

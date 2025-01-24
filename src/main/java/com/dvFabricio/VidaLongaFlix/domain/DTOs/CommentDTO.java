@@ -8,17 +8,17 @@ import java.util.UUID;
 public record CommentDTO(
         UUID id,
         String text,
-        UserDTO user,
         LocalDateTime date,
-        UUID videoUuid
+        UUID userId,
+        UUID videoId
 ) {
     public CommentDTO(Comment comment) {
         this(
                 comment.getId(),
                 comment.getText(),
-                new UserDTO(comment.getUser()),
                 comment.getDate(),
-                comment.getVideo().getUuid()
+                comment.getUser().getId(),
+                comment.getVideo().getId()
         );
     }
 }

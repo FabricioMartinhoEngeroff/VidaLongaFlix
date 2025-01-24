@@ -1,6 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.infra.security;
 
-import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.AccessDeniedException;
+import com.dvFabricio.VidaLongaFlix.domain.user.User;
+
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,11 +9,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.JwtException;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
+
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -28,35 +32,30 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
-        String token = recoverToken(request);
+        String token = extractToken(request);
 
         if (token != null) {
-            try {
-                String email = tokenService.validateToken(token);
-                if (email != null) {
-                    userRepository.findByEmail(email).ifPresent(user -> {
-                        var authentication = new UsernamePasswordAuthenticationToken(
-                                user, null, user.getAuthorities());
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                    });
-                }
-            } catch (JwtException e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write("Token inválido: " + e.getMessage());
-                return;
-            } catch (AccessDeniedException e) {
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                response.getWriter().write("Acesso negado: " + e.getMessage());
-                return;
-            }
+            authenticateWithToken(token);
         }
 
         filterChain.doFilter(request, response);
     }
 
-    private String recoverToken(HttpServletRequest request) {
+    private String extractToken(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         return (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
+    }
+
+    private void authenticateWithToken(String token) {
+        String email = tokenService.validateToken(token);
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            Optional<User> userOptional = userRepository.findByEmail(email);
+            if (userOptional.isPresent()) {
+                UserDetails userDetails = userOptional.get();
+                var authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        }
     }
 }
