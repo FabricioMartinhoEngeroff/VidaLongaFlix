@@ -21,4 +21,8 @@ public record CommentDTO(
                 comment.getVideo().getId()
         );
     }
+
+    public CommentDTO(String text) {
+        this(null, text, null, null, null);
+    }
 }

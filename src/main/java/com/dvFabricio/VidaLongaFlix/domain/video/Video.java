@@ -2,14 +2,14 @@ package com.dvFabricio.VidaLongaFlix.domain.video;
 
 import com.dvFabricio.VidaLongaFlix.domain.category.Category;
 import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentDTO;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "videos")
@@ -44,42 +44,21 @@ public class Video {
     @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
 
+    @Column(nullable = false)
+    private int views = 0;
+
+    @Column(nullable = false)
+    private double watchTime;
+
     @Builder
-    public Video(String title, String description, String url, Category category) {
+    public Video(String title, String description, String url, Category category, int views, double watchTime) {
         this.title = title;
         this.description = description;
         this.url = url;
         this.category = category;
+        this.views = views;
+        this.watchTime = watchTime;
     }
-
-    public void update(String title, String description, String url) {
-        if (title != null && !title.isBlank()) {
-            this.title = title;
-        }
-        if (description != null && !description.isBlank()) {
-            this.description = description;
-        }
-        if (url != null && !url.isBlank()) {
-            this.url = url;
-        }
-    }
-
-    public List<CommentDTO> getCommentDTOs() {
-        return comments.stream()
-                .map(CommentDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    public int getCommentCount() {
-        return comments != null ? comments.size() : 0;
-    }
-
-    public List<String> getUserNamesFromComments() {
-        return comments.stream()
-                .map(comment -> comment.getUser().getLogin())
-                .collect(Collectors.toList());
-    }
-
-
 }
+
 

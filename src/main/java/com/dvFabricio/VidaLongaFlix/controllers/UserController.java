@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -44,11 +45,16 @@ public class UserController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userRequestDTO));
         } catch (DuplicateResourceException e) {
-            return ResponseEntity.badRequest().body("Email is already in use.");
+            Map<String, String> errorResponse = Map.of(
+                    "field", e.getField(),
+                    "message", e.getMessage()
+            );
+            return ResponseEntity.badRequest().body(errorResponse);
         } catch (MissingRequiredFieldException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody @Valid UserRequestDTO userRequestDTO) {

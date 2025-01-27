@@ -42,7 +42,10 @@ public class CategoryService {
         validateCategoryName(name);
 
         if (categoryRepository.existsByName(name)) {
-            throw new DuplicateResourceException("name", "A category with the name '" + name + "' already exists.");
+            throw new DuplicateResourceException(
+                    "name",
+                    "A category with this name already exists."
+            );
         }
 
         Category category = new Category(name);
@@ -56,7 +59,10 @@ public class CategoryService {
         Category category = findCategoryById(id);
 
         if (!category.getName().equalsIgnoreCase(name) && categoryRepository.existsByName(name)) {
-            throw new DuplicateResourceException("name", "A category with the name '" + name + "' already exists.");
+            throw new DuplicateResourceException(
+                    "name",
+                    "A category with this name already exists."
+            );
         }
 
         category.setName(name);
@@ -85,6 +91,7 @@ public class CategoryService {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("Category with ID " + id + " not found."));
     }
+
 
     private void validateCategoryName(String name) {
         if (isBlank(name)) {

@@ -12,7 +12,9 @@ public record VideoDTO(
         String url,
         UUID categoryId,
         List<CommentDTO> comments,
-        int commentCount
+        int commentCount,
+        int views,
+        double watchTime
 ) {
     public VideoDTO(Video video) {
         this(
@@ -24,8 +26,9 @@ public record VideoDTO(
                 video.getComments() != null
                         ? video.getComments().stream().map(CommentDTO::new).toList()
                         : List.of(),
-                video.getComments() != null ? video.getComments().size() : 0
+                video.getComments() != null ? video.getComments().size() : 0,
+                video.getViews(),
+                video.getWatchTime()
         );
     }
 }
-

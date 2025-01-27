@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.user.controller;
+package com.dvFabricio.VidaLongaFlix.userTest.controller;
 
 import com.dvFabricio.VidaLongaFlix.controllers.AuthController;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.LoginRequestDTO;

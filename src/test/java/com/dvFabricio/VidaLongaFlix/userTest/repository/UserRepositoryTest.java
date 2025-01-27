@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.user.repository;
+package com.dvFabricio.VidaLongaFlix.userTest.repository;
 
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;

@@ -1,15 +1,17 @@
-package com.dvFabricio.VidaLongaFlix.user.domain;
+package com.dvFabricio.VidaLongaFlix.userTest.domain;
 
 
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.List;
 
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserTest {
 
     @Test

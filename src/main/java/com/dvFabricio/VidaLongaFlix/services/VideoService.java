@@ -8,11 +8,14 @@ import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFiel
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class VideoService {
@@ -45,11 +48,19 @@ public class VideoService {
 
         Video video = findVideoById(id);
 
+        if (videoDTO.title() != null && !videoDTO.title().isBlank()) {
+            video.setTitle(videoDTO.title());
+        }
+        if (videoDTO.description() != null && !videoDTO.description().isBlank()) {
+            video.setDescription(videoDTO.description());
+        }
+        if (videoDTO.url() != null && !videoDTO.url().isBlank()) {
+            video.setUrl(videoDTO.url());
+        }
         if (videoDTO.categoryId() != null) {
             video.setCategory(findCategoryById(videoDTO.categoryId()));
         }
 
-        video.update(videoDTO.title(), videoDTO.description(), videoDTO.url());
         saveVideo(video);
     }
 
@@ -89,6 +100,37 @@ public class VideoService {
     private Category findCategoryById(UUID categoryId) {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("Category with ID " + categoryId + " not found."));
+    }
+
+    public List<VideoDTO> getMostWatchedVideos(int limit) {
+        return videoRepository.findTopByOrderByViewsDesc(Pageable.ofSize(limit)).stream()
+                .map(VideoDTO::new)
+                .toList();
+    }
+
+    public List<VideoDTO> getLeastWatchedVideos(int limit) {
+        return videoRepository.findTopByOrderByViewsAsc(Pageable.ofSize(limit)).stream()
+                .map(VideoDTO::new)
+                .toList();
+    }
+
+    public Map<String, Long> getTotalViewsByCategory() {
+        return categoryRepository.findAll().stream()
+                .collect(Collectors.toMap(
+                        Category::getName,
+                        category -> videoRepository.countViewsByCategoryId(category.getId())
+                ));
+    }
+
+    public double getAverageWatchTime(UUID videoId) {
+        return videoRepository.findAverageWatchTimeByVideoId(videoId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Video with ID " + videoId + " has no watch time data."));
+    }
+
+    public List<VideoDTO> getVideosWithMostComments(int limit) {
+        return videoRepository.findTopByOrderByCommentsCountDesc(Pageable.ofSize(limit)).stream()
+                .map(VideoDTO::new)
+                .toList();
     }
 
     private void validateVideoFields(VideoDTO videoDTO) {

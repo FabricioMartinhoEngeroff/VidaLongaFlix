@@ -2,13 +2,16 @@ package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentNotFoundException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentPostException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.services.CommentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,20 +30,26 @@ public class CommentController {
         try {
             commentService.create(commentDTO);
             return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (CommentPostException e) {
+        } catch (DuplicateResourceException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (MissingRequiredFieldException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while creating the comment");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
 
     @GetMapping("/video/{videoId}")
-    public ResponseEntity<?> getCommentsByVideo(@PathVariable UUID videoId) {
+    public ResponseEntity<List<CommentDTO>> getCommentsByVideo(@PathVariable UUID videoId) {
         try {
             List<CommentDTO> comments = commentService.getCommentsByVideo(videoId);
             return ResponseEntity.ok(comments);
+        } catch (ResourceNotFoundExceptions e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonList(new CommentDTO("Error: " + e.getMessage())));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while fetching comments");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonList(new CommentDTO("Unexpected error occurred: " + e.getMessage())));
         }
     }
 
@@ -49,8 +58,8 @@ public class CommentController {
         try {
             List<CommentDTO> comments = commentService.getCommentsByUser(userId);
             return ResponseEntity.ok(comments);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while fetching comments");
+        } catch (ResourceNotFoundExceptions e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
@@ -62,7 +71,7 @@ public class CommentController {
         } catch (CommentNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while deleting the comment");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
 }

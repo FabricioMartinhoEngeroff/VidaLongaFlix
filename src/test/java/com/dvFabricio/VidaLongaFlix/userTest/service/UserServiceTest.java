@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.user.service;
+package com.dvFabricio.VidaLongaFlix.userTest.service;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;

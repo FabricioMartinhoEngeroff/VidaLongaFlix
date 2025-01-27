@@ -6,10 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
+import java.util.*;
 
 @Entity
 @Table(name = "categories")
@@ -24,15 +21,11 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 100, unique = true)
-    @NotBlank(message = "The category name cannot be empty.")
-    @Size(max = 100, message = "The category name cannot exceed 100 characters.")
+    @Column(nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @Setter(AccessLevel.NONE)
-    private Set<Video> videos = new HashSet<>();
-
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Video> videos = new ArrayList<>();
 
     public Category(String name) {
         this.name = name;

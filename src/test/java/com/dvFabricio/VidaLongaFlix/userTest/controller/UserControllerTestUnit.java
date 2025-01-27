@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.user.controller;
+package com.dvFabricio.VidaLongaFlix.userTest.controller;
 
 import com.dvFabricio.VidaLongaFlix.controllers.UserController;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
@@ -86,12 +87,19 @@ public class UserControllerTestUnit {
     @Test
     void createUser_ShouldReturnBadRequest_WhenDuplicateEmail() {
         UserRequestDTO request = new UserRequestDTO("login1", "email1@test.com", "password1");
-        Mockito.when(userService.createUser(request)).thenThrow(new DuplicateResourceException("email", "Email is already in use."));
+
+        Mockito.when(userService.createUser(request))
+                .thenThrow(new DuplicateResourceException("email", "A user with this email already exists."));
 
         ResponseEntity<?> response = userController.createUser(request);
 
         Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        Assertions.assertEquals("Email is already in use.", response.getBody());
+
+        @SuppressWarnings("unchecked")
+        Map<String, String> responseBody = (Map<String, String>) response.getBody();
+        Assertions.assertNotNull(responseBody);
+        Assertions.assertEquals("email", responseBody.get("field"));
+        Assertions.assertEquals("A user with this email already exists.", responseBody.get("message"));
     }
 
     @Test

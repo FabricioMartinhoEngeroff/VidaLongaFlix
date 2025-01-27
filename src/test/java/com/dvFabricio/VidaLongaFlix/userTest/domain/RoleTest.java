@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.user.domain;
+package com.dvFabricio.VidaLongaFlix.userTest.domain;
 
 
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;

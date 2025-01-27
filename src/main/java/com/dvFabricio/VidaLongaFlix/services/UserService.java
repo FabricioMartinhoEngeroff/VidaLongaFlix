@@ -3,8 +3,8 @@ package com.dvFabricio.VidaLongaFlix.services;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import jakarta.transaction.Transactional;
@@ -30,16 +30,11 @@ public class UserService {
     }
 
     public List<UserDTO> findAllUsers() {
-        return userRepository.findAll()
-                .stream()
-                .map(UserDTO::new)
-                .toList();
+        return userRepository.findAll().stream().map(UserDTO::new).toList();
     }
 
     public UserDTO findUserById(UUID userId) {
-        return userRepository.findById(userId)
-                .map(UserDTO::new)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
+        return userRepository.findById(userId).map(UserDTO::new).orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
     }
 
     @Transactional
@@ -47,7 +42,7 @@ public class UserService {
         validateRequiredFields(userRequestDTO);
 
         if (userRepository.existsByEmail(userRequestDTO.email())) {
-            throw new DuplicateResourceException("email", "Email is already in use.");
+            throw new DuplicateResourceException("email", "A user with this email already exists.");
         }
 
         String encodedPassword = passwordEncoder.encode(userRequestDTO.password());
@@ -57,10 +52,10 @@ public class UserService {
         return new UserDTO(user);
     }
 
+
     @Transactional
     public UserDTO updateUser(UUID userId, UserRequestDTO userRequestDTO) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
 
         logger.debug("Before update: {}", user);
         updateUserFields(user, userRequestDTO);
@@ -72,8 +67,7 @@ public class UserService {
 
     @Transactional
     public void deleteUser(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
         userRepository.delete(user);
     }
 
