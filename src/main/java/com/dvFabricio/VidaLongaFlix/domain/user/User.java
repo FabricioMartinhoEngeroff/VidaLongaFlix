@@ -9,8 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,11 +35,7 @@ public class User implements UserDetails {
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "users_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<Role> roles = new ArrayList<>();
 
     public User(String login, String email, String password) {
@@ -56,16 +50,13 @@ public class User implements UserDetails {
     }
 
     public boolean hasPermissionToAccess(String requiredRole) {
-       // Verifica se o usuário possui o papel necessário para acessar o recurso
-       return roles.stream()
-               .anyMatch(role -> role.getName().equals(requiredRole));
-   }
+        // Verifica se o usuário possui o papel necessário para acessar o recurso
+        return roles.stream().anyMatch(role -> role.getName().equals(requiredRole));
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
-                .toList();
+        return getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList();
     }
 
     @Override

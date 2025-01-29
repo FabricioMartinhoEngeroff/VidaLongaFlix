@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.categoryTest.domain;
 
 
-import com.dvFabricio.VidaLongaFlix.domain.category.Category;
+import com.dvFabricio.VidaLongaFlix.domain.video.Category;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

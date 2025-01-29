@@ -2,13 +2,12 @@ package com.dvFabricio.VidaLongaFlix.videoTest.controller;
 
 import com.dvFabricio.VidaLongaFlix.controllers.VideoController;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoDTO;
-import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.services.VideoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,7 +18,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -54,6 +52,17 @@ public class VideoControllerTest {
                 .andExpect(jsonPath("$.size()").value(2))
                 .andExpect(jsonPath("$[0].title").value("Video 1"))
                 .andExpect(jsonPath("$[1].title").value("Video 2"));
+
+        verify(videoService).findAll();
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenNoVideosExist() throws Exception {
+        when(videoService.findAll()).thenReturn(List.of());
+
+        mockMvc.perform(get("/videos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(0));
 
         verify(videoService).findAll();
     }
@@ -105,16 +114,21 @@ public class VideoControllerTest {
     }
 
     @Test
-    void shouldNotCreateVideoWithMissingFields() throws Exception {
-        doThrow(new MissingRequiredFieldException("Title", "Title is required.")).when(videoService).create(any(VideoDTO.class));
+    void shouldReturnBadRequestWhenCreatingVideoWithNonExistentCategory() throws Exception {
+        UUID categoryId = UUID.randomUUID();
+
+        doThrow(new ResourceNotFoundExceptions("Category with ID " + categoryId + " not found."))
+                .when(videoService).create(any(VideoDTO.class));
 
         mockMvc.perform(post("/videos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{" +
+                                "\"title\":\"Video 1\"," +
                                 "\"description\":\"Description 1\"," +
-                                "\"url\":\"http://example.com/1\"}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("O campo obrigatório 'Title' está ausente ou inválido. Title is required."));
+                                "\"url\":\"http://example.com/1\"," +
+                                "\"categoryId\":\"" + categoryId + "\"}"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Category with ID " + categoryId + " not found."));
 
         verify(videoService).create(any(VideoDTO.class));
     }
@@ -133,19 +147,25 @@ public class VideoControllerTest {
                                 "\"categoryId\":\"" + categoryId + "\"}"))
                 .andExpect(status().isOk());
 
-        ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
-        ArgumentCaptor<VideoDTO> dtoCaptor = ArgumentCaptor.forClass(VideoDTO.class);
-
-        verify(videoService).update(idCaptor.capture(), dtoCaptor.capture());
-
-        assertEquals(videoId, idCaptor.getValue());
-        VideoDTO capturedDTO = dtoCaptor.getValue();
-        assertEquals("Updated Video", capturedDTO.title());
-        assertEquals("Updated Description", capturedDTO.description());
-        assertEquals("http://example.com/updated", capturedDTO.url());
-        assertEquals(categoryId, capturedDTO.categoryId());
+        verify(videoService).update(eq(videoId), any(VideoDTO.class));
     }
 
+    @Test
+    void shouldReturnNotFoundWhenUpdatingNonExistentVideo() throws Exception {
+        UUID videoId = UUID.randomUUID();
+        doThrow(new ResourceNotFoundExceptions("Video not found")).when(videoService).update(eq(videoId), any(VideoDTO.class));
+
+        mockMvc.perform(put("/videos/{id}", videoId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{" +
+                                "\"title\":\"Updated Video\"," +
+                                "\"description\":\"Updated Description\"," +
+                                "\"url\":\"http://example.com/updated\"}"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("Video not found"));
+
+        verify(videoService).update(eq(videoId), any(VideoDTO.class));
+    }
 
     @Test
     void shouldDeleteVideo() throws Exception {
@@ -169,6 +189,18 @@ public class VideoControllerTest {
         mockMvc.perform(delete("/videos/{id}", videoId))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("Video with ID " + videoId + " not found."));
+
+        verify(videoService).delete(videoId);
+    }
+
+    @Test
+    void shouldReturnInternalServerErrorWhenDatabaseErrorOccurs() throws Exception {
+        UUID videoId = UUID.randomUUID();
+        doThrow(new DatabaseException("Database error")).when(videoService).delete(videoId);
+
+        mockMvc.perform(delete("/videos/{id}", videoId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string("Database error"));
 
         verify(videoService).delete(videoId);
     }

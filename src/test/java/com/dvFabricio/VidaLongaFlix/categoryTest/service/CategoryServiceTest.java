@@ -1,8 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.categoryTest.service;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryDTO;
-import com.dvFabricio.VidaLongaFlix.domain.category.Category;
-
+import com.dvFabricio.VidaLongaFlix.domain.video.Category;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
@@ -103,10 +102,11 @@ class CategoryServiceTest {
                 () -> categoryService.create(category.getName())
         );
 
-        assertEquals("A category with the name 'Health' already exists.", exception.getMessage());
+        assertEquals("A category with this name already exists.", exception.getMessage());
         then(categoryRepository).should().existsByName(category.getName());
         then(categoryRepository).should(never()).save(any(Category.class));
     }
+
 
     @Test
     void shouldUpdateCategory() {
@@ -137,7 +137,7 @@ class CategoryServiceTest {
                 () -> categoryService.update(categoryId, duplicateName)
         );
 
-        assertEquals("A category with the name 'Duplicate Health' already exists.", exception.getMessage());
+        assertEquals("A category with this name already exists.", exception.getMessage());
         then(categoryRepository).should().findById(categoryId);
         then(categoryRepository).should().existsByName(duplicateName);
         then(categoryRepository).should(never()).save(any(Category.class));

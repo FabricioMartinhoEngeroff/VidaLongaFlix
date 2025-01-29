@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.commentTest.service;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentDTO;
-import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
+import com.dvFabricio.VidaLongaFlix.domain.video.Comment;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentNotFoundException;
@@ -58,15 +58,12 @@ class CommentServiceTest {
         video = Video.builder().title("Video Title").description("Video Description").url("http://example.com/video").views(100).watchTime(50.5).build();
         ReflectionTestUtils.setField(video, "id", UUID.randomUUID());
 
-        comment = new Comment();
-        comment.setText("Sample comment");
-        comment.setUser(user);
-        comment.setVideo(video);
-        comment.setDate(LocalDateTime.now());
+        comment = Comment.builder().text("Sample comment").user(user).video(video).date(LocalDateTime.now()).build();
         ReflectionTestUtils.setField(comment, "id", UUID.randomUUID());
 
         commentDTO = new CommentDTO(comment.getId(), comment.getText(), comment.getDate(), user.getId(), video.getId());
     }
+
 
     @Test
     void shouldCreateNewComment() {

@@ -1,6 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.domain.DTOs;
 
-import com.dvFabricio.VidaLongaFlix.domain.category.Category;
+import com.dvFabricio.VidaLongaFlix.domain.video.Category;
+import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 
 
 import java.util.Set;
@@ -21,7 +22,7 @@ public record CategoryDTO(
                 category.getVideos() != null
                         ? category.getVideos().stream()
                         .filter(video -> video != null && video.getTitle() != null)
-                        .map(video -> video.getTitle())
+                        .map(Video::getTitle)
                         .collect(Collectors.toSet())
                         : Set.of());
     }

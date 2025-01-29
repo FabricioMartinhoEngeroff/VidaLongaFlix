@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.categoryTest.repository;
 
 
-import com.dvFabricio.VidaLongaFlix.domain.category.Category;
+import com.dvFabricio.VidaLongaFlix.domain.video.Category;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

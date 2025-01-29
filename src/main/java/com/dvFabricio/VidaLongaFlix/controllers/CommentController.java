@@ -2,6 +2,7 @@ package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentNotFoundException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
@@ -31,7 +32,9 @@ public class CommentController {
             commentService.create(commentDTO);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (DuplicateResourceException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Comment: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (MissingRequiredFieldException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -40,16 +43,12 @@ public class CommentController {
     }
 
     @GetMapping("/video/{videoId}")
-    public ResponseEntity<List<CommentDTO>> getCommentsByVideo(@PathVariable UUID videoId) {
+    public ResponseEntity<?> getCommentsByVideo(@PathVariable UUID videoId) {
         try {
             List<CommentDTO> comments = commentService.getCommentsByVideo(videoId);
             return ResponseEntity.ok(comments);
         } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Collections.singletonList(new CommentDTO("Error: " + e.getMessage())));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonList(new CommentDTO("Unexpected error occurred: " + e.getMessage())));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Video not found"); // ✅ Fix: Return plain message
         }
     }
 
@@ -59,7 +58,7 @@ public class CommentController {
             List<CommentDTO> comments = commentService.getCommentsByUser(userId);
             return ResponseEntity.ok(comments);
         } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found"); // ✅ Fix: Return plain message
         }
     }
 
@@ -68,8 +67,10 @@ public class CommentController {
         try {
             commentService.delete(commentId);
             return ResponseEntity.noContent().build();
-        } catch (CommentNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (ResourceNotFoundExceptions e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not found"); // ✅ Fix: Ensure expected error message
+        } catch (DatabaseException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Database error"); // ✅ Fix: Ensure correct response
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }

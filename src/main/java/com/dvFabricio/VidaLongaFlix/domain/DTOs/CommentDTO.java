@@ -1,6 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.domain.DTOs;
 
-import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
+import com.dvFabricio.VidaLongaFlix.domain.video.Comment;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

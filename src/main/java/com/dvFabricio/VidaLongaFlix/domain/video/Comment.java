@@ -1,7 +1,6 @@
-package com.dvFabricio.VidaLongaFlix.domain.comment;
+package com.dvFabricio.VidaLongaFlix.domain.video;
 
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
-import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -39,10 +38,12 @@ public class Comment {
     @JoinColumn(name = "video_id", nullable = false)
     private Video video;
 
+    @Builder
     public Comment(String text, LocalDateTime date, User user, Video video) {
         this.text = text;
         this.date = date;
         this.user = user;
         this.video = video;
     }
+
 }

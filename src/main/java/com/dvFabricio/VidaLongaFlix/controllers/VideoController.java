@@ -52,6 +52,8 @@ public class VideoController {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (MissingRequiredFieldException | DuplicateResourceException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (ResourceNotFoundExceptions e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // <-- Verifique se está retornando corretamente
         } catch (DatabaseException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }

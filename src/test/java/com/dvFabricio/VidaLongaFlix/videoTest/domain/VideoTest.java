@@ -1,8 +1,8 @@
 package com.dvFabricio.VidaLongaFlix.videoTest.domain;
 
 
-import com.dvFabricio.VidaLongaFlix.domain.category.Category;
-import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
+import com.dvFabricio.VidaLongaFlix.domain.video.Category;
+import com.dvFabricio.VidaLongaFlix.domain.video.Comment;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;

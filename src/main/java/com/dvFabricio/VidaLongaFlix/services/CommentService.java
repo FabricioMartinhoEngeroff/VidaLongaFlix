@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentDTO;
-import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
+import com.dvFabricio.VidaLongaFlix.domain.video.Comment;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentNotFoundException;
