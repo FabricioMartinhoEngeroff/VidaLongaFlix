@@ -3,7 +3,6 @@ package com.dvFabricio.VidaLongaFlix.domain.DTOs;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 
-
 import java.util.List;
 import java.util.UUID;
 

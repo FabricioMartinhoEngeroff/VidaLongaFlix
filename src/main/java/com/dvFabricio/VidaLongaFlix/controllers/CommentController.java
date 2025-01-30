@@ -1,7 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentDTO;
-import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentNotFoundException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
@@ -12,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,7 +46,7 @@ public class CommentController {
             List<CommentDTO> comments = commentService.getCommentsByVideo(videoId);
             return ResponseEntity.ok(comments);
         } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Video not found"); // ✅ Fix: Return plain message
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Video not found");
         }
     }
 
@@ -58,7 +56,7 @@ public class CommentController {
             List<CommentDTO> comments = commentService.getCommentsByUser(userId);
             return ResponseEntity.ok(comments);
         } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found"); // ✅ Fix: Return plain message
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
     }
 
@@ -68,9 +66,9 @@ public class CommentController {
             commentService.delete(commentId);
             return ResponseEntity.noContent().build();
         } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not found"); // ✅ Fix: Ensure expected error message
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not found");
         } catch (DatabaseException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Database error"); // ✅ Fix: Ensure correct response
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Database error");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }

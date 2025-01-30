@@ -53,7 +53,7 @@ public class VideoController {
         } catch (MissingRequiredFieldException | DuplicateResourceException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // <-- Verifique se está retornando corretamente
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (DatabaseException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
