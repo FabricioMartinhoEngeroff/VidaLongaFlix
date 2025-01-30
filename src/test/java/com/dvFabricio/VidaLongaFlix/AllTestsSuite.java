@@ -10,5 +10,5 @@ import org.junit.platform.suite.api.Suite;
         "com.dvFabricio.VidaLongaFlix.videoTest.controller"
 })
 public class AllTestsSuite {
-    // Este Test Suite executará todos os testes dos pacotes especificados.
+
 }

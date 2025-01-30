@@ -1,6 +1,5 @@
 package com.dvFabricio.VidaLongaFlix.categoryTest.domain;
 
-
 import com.dvFabricio.VidaLongaFlix.domain.video.Category;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,7 @@ public class CategoryTest {
 
     @Test
     void shouldCreateCategoryWithValidName() {
-        Category category = new Category("Health");
+        Category category = Category.builder().name("Health").build();
 
         Set<ConstraintViolation<Category>> violations = validator.validate(category);
 
@@ -37,7 +36,7 @@ public class CategoryTest {
 
     @Test
     void shouldNotCreateCategoryWithBlankName() {
-        Category category = new Category("");
+        Category category = Category.builder().name("").build();
 
         Set<ConstraintViolation<Category>> violations = validator.validate(category);
 
@@ -49,7 +48,7 @@ public class CategoryTest {
     @Test
     void shouldNotCreateCategoryWithNameExceedingMaxLength() {
         String longName = "a".repeat(101);
-        Category category = new Category(longName);
+        Category category = Category.builder().name(longName).build();
 
         Set<ConstraintViolation<Category>> violations = validator.validate(category);
 
@@ -60,7 +59,7 @@ public class CategoryTest {
 
     @Test
     void shouldInitializeWithEmptyVideosSet() {
-        Category category = new Category("Health");
+        Category category = Category.builder().name("Health").build();
 
         assertNotNull(category.getVideos(), "The videos set should be initialized.");
         assertTrue(category.getVideos().isEmpty(), "The videos set should initially be empty.");
@@ -68,7 +67,7 @@ public class CategoryTest {
 
     @Test
     void shouldAddVideoToCategory() {
-        Category category = new Category("Health");
+        Category category = Category.builder().name("Health").build();
         Video video = new Video();
 
         category.getVideos().add(video);
@@ -79,7 +78,7 @@ public class CategoryTest {
 
     @Test
     void shouldRemoveVideoFromCategory() {
-        Category category = new Category("Health");
+        Category category = Category.builder().name("Health").build();
         Video video = new Video();
 
         category.getVideos().add(video);
@@ -88,5 +87,4 @@ public class CategoryTest {
         assertFalse(category.getVideos().contains(video), "The video should be removed from the category.");
         assertTrue(category.getVideos().isEmpty(), "The category should have no videos after removal.");
     }
-
 }

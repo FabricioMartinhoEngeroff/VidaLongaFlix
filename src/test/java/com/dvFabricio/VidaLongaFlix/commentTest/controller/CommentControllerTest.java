@@ -92,11 +92,11 @@ public class CommentControllerTest {
 
     @Test
     void shouldReturnBadRequestForInvalidComment() throws Exception {
-        doThrow(new IllegalArgumentException("Invalid data"))  // ✅ Fix: This should now return 400
+        doThrow(new IllegalArgumentException("Invalid data"))
                 .when(commentService).create(any(CommentDTO.class));
 
         mockMvc.perform(post("/comments").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(new CommentDTO(null, "", null, userId, videoId)))).andExpect(status().isBadRequest()) // ✅ Ensure it correctly returns 400
-                .andExpect(content().string("Invalid data")); // ✅ Ensure correct response
+                .andExpect(content().string("Invalid data"));
 
         verify(commentService).create(any(CommentDTO.class));
     }
