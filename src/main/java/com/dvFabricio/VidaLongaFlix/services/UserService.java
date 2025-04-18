@@ -2,6 +2,7 @@ package com.dvFabricio.VidaLongaFlix.services;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.message.Message;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
@@ -13,8 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+
 
 @Service
 public class UserService {
@@ -23,18 +25,24 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final WelcomeService welcomeService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, WelcomeService welcomeService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.welcomeService = welcomeService;
     }
 
-    public List<UserDTO> findAllUsers() {
-        return userRepository.findAll().stream().map(UserDTO::new).toList();
+    public UserDTO findAuthenticatedUser(UUID userId) {
+        return userRepository.findById(userId)
+                .map(UserDTO::new)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Usuário não encontrado com ID: " + userId));
     }
 
     public UserDTO findUserById(UUID userId) {
-        return userRepository.findById(userId).map(UserDTO::new).orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
+        return userRepository.findById(userId)
+                .map(UserDTO::new)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
     }
 
     @Transactional
@@ -45,17 +53,31 @@ public class UserService {
             throw new DuplicateResourceException("email", "A user with this email already exists.");
         }
 
+        if (userRepository.existsByCpf(userRequestDTO.cpf())) {
+            throw new DuplicateResourceException("cpf", "A user with this CPF already exists.");
+        }
+
         String encodedPassword = passwordEncoder.encode(userRequestDTO.password());
-        User user = new User(userRequestDTO.login(), userRequestDTO.email(), encodedPassword);
+        User user = new User(
+                userRequestDTO.name(),
+                userRequestDTO.email(),
+                encodedPassword,
+                userRequestDTO.cpf(),
+                userRequestDTO.telefone(),
+                userRequestDTO.endereco()
+        );
 
         user = userRepository.save(user);
+
+        welcomeService.enviarBoasVindas(user.getName(), user.getTelefone()); // ✅ refatorado aqui
+
         return new UserDTO(user);
     }
 
-
     @Transactional
     public UserDTO updateUser(UUID userId, UserRequestDTO userRequestDTO) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
 
         logger.debug("Before update: {}", user);
         updateUserFields(user, userRequestDTO);
@@ -67,37 +89,37 @@ public class UserService {
 
     @Transactional
     public void deleteUser(UUID userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
         userRepository.delete(user);
     }
 
-    private void updateUserFields(User user, UserRequestDTO userRequestDTO) {
-        if (!isBlank(userRequestDTO.login())) {
-            user.setLogin(userRequestDTO.login());
-        }
-        if (!isBlank(userRequestDTO.email())) {
-            user.setEmail(userRequestDTO.email());
-        }
-        if (!isBlank(userRequestDTO.password())) {
-            user.setPassword(passwordEncoder.encode(userRequestDTO.password()));
+    private void updateUserFields(User user, UserRequestDTO dto) {
+        Optional.ofNullable(dto.name()).ifPresent(user::setName);
+        Optional.ofNullable(dto.email()).ifPresent(user::setEmail);
+        Optional.ofNullable(dto.password()).filter(p -> !p.isBlank())
+                .ifPresent(p -> user.setPassword(passwordEncoder.encode(p)));
+        Optional.ofNullable(dto.cpf()).ifPresent(user::setCpf);
+        Optional.ofNullable(dto.telefone()).ifPresent(user::setTelefone);
+        Optional.ofNullable(dto.endereco()).ifPresent(user::setEndereco);
+    }
+
+    private void validateRequiredFields(UserRequestDTO dto) {
+        validateField("name", dto.name());
+        validateField("email", dto.email());
+        validateField("password", dto.password());
+        validateField("cpf", dto.cpf());
+        validateField("telefone", dto.telefone());
+
+        if (dto.endereco() == null) {
+            throw new MissingRequiredFieldException("endereco", "Address cannot be empty");
         }
     }
 
-    private void validateRequiredFields(UserRequestDTO userRequestDTO) {
-        if (isBlank(userRequestDTO.login())) {
-            throw new MissingRequiredFieldException("login", "Login cannot be empty");
+    private void validateField(String fieldName, String value) {
+        if (value == null || value.isBlank()) {
+            throw new MissingRequiredFieldException(fieldName, fieldName + " cannot be empty");
         }
-        if (isBlank(userRequestDTO.email())) {
-            throw new MissingRequiredFieldException("email", "Email cannot be empty");
-        }
-        if (isBlank(userRequestDTO.password())) {
-            throw new MissingRequiredFieldException("password", "Password cannot be empty");
-        }
-    }
-
-    private boolean isBlank(String value) {
-        return value == null || value.isBlank();
     }
 }
-
 

@@ -1,6 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.domain.user;
 
 
+import com.dvFabricio.VidaLongaFlix.domain.endereco.Endereco;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,7 @@ public class User implements UserDetails {
     private UUID id;
 
     @Column(nullable = false, unique = true)
-    private String login;
+    private String name;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -34,14 +35,31 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false, unique = true, length = 14)
+    private String cpf;
+
+    @Column(nullable = false, length = 15)
+    private String telefone;
+
+    @Embedded
+    private Endereco endereco;
+
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
     private List<Role> roles = new ArrayList<>();
 
-    public User(String login, String email, String password) {
-        this.login = login;
+    public User(String name, String email, String password, String cpf, String telefone, Endereco endereco) {
+        this.id = UUID.randomUUID();
+        this.name = name;
         this.email = email;
         this.password = password;
+        this.cpf = cpf;
+        this.telefone = telefone;
+        this.endereco = endereco;
         this.roles = new ArrayList<>();
     }
 
@@ -49,15 +67,18 @@ public class User implements UserDetails {
         return roles == null ? new ArrayList<>() : roles;
     }
 
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).toList();
     }
 
     @Override
+    public String getPassword() {
+        return password;
+    }
+    @Override
     public String getUsername() {
-        return login;
+        return name;
     }
 
     @Override
@@ -79,5 +100,6 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }
 

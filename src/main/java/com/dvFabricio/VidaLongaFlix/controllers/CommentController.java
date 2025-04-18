@@ -1,12 +1,9 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
-
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentDTO;
-import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentResponseDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CreateCommentDTO;
 import com.dvFabricio.VidaLongaFlix.services.CommentService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,61 +13,30 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/comments")
+@RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
 
-    public CommentController(CommentService commentService) {
-        this.commentService = commentService;
-    }
-
     @PostMapping
-    public ResponseEntity<?> createComment(@RequestBody @Valid CommentDTO commentDTO) {
-        try {
-            commentService.create(commentDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } catch (DuplicateResourceException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Comment: " + e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (MissingRequiredFieldException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
-        }
+    public ResponseEntity<Void> createComment(@RequestBody @Valid CreateCommentDTO dto) {
+        commentService.create(dto); // novo método com CreateCommentDTO
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/video/{videoId}")
-    public ResponseEntity<?> getCommentsByVideo(@PathVariable UUID videoId) {
-        try {
-            List<CommentDTO> comments = commentService.getCommentsByVideo(videoId);
-            return ResponseEntity.ok(comments);
-        } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Video not found");
-        }
+    public ResponseEntity<List<CommentResponseDTO>> getCommentsByVideo(@PathVariable UUID videoId) {
+        return ResponseEntity.ok(commentService.getCommentsByVideo(videoId));
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getCommentsByUser(@PathVariable UUID userId) {
-        try {
-            List<CommentDTO> comments = commentService.getCommentsByUser(userId);
-            return ResponseEntity.ok(comments);
-        } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
+    public ResponseEntity<List<CommentResponseDTO>> getCommentsByUser(@PathVariable UUID userId) {
+        return ResponseEntity.ok(commentService.getCommentsByUser(userId));
     }
 
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable UUID commentId) {
-        try {
-            commentService.delete(commentId);
-            return ResponseEntity.noContent().build();
-        } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Comment not found");
-        } catch (DatabaseException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Database error");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
-        }
+    public ResponseEntity<Void> deleteComment(@PathVariable UUID commentId) {
+        commentService.delete(commentId);
+        return ResponseEntity.noContent().build();
     }
 }

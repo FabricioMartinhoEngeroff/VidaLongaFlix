@@ -11,7 +11,7 @@ public record VideoDTO(
         String description,
         String url,
         UUID categoryId,
-        List<CommentDTO> comments,
+        List<CreateCommentDTO> comments,
         int commentCount,
         int views,
         double watchTime
@@ -24,7 +24,7 @@ public record VideoDTO(
                 video.getUrl(),
                 video.getCategory() != null ? video.getCategory().getId() : null,
                 video.getComments() != null
-                        ? video.getComments().stream().map(CommentDTO::new).toList()
+                        ? video.getComments().stream().map(CreateCommentDTO::new).toList()
                         : List.of(),
                 video.getComments() != null ? video.getComments().size() : 0,
                 video.getViews(),

@@ -1,19 +1,13 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
-
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
-import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
+import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
 import com.dvFabricio.VidaLongaFlix.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -22,62 +16,41 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final TokenService tokenService;
 
-    @GetMapping
-    public ResponseEntity<List<UserDTO>> findAllUsers() {
-        return ResponseEntity.ok(userService.findAllUsers());
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> findAuthenticatedUser(@RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String token = authorizationHeader.replace("Bearer ", "").trim();
+        UUID userId = tokenService.getUserIdFromToken(token);
+        UserDTO userDTO = userService.findAuthenticatedUser(userId);
+        return ResponseEntity.ok(userDTO);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> findUserById(@PathVariable String id) {
-        try {
-            UUID uuid = UUID.fromString(id);
-            return ResponseEntity.ok(userService.findUserById(uuid));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid ID format");
-        } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<UserDTO> findUserById(@PathVariable UUID id) {
+        UserDTO userDTO = userService.findUserById(id);
+        return ResponseEntity.ok(userDTO);
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userRequestDTO));
-        } catch (DuplicateResourceException e) {
-            Map<String, String> errorResponse = Map.of(
-                    "field", e.getField(),
-                    "message", e.getMessage()
-            );
-            return ResponseEntity.badRequest().body(errorResponse);
-        } catch (MissingRequiredFieldException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        }
+    public ResponseEntity<UserDTO> createUser(@RequestBody @Valid UserRequestDTO userRequestDTO) {
+        UserDTO created = userService.createUser(userRequestDTO);
+        return ResponseEntity.status(201).body(created);
     }
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody @Valid UserRequestDTO userRequestDTO) {
-        try {
-            UUID uuid = UUID.fromString(id);
-            return ResponseEntity.ok(userService.updateUser(uuid, userRequestDTO));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid ID format");
-        } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @RequestBody @Valid UserRequestDTO userRequestDTO) {
+        UserDTO updated = userService.updateUser(id, userRequestDTO);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable String id) {
-        try {
-            UUID uuid = UUID.fromString(id);
-            userService.deleteUser(uuid);
-            return ResponseEntity.noContent().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Invalid ID format");
-        } catch (ResourceNotFoundExceptions e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

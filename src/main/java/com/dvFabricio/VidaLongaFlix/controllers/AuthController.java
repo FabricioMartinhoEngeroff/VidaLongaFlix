@@ -1,8 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.LoginRequestDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.LoginResponseDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.RegisterRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.*;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
@@ -13,14 +11,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -31,6 +29,19 @@ public class AuthController {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(@RequestHeader("Authorization") String bearerToken) {
+        String token = bearerToken.replace("Bearer ", "");
+        UUID userId = tokenService.getUserIdFromToken(token);
+        User user = repository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions("Usuário não encontrado"));
+
+        return ResponseEntity.ok(new UserProfileDTO(
+                user.getName(), user.getEmail(), user.getCpf(), user.getTelefone(), user.getEndereco()
+        ));
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO body) {
@@ -47,7 +58,8 @@ public class AuthController {
             }
 
             String token = tokenService.generateToken(user);
-            return ResponseEntity.ok(new LoginResponseDTO(user.getLogin(), token));
+            return ResponseEntity.ok(new TokenDTO(token));
+
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
@@ -60,14 +72,25 @@ public class AuthController {
         }
 
         try {
-            User newUser = new User(body.login(), body.email(), passwordEncoder.encode(body.password()));
+            User newUser = new User(
+                    body.name(),
+                    body.email(),
+                    passwordEncoder.encode(body.password()),
+                    body.cpf(),
+                    body.telefone(),
+                    body.endereco()
+            );
+
             Role userRole = roleRepository.findByName("ROLE_USER")
                     .orElseThrow(() -> new ResourceNotFoundExceptions("Role 'ROLE_USER' not found"));
+
             newUser.setRoles(List.of(userRole));
             repository.save(newUser);
 
             String token = tokenService.generateToken(newUser);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new LoginResponseDTO(newUser.getLogin(), token));
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(new TokenDTO(token));
+
         } catch (ResourceNotFoundExceptions e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }

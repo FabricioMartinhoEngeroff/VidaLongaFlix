@@ -1,6 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentResponseDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CreateCommentDTO;
 import com.dvFabricio.VidaLongaFlix.domain.video.Comment;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
@@ -35,18 +36,18 @@ public class CommentService {
     }
 
     @Transactional
-    public void create(CommentDTO commentDTO) {
-        validateCommentFields(commentDTO);
+    public void create(CreateCommentDTO createCommentDTO) {
+        validateCommentFields(createCommentDTO);
 
-        User user = findUserById(commentDTO.userId());
-        Video video = findVideoById(commentDTO.videoId());
+        User user = findUserById(createCommentDTO.userId());
+        Video video = findVideoById(createCommentDTO.videoId());
 
-        if (commentRepository.existsByTextAndUser_IdAndVideo_Id(commentDTO.text(), user.getId(), video.getId())) {
+        if (commentRepository.existsByTextAndUser_IdAndVideo_Id(createCommentDTO.text(), user.getId(), video.getId())) {
             throw new DuplicateResourceException("text", "Duplicate comment: same user, video, and text.");
         }
 
         Comment comment = new Comment();
-        comment.setText(commentDTO.text());
+        comment.setText(createCommentDTO.text());
         comment.setUser(user);
         comment.setVideo(video);
         comment.setDate(LocalDateTime.now());
@@ -71,23 +72,20 @@ public class CommentService {
         }
     }
 
-    public List<CommentDTO> getCommentsByUser(UUID userId) {
+    public List<CommentResponseDTO> getCommentsByUser(UUID userId) {
         List<Comment> comments = commentRepository.findByUser_Id(userId);
         if (comments.isEmpty()) {
             throw new ResourceNotFoundExceptions("No comments found for user with ID " + userId);
         }
-        return comments.stream().map(CommentDTO::new).toList();
+        return comments.stream().map(CommentResponseDTO::new).toList();
     }
 
-    public List<CommentDTO> getCommentsByVideo(UUID videoId) {
-
+    public List<CommentResponseDTO> getCommentsByVideo(UUID videoId) {
         List<Comment> comments = commentRepository.findByVideo_Id(videoId);
-
         if (comments.isEmpty()) {
             throw new ResourceNotFoundExceptions("No comments found for video with ID " + videoId);
         }
-
-        return comments.stream().map(CommentDTO::new).toList();
+        return comments.stream().map(CommentResponseDTO::new).toList();
     }
 
     public int getCommentCountByVideo(UUID videoId) {
@@ -96,7 +94,7 @@ public class CommentService {
 
     public List<String> getUserNamesFromCommentsByVideo(UUID videoId) {
         List<Comment> comments = commentRepository.findByVideo_Id(videoId);
-        return comments.stream().map(comment -> comment.getUser().getLogin()).toList();
+        return comments.stream().map(comment -> comment.getUser().getUsername()).toList();
     }
 
     @Transactional
@@ -129,8 +127,8 @@ public class CommentService {
         return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundExceptions("User with ID " + userId + " not found."));
     }
 
-    private void validateCommentFields(CommentDTO commentDTO) {
-        if (isBlank(commentDTO.text())) {
+    private void validateCommentFields(CreateCommentDTO createCommentDTO) {
+        if (isBlank(createCommentDTO.text())) {
             throw new MissingRequiredFieldException("text", "The comment text is required.");
         }
     }

@@ -1,6 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.domain.user;
 
 
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,5 +26,6 @@ public class Role {
     public Role(String name) {
         this.name = name;
     }
+
 }
 
