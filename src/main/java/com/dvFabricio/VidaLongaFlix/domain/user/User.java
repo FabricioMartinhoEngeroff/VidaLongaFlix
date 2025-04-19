@@ -2,6 +2,7 @@ package com.dvFabricio.VidaLongaFlix.domain.user;
 
 
 import com.dvFabricio.VidaLongaFlix.domain.endereco.Endereco;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,7 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -76,9 +78,10 @@ public class User implements UserDetails {
     public String getPassword() {
         return password;
     }
+
     @Override
     public String getUsername() {
-        return name;
+        return email;
     }
 
     @Override

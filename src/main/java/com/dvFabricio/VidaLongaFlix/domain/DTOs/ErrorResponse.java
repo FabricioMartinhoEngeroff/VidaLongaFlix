@@ -1,6 +1,13 @@
 package com.dvFabricio.VidaLongaFlix.domain.DTOs;
 
 
-public record ErrorResponse(String message, String exMessage) {
-}
+import java.time.LocalDateTime;
+
+public record ErrorResponse(
+        String message,
+        String exMessage,
+        String path,
+        int status,
+        LocalDateTime timestamp
+) {}
 

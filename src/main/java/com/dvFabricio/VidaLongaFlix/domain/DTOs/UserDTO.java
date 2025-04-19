@@ -17,16 +17,16 @@ public record UserDTO(
         String telefone,
         Endereco endereco
 ) {
+
     public UserDTO(User user) {
         this(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),
-                user.getRoles() != null && !user.getRoles().isEmpty()
-                        ? user.getRoles().stream()
+                user.getRoles().stream()
                         .map(Role::getName)
-                        .toList()
-                        : List.of(),
+                        .toList(),
+
                 user.getCpf(),
                 user.getTelefone(),
                 user.getEndereco()
@@ -34,8 +34,9 @@ public record UserDTO(
     }
 
     public String getRua() {
-        return Optional.ofNullable(endereco).map(Endereco::getRua).orElse(null);
+        return Optional.ofNullable(endereco)
+                .map(Endereco::getRua)
+                .orElse(null); // Evita NullPointerException se endereço for null
     }
-
 }
 

@@ -1,6 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.infra.exception.resource;
 
 
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.ErrorResponse;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.JwtException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.ForbiddenException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 
 @ControllerAdvice
@@ -109,5 +111,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<StandardError> handleInvalidToken(InvalidTokenException e, HttpServletRequest request) {
         StandardError err = buildStandardError(HttpStatus.BAD_REQUEST, "Token inválido", e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception ex, HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                "Erro ao processar requisição",
+                ex.getMessage(),
+                request.getRequestURI(),
+                HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 }

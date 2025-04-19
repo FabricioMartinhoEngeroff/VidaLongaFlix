@@ -37,6 +37,11 @@ public class VideoService {
                 .description(videoDTO.description())
                 .url(videoDTO.url())
                 .category(findCategoryById(videoDTO.categoryId()))
+                .receita(videoDTO.receita())
+                .proteinas(videoDTO.proteinas())
+                .carboidratos(videoDTO.carboidratos())
+                .gorduras(videoDTO.gorduras())
+                .fibras(videoDTO.fibras())
                 .build();
 
         saveVideo(video);
@@ -48,18 +53,24 @@ public class VideoService {
 
         Video video = findVideoById(id);
 
-        if (videoDTO.title() != null && !videoDTO.title().isBlank()) {
+        if (!isBlank(videoDTO.title())) {
             video.setTitle(videoDTO.title());
         }
-        if (videoDTO.description() != null && !videoDTO.description().isBlank()) {
+        if (!isBlank(videoDTO.description())) {
             video.setDescription(videoDTO.description());
         }
-        if (videoDTO.url() != null && !videoDTO.url().isBlank()) {
+        if (!isBlank(videoDTO.url())) {
             video.setUrl(videoDTO.url());
         }
         if (videoDTO.categoryId() != null) {
             video.setCategory(findCategoryById(videoDTO.categoryId()));
         }
+
+        if (videoDTO.receita() != null) video.setReceita(videoDTO.receita());
+        if (videoDTO.proteinas() != null) video.setProteinas(videoDTO.proteinas());
+        if (videoDTO.carboidratos() != null) video.setCarboidratos(videoDTO.carboidratos());
+        if (videoDTO.gorduras() != null) video.setGorduras(videoDTO.gorduras());
+        if (videoDTO.fibras() != null) video.setFibras(videoDTO.fibras());
 
         saveVideo(video);
     }

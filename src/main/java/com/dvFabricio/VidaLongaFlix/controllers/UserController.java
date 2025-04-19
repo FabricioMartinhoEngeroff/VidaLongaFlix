@@ -1,11 +1,13 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
 import com.dvFabricio.VidaLongaFlix.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -19,15 +21,8 @@ public class UserController {
     private final TokenService tokenService;
 
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> findAuthenticatedUser(@RequestHeader("Authorization") String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        String token = authorizationHeader.replace("Bearer ", "").trim();
-        UUID userId = tokenService.getUserIdFromToken(token);
-        UserDTO userDTO = userService.findAuthenticatedUser(userId);
-        return ResponseEntity.ok(userDTO);
+    public ResponseEntity<UserDTO> findAuthenticatedUser(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new UserDTO(user));
     }
 
     @GetMapping("/{id}")

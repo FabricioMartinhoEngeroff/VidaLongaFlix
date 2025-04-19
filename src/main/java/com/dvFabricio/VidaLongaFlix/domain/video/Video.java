@@ -13,7 +13,6 @@ import java.util.UUID;
 @Table(name = "videos")
 @Getter
 @Setter
-@EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Video {
@@ -23,16 +22,12 @@ public class Video {
     private UUID id;
 
     @Column(nullable = false, length = 150)
-    @NotBlank(message = "The video title cannot be empty.")
-    @Size(max = 150, message = "The video title cannot exceed 150 characters.")
     private String title;
 
     @Column(nullable = false)
-    @NotBlank(message = "The video description cannot be empty.")
     private String description;
 
     @Column(nullable = false)
-    @NotBlank(message = "The video URL cannot be empty.")
     private String url;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -48,15 +43,31 @@ public class Video {
     @Column(nullable = false)
     private double watchTime;
 
+    @Column(columnDefinition = "TEXT")
+    private String receita;
+
+    private Double proteinas;
+    private Double carboidratos;
+    private Double gorduras;
+    private Double fibras;
+
+
     @Builder
-    public Video(String title, String description, String url, Category category, int views, double watchTime) {
+    public Video(String title, String description, String url, Category category, int views, double watchTime,
+                 String receita, Double proteinas, Double carboidratos, Double gorduras, Double fibras) {
         this.title = title;
         this.description = description;
         this.url = url;
         this.category = category;
         this.views = views;
         this.watchTime = watchTime;
+        this.receita = receita;
+        this.proteinas = proteinas;
+        this.carboidratos = carboidratos;
+        this.gorduras = gorduras;
+        this.fibras = fibras;
     }
 }
+
 
 

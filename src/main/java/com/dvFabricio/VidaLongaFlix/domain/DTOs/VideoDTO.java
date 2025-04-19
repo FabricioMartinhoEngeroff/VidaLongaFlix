@@ -14,7 +14,12 @@ public record VideoDTO(
         List<CreateCommentDTO> comments,
         int commentCount,
         int views,
-        double watchTime
+        double watchTime,
+        String receita,
+        Double proteinas,
+        Double carboidratos,
+        Double gorduras,
+        Double fibras
 ) {
     public VideoDTO(Video video) {
         this(
@@ -28,7 +33,13 @@ public record VideoDTO(
                         : List.of(),
                 video.getComments() != null ? video.getComments().size() : 0,
                 video.getViews(),
-                video.getWatchTime()
+                video.getWatchTime(),
+                video.getReceita(),
+                video.getProteinas(),
+                video.getCarboidratos(),
+                video.getGorduras(),
+                video.getFibras()
         );
     }
 }
+

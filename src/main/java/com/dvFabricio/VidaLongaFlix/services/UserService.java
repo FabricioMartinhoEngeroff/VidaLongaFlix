@@ -3,6 +3,7 @@ package com.dvFabricio.VidaLongaFlix.services;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.message.Message;
+import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
@@ -58,6 +59,7 @@ public class UserService {
         }
 
         String encodedPassword = passwordEncoder.encode(userRequestDTO.password());
+
         User user = new User(
                 userRequestDTO.name(),
                 userRequestDTO.email(),
@@ -67,9 +69,12 @@ public class UserService {
                 userRequestDTO.endereco()
         );
 
+        Role defaultRole = new Role("ROLE_USER");
+        user.getRoles().add(defaultRole);
+
         user = userRepository.save(user);
 
-        welcomeService.enviarBoasVindas(user.getName(), user.getTelefone()); // ✅ refatorado aqui
+        welcomeService.enviarBoasVindas(user.getName(), user.getTelefone());
 
         return new UserDTO(user);
     }
