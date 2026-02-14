@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.domain.DTOs;
 
 
-import com.dvFabricio.VidaLongaFlix.domain.endereco.Endereco;
+import com.dvFabricio.VidaLongaFlix.domain.address.Address;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -25,12 +25,12 @@ public record UserRequestDTO(
 
         @NotBlank(message = "CPF não pode estar vazio")
         @Pattern(regexp = "\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}", message = "CPF deve estar no formato XXX.XXX.XXX-XX")
-        String cpf,
+        String taxId,
 
         @NotBlank(message = "Telefone não pode estar vazio")
         @Pattern(regexp = "\\(\\d{2}\\) \\d{4,5}-\\d{4}", message = "Telefone deve estar no formato (XX) XXXXX-XXXX")
-        String telefone,
+        String phone,
 
-        Endereco endereco
+        Address address
 ) {
 }

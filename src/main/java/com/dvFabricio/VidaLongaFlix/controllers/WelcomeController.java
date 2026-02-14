@@ -17,11 +17,11 @@ public class WelcomeController {
     private final WelcomeService welcomeService;
 
     @PostMapping
-    public ResponseEntity<String> registrarUsuario(
-            @RequestParam @NotBlank String nome,
-            @RequestParam @NotBlank String telefone) {
+    public ResponseEntity<String> registerUser(
+            @RequestParam @NotBlank String name,
+            @RequestParam @NotBlank String phone) {
 
-        welcomeService.enviarBoasVindas(nome, telefone);
-        return ResponseEntity.ok("Mensagem de boas-vindas enviada para " + nome);
+        welcomeService.sendWelcomeMessage(name, phone);
+        return ResponseEntity.ok("Mensagem de boas-vindas enviada para " + name);
     }
 }

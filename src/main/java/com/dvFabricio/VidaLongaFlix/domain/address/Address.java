@@ -1,5 +1,6 @@
-package com.dvFabricio.VidaLongaFlix.domain.endereco;
+package com.dvFabricio.VidaLongaFlix.domain.address;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,15 +14,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Endereco {
+public class Address {
 
-    private String rua;
-    private String bairro;
-    private String cidade;
+    private String street;
+    private String neighborhood;
+    private String city;
 
     @Enumerated(EnumType.STRING)
-    private Estado estado;
+    private State state;
 
-    private String cep;
+    @Column(name = "postal_code")
+    private String postalCode;
 
 }

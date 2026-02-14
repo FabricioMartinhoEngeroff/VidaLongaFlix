@@ -10,9 +10,9 @@ public record VideoRequestDTO(
         @NotBlank String description,
         @NotBlank String url,
         @NotNull UUID categoryId,
-        String receita,
-        Double proteinas,
-        Double carboidratos,
-        Double gorduras,
-        Double fibras
+        String recipe,
+        Double protein,
+        Double carbohydrates,
+        Double fats,
+        Double fiber
 ) {}

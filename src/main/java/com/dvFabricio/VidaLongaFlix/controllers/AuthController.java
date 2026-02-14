@@ -1,22 +1,23 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.*;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.AuthResponseDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.LoginRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.RegisterRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserResponseDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
 import com.dvFabricio.VidaLongaFlix.repositories.RoleRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
+import com.dvFabricio.VidaLongaFlix.services.WelcomeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -29,6 +30,8 @@ public class AuthController {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final WelcomeService welcomeService;
+
 
 
     @GetMapping("/me")
@@ -38,9 +41,7 @@ public class AuthController {
         User user = repository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("Usuário não encontrado"));
 
-        return ResponseEntity.ok(new UserProfileDTO(
-                user.getName(), user.getEmail(), user.getCpf(), user.getTelefone(), user.getEndereco()
-        ));
+        return ResponseEntity.ok(new UserResponseDTO(user));
     }
 
     @PostMapping("/login")
@@ -58,7 +59,15 @@ public class AuthController {
             }
 
             String token = tokenService.generateToken(user);
-            return ResponseEntity.ok(new TokenDTO(token));
+
+            try {
+                welcomeService.sendWelcomeMessage(user.getName(), user.getPhone());
+            } catch (Exception e) {
+                System.out.println("Falha ao enviar WhatsApp: " + e.getMessage());
+            }
+
+            UserResponseDTO userResponse = new UserResponseDTO(user);
+            return ResponseEntity.ok(new AuthResponseDTO(token, userResponse));
 
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -70,27 +79,22 @@ public class AuthController {
         if (repository.existsByEmail(body.email())) {
             return ResponseEntity.badRequest().body("Email is already in use.");
         }
-
         try {
             User newUser = new User(
                     body.name(),
                     body.email(),
                     passwordEncoder.encode(body.password()),
-                    body.cpf(),
-                    body.telefone(),
-                    body.endereco()
+                    body.phone()
             );
-
             Role userRole = roleRepository.findByName("ROLE_USER")
                     .orElseThrow(() -> new ResourceNotFoundExceptions("Role 'ROLE_USER' not found"));
-
             newUser.setRoles(List.of(userRole));
             repository.save(newUser);
 
             String token = tokenService.generateToken(newUser);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(new TokenDTO(token));
-
+            UserResponseDTO userResponse = new UserResponseDTO(newUser);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new AuthResponseDTO(token, userResponse));
         } catch (ResourceNotFoundExceptions e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }

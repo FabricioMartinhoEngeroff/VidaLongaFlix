@@ -2,7 +2,6 @@ package com.dvFabricio.VidaLongaFlix.services;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
-import com.dvFabricio.VidaLongaFlix.domain.message.Message;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
@@ -54,8 +53,8 @@ public class UserService {
             throw new DuplicateResourceException("email", "A user with this email already exists.");
         }
 
-        if (userRepository.existsByCpf(userRequestDTO.cpf())) {
-            throw new DuplicateResourceException("cpf", "A user with this CPF already exists.");
+        if (userRepository.existsByTaxId(userRequestDTO.taxId())) {
+            throw new DuplicateResourceException("taxId", "A user with this CPF already exists.");
         }
 
         String encodedPassword = passwordEncoder.encode(userRequestDTO.password());
@@ -64,9 +63,9 @@ public class UserService {
                 userRequestDTO.name(),
                 userRequestDTO.email(),
                 encodedPassword,
-                userRequestDTO.cpf(),
-                userRequestDTO.telefone(),
-                userRequestDTO.endereco()
+                userRequestDTO.taxId(),
+                userRequestDTO.phone(),
+                userRequestDTO.address()
         );
 
         Role defaultRole = new Role("ROLE_USER");
@@ -74,7 +73,7 @@ public class UserService {
 
         user = userRepository.save(user);
 
-        welcomeService.enviarBoasVindas(user.getName(), user.getTelefone());
+        welcomeService.sendWelcomeMessage(user.getName(), user.getPhone());
 
         return new UserDTO(user);
     }
@@ -104,20 +103,20 @@ public class UserService {
         Optional.ofNullable(dto.email()).ifPresent(user::setEmail);
         Optional.ofNullable(dto.password()).filter(p -> !p.isBlank())
                 .ifPresent(p -> user.setPassword(passwordEncoder.encode(p)));
-        Optional.ofNullable(dto.cpf()).ifPresent(user::setCpf);
-        Optional.ofNullable(dto.telefone()).ifPresent(user::setTelefone);
-        Optional.ofNullable(dto.endereco()).ifPresent(user::setEndereco);
+        Optional.ofNullable(dto.taxId()).ifPresent(user::setTaxId);
+        Optional.ofNullable(dto.phone()).ifPresent(user::setPhone);
+        Optional.ofNullable(dto.address()).ifPresent(user::setAddress);
     }
 
     private void validateRequiredFields(UserRequestDTO dto) {
         validateField("name", dto.name());
         validateField("email", dto.email());
         validateField("password", dto.password());
-        validateField("cpf", dto.cpf());
-        validateField("telefone", dto.telefone());
+        validateField("taxId", dto.taxId());
+        validateField("phone", dto.phone());
 
-        if (dto.endereco() == null) {
-            throw new MissingRequiredFieldException("endereco", "Address cannot be empty");
+        if (dto.address() == null) {
+            throw new MissingRequiredFieldException("address", "Address cannot be empty");
         }
     }
 
@@ -127,4 +126,3 @@ public class UserService {
         }
     }
 }
-

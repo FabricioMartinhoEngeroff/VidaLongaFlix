@@ -44,30 +44,29 @@ public class Video {
     private double watchTime;
 
     @Column(columnDefinition = "TEXT")
-    private String receita;
+    private String recipe;
 
-    private Double proteinas;
-    private Double carboidratos;
-    private Double gorduras;
-    private Double fibras;
+    private Double protein;
+    private Double carbohydrates;
+    private Double fats;
+    private Double fiber;
 
 
     @Builder
     public Video(String title, String description, String url, Category category, int views, double watchTime,
-                 String receita, Double proteinas, Double carboidratos, Double gorduras, Double fibras) {
+                 String recipe, Double protein, Double carbohydrates, Double fats, Double fiber) {
         this.title = title;
         this.description = description;
         this.url = url;
         this.category = category;
         this.views = views;
         this.watchTime = watchTime;
-        this.receita = receita;
-        this.proteinas = proteinas;
-        this.carboidratos = carboidratos;
-        this.gorduras = gorduras;
-        this.fibras = fibras;
+        this.recipe = recipe;
+        this.protein = protein;
+        this.carbohydrates = carbohydrates;
+        this.fats = fats;
+        this.fiber = fiber;
     }
 }
-
 
 

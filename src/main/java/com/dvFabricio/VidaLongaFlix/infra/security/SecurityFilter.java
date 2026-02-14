@@ -16,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
 
 @Component
@@ -47,9 +48,9 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
 
     private void authenticateWithToken(String token) {
-        String email = tokenService.validateToken(token);
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            Optional<User> userOptional = userRepository.findByEmail(email);
+        UUID userId = tokenService.getUserIdFromToken(token);
+        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            Optional<User> userOptional = userRepository.findById(userId);
             if (userOptional.isPresent()) {
                 UserDetails userDetails = userOptional.get();
                 var authentication = new UsernamePasswordAuthenticationToken(

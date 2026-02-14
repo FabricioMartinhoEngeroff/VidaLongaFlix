@@ -1,6 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.domain.DTOs;
 
-import com.dvFabricio.VidaLongaFlix.domain.endereco.Endereco;
+import com.dvFabricio.VidaLongaFlix.domain.address.Address;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 
@@ -13,9 +13,9 @@ public record UserDTO(
         String name,
         String email,
         List<String> roles,
-        String cpf,
-        String telefone,
-        Endereco endereco
+        String taxId,
+        String phone,
+        Address address
 ) {
 
     public UserDTO(User user) {
@@ -27,16 +27,15 @@ public record UserDTO(
                         .map(Role::getName)
                         .toList(),
 
-                user.getCpf(),
-                user.getTelefone(),
-                user.getEndereco()
+                user.getTaxId(),
+                user.getPhone(),
+                user.getAddress()
         );
     }
 
-    public String getRua() {
-        return Optional.ofNullable(endereco)
-                .map(Endereco::getRua)
-                .orElse(null); // Evita NullPointerException se endereço for null
+    public String getStreet() {
+        return Optional.ofNullable(address)
+                .map(Address::getStreet)
+                .orElse(null); // Avoids NullPointerException when address is null
     }
 }
-

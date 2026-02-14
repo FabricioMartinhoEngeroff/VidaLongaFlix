@@ -1,6 +1,12 @@
 package com.dvFabricio.VidaLongaFlix.domain.message;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
 @Entity
@@ -16,14 +22,14 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String destino;
-    private String titulo;
-    private String corpo;
-    private String statusEntrega;
+    private String destination;
+    private String title;
+    private String body;
+    @Enumerated(EnumType.STRING)
+    private DeliveryStatus deliveryStatus;
 
-    public Message(String destino, String corpo) {
-        this.destino = destino;
-        this.corpo = corpo;
+    public Message(String destination, String body) {
+        this.destination = destination;
+        this.body = body;
     }
 }
-

@@ -37,11 +37,11 @@ public class VideoService {
                 .description(videoDTO.description())
                 .url(videoDTO.url())
                 .category(findCategoryById(videoDTO.categoryId()))
-                .receita(videoDTO.receita())
-                .proteinas(videoDTO.proteinas())
-                .carboidratos(videoDTO.carboidratos())
-                .gorduras(videoDTO.gorduras())
-                .fibras(videoDTO.fibras())
+                .recipe(videoDTO.recipe())
+                .protein(videoDTO.protein())
+                .carbohydrates(videoDTO.carbohydrates())
+                .fats(videoDTO.fats())
+                .fiber(videoDTO.fiber())
                 .build();
 
         saveVideo(video);
@@ -66,11 +66,11 @@ public class VideoService {
             video.setCategory(findCategoryById(videoDTO.categoryId()));
         }
 
-        if (videoDTO.receita() != null) video.setReceita(videoDTO.receita());
-        if (videoDTO.proteinas() != null) video.setProteinas(videoDTO.proteinas());
-        if (videoDTO.carboidratos() != null) video.setCarboidratos(videoDTO.carboidratos());
-        if (videoDTO.gorduras() != null) video.setGorduras(videoDTO.gorduras());
-        if (videoDTO.fibras() != null) video.setFibras(videoDTO.fibras());
+        if (videoDTO.recipe() != null) video.setRecipe(videoDTO.recipe());
+        if (videoDTO.protein() != null) video.setProtein(videoDTO.protein());
+        if (videoDTO.carbohydrates() != null) video.setCarbohydrates(videoDTO.carbohydrates());
+        if (videoDTO.fats() != null) video.setFats(videoDTO.fats());
+        if (videoDTO.fiber() != null) video.setFiber(videoDTO.fiber());
 
         saveVideo(video);
     }

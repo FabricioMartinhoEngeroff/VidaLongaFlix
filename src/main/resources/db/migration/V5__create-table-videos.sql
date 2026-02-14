@@ -6,10 +6,15 @@ CREATE TABLE videos (
     category_id UUID NOT NULL,
     views INT NOT NULL DEFAULT 0,
     watch_time DOUBLE PRECISION NOT NULL,
+    recipe TEXT,
+    protein DOUBLE PRECISION,
+    carbohydrates DOUBLE PRECISION,
+    fats DOUBLE PRECISION,
+    fiber DOUBLE PRECISION,
     FOREIGN KEY (category_id) REFERENCES categories (id)
 );
 
-INSERT INTO videos (id, title, description, url, category_id, views, watch_time)
+INSERT INTO videos (id, title, description, url, category_id, views, watch_time, recipe, protein, carbohydrates, fats, fiber)
 VALUES
-    ('a23e4567-e89b-12d3-a456-426614174002', 'Video 1', 'Description for Video 1', 'http://example.com/video1', '9d8aafd4-9222-4150-aadb-5167405a7720', 100, 12.5),
-    ('a23e4567-e89b-12d3-a456-426614174003', 'Video 2', 'Description for Video 2', 'http://example.com/video2', '9d8aafd4-9222-4150-aadb-5167405a7721', 50, 8.0);
+    ('a23e4567-e89b-12d3-a456-426614174002', 'Video 1', 'Description for Video 1', 'http://example.com/video1', '9d8aafd4-9222-4150-aadb-5167405a7720', 100, 12.5, NULL, NULL, NULL, NULL, NULL),
+    ('a23e4567-e89b-12d3-a456-426614174003', 'Video 2', 'Description for Video 2', 'http://example.com/video2', '9d8aafd4-9222-4150-aadb-5167405a7721', 50, 8.0, NULL, NULL, NULL, NULL, NULL);

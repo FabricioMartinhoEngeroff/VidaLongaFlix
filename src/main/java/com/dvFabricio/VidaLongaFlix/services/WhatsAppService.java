@@ -1,49 +1,55 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
+import com.dvFabricio.VidaLongaFlix.domain.message.DeliveryStatus;
 import com.dvFabricio.VidaLongaFlix.domain.message.Message;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceAccessException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-
-import java.util.Map;
 
 @Service
 public class WhatsAppService {
 
-    private final String token = "SEU_ACCESS_TOKEN";             // Token do Meta Developer
-    private final String phoneNumberId = "SEU_PHONE_NUMBER_ID";  // ID do número remetente
+    @Value("${twilio.account-sid}")
+    private String accountSid;
+
+    @Value("${twilio.auth-token}")
+    private String authToken;
+
+    @Value("${twilio.whatsapp-from}")
+    private String fromNumber;
 
     @Async
-    public void enviar(Message message){
+    public void send(Message message) {
         RestTemplate restTemplate = new RestTemplate();
 
-        Map<String, Object> body = Map.of(
-                "messaging_product", "whatsapp",
-                "to", message.getDestino(),
-                "type", "text",
-                "text", Map.of("body", message.getCorpo())
-        );
+        // Twilio expects form-urlencoded, not JSON.
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("From", "whatsapp:" + fromNumber);
+        body.add("To", "whatsapp:+55" + message.getDestination().replaceAll("[^0-9]", ""));
+        body.add("Body", message.getBody());
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);                       // Token JWT do app
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBasicAuth(accountSid, authToken);  // Twilio uses Basic Auth.
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        String url = "https://graph.facebook.com/v19.0/" + phoneNumberId + "/messages";
+        String url = "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/Messages.json";
 
         try {
             restTemplate.postForEntity(url, request, String.class);
-            message.setStatusEntrega("ENVIADO");
-            System.out.println("WhatsApp enviado com sucesso para " + message.getDestino());
+            message.setDeliveryStatus(DeliveryStatus.SENT);
+            System.out.println("WhatsApp enviado com sucesso para " + message.getDestination());
         } catch (Exception e) {
-            message.setStatusEntrega("FALHA");
-            throw new ResourceAccessException("Falha ao enviar mensagem via WhatsApp: " + e.getMessage(), e);
+            message.setDeliveryStatus(DeliveryStatus.SEND_ERROR);
+            throw new ResourceAccessException("Falha ao enviar WhatsApp via Twilio: " + e.getMessage(), e);
         }
     }
 }

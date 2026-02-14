@@ -15,11 +15,11 @@ public record VideoDTO(
         int commentCount,
         int views,
         double watchTime,
-        String receita,
-        Double proteinas,
-        Double carboidratos,
-        Double gorduras,
-        Double fibras
+        String recipe,
+        Double protein,
+        Double carbohydrates,
+        Double fats,
+        Double fiber
 ) {
     public VideoDTO(Video video) {
         this(
@@ -34,12 +34,11 @@ public record VideoDTO(
                 video.getComments() != null ? video.getComments().size() : 0,
                 video.getViews(),
                 video.getWatchTime(),
-                video.getReceita(),
-                video.getProteinas(),
-                video.getCarboidratos(),
-                video.getGorduras(),
-                video.getFibras()
+                video.getRecipe(),
+                video.getProtein(),
+                video.getCarbohydrates(),
+                video.getFats(),
+                video.getFiber()
         );
     }
 }
-

@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.domain.user;
 
 
-import com.dvFabricio.VidaLongaFlix.domain.endereco.Endereco;
+import com.dvFabricio.VidaLongaFlix.domain.address.Address;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -37,14 +38,26 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true, length = 14)
-    private String cpf;
+    @Column(name = "tax_id", nullable = false, unique = true, length = 14)
+    private String taxId;
 
-    @Column(nullable = false, length = 15)
-    private String telefone;
+    @Column(name = "phone", nullable = false, length = 15)
+    private String phone;
 
     @Embedded
-    private Endereco endereco;
+    private Address address;
+
+    @Column(name = "photo")
+    private String photo;
+
+    @Column(name = "profile_complete", nullable = false)
+    private boolean profileComplete = false;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -54,14 +67,23 @@ public class User implements UserDetails {
     )
     private List<Role> roles = new ArrayList<>();
 
-    public User(String name, String email, String password, String cpf, String telefone, Endereco endereco) {
-        this.id = UUID.randomUUID();
+    public User(String name, String email, String password, String phone) {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.cpf = cpf;
-        this.telefone = telefone;
-        this.endereco = endereco;
+        this.phone = phone;
+        this.profileComplete = false;
+        this.roles = new ArrayList<>();
+    }
+
+    public User(String name, String email, String password, String taxId, String phone, Address address) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.taxId = taxId;
+        this.phone = phone;
+        this.address = address;
+        this.profileComplete = true;
         this.roles = new ArrayList<>();
     }
 
@@ -104,5 +126,15 @@ public class User implements UserDetails {
         return true;
     }
 
-}
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+}

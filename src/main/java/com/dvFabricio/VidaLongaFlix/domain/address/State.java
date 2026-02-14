@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.domain.endereco;
+package com.dvFabricio.VidaLongaFlix.domain.address;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-public enum Estado {
+public enum State {
     ACRE("AC", "Acre"),
     ALAGOAS("AL", "Alagoas"),
     AMAPA("AP", "Amapá"),
@@ -37,40 +37,40 @@ public enum Estado {
     SERGIPE("SE", "Sergipe"),
     TOCANTINS("TO", "Tocantins");
 
-    private final String sigla;
-    private final String nome;
+    private final String abbreviation;
+    private final String name;
 
-    Estado(String sigla, String nome) {
-        this.sigla = sigla;
-        this.nome = nome;
+    State(String abbreviation, String name) {
+        this.abbreviation = abbreviation;
+        this.name = name;
     }
 
-    public String getSigla() {
-        return sigla;
+    public String getAbbreviation() {
+        return abbreviation;
     }
 
     @JsonValue
-    public String getNome() {
-        return nome;
+    public String getName() {
+        return name;
     }
 
     @JsonCreator
-    public static Estado fromNome(String input) {
-        String normalizado = Normalizer
+    public static State fromName(String input) {
+        String normalized = Normalizer
                 .normalize(input.trim(), Normalizer.Form.NFD)
                 .replaceAll("[^\\p{ASCII}]", "")
                 .toUpperCase(Locale.ROOT);
 
         return Arrays.stream(values())
                 .filter(estado ->
-                        estado.name().equalsIgnoreCase(normalizado) ||
-                                estado.sigla.equalsIgnoreCase(normalizado) ||
-                                estado.nome.equalsIgnoreCase(input.trim()))
+                        estado.name().equalsIgnoreCase(normalized) ||
+                                estado.abbreviation.equalsIgnoreCase(normalized) ||
+                                estado.name.equalsIgnoreCase(input.trim()))
                 .findFirst()
                 .orElseThrow(() -> {
                     System.err.println("❌ Estado inválido: " + input);
                     System.err.println("📌 Estados disponíveis (siglas): " +
-                            Arrays.stream(values()).map(Estado::getSigla).collect(Collectors.joining(", ")));
+                            Arrays.stream(values()).map(State::getAbbreviation).collect(Collectors.joining(", ")));
                     return new IllegalArgumentException("Estado inválido: " + input);
                 });
     }
