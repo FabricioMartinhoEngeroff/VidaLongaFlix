@@ -1,5 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategorySummaryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoDTO;
 import com.dvFabricio.VidaLongaFlix.domain.video.Category;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 @Service
 public class VideoService {
 
@@ -32,16 +34,20 @@ public class VideoService {
     public void create(VideoDTO videoDTO) {
         validateVideoFields(videoDTO);
 
+        UUID categoryId = videoDTO.category() != null ? videoDTO.category().id() : null;
+
         Video video = Video.builder()
                 .title(videoDTO.title())
                 .description(videoDTO.description())
                 .url(videoDTO.url())
-                .category(findCategoryById(videoDTO.categoryId()))
+                .thumbnailUrl(videoDTO.thumbnailUrl()) // ✅ NEW
+                .category(findCategoryById(categoryId))
                 .recipe(videoDTO.recipe())
                 .protein(videoDTO.protein())
                 .carbohydrates(videoDTO.carbohydrates())
                 .fats(videoDTO.fats())
                 .fiber(videoDTO.fiber())
+                .calories(videoDTO.calories())
                 .build();
 
         saveVideo(video);
@@ -62,8 +68,13 @@ public class VideoService {
         if (!isBlank(videoDTO.url())) {
             video.setUrl(videoDTO.url());
         }
-        if (videoDTO.categoryId() != null) {
-            video.setCategory(findCategoryById(videoDTO.categoryId()));
+
+        if (!isBlank(videoDTO.thumbnailUrl())) {
+            video.setThumbnailUrl(videoDTO.thumbnailUrl());
+        }
+
+        if (videoDTO.category() != null && videoDTO.category().id() != null) {
+            video.setCategory(findCategoryById(videoDTO.category().id()));
         }
 
         if (videoDTO.recipe() != null) video.setRecipe(videoDTO.recipe());
@@ -71,6 +82,7 @@ public class VideoService {
         if (videoDTO.carbohydrates() != null) video.setCarbohydrates(videoDTO.carbohydrates());
         if (videoDTO.fats() != null) video.setFats(videoDTO.fats());
         if (videoDTO.fiber() != null) video.setFiber(videoDTO.fiber());
+        if (videoDTO.calories() != null) video.setCalories(videoDTO.calories());
 
         saveVideo(video);
     }
@@ -109,6 +121,10 @@ public class VideoService {
     }
 
     private Category findCategoryById(UUID categoryId) {
+        if (categoryId == null) {
+            throw new MissingRequiredFieldException("category", "The video category is required.");
+        }
+
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("Category with ID " + categoryId + " not found."));
     }
@@ -153,6 +169,14 @@ public class VideoService {
         }
         if (isBlank(videoDTO.url())) {
             throw new MissingRequiredFieldException("url", "The video URL is required.");
+        }
+
+        if (isBlank(videoDTO.thumbnailUrl())) {
+            throw new MissingRequiredFieldException("thumbnailUrl", "The video thumbnail URL is required.");
+        }
+
+        if (videoDTO.category() == null || videoDTO.category().id() == null) {
+            throw new MissingRequiredFieldException("category", "The video category is required.");
         }
     }
 

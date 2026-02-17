@@ -1,4 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategorySummaryDTO;
 import com.dvFabricio.VidaLongaFlix.services.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,24 +18,24 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<List<CategoryDTO>> getAllCategories() {
+    public ResponseEntity<List<CategorySummaryDTO>> getAllCategories() {
         return ResponseEntity.ok(categoryService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryDTO> getCategoryById(@PathVariable UUID id) {
+    public ResponseEntity<CategorySummaryDTO> getCategoryById(@PathVariable UUID id) {
         return ResponseEntity.ok(categoryService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Void> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
-        categoryService.create(categoryDTO.name());
+    public ResponseEntity<Void> createCategory(@Valid @RequestBody CategoryRequestDTO request) {
+        categoryService.create(request.name());
         return ResponseEntity.status(201).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateCategory(@PathVariable UUID id, @Valid @RequestBody CategoryDTO categoryDTO) {
-        categoryService.update(id, categoryDTO.name());
+    public ResponseEntity<Void> updateCategory(@PathVariable UUID id, @Valid @RequestBody CategoryRequestDTO request) {
+        categoryService.update(id, request.name());
         return ResponseEntity.ok().build();
     }
 
