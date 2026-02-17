@@ -1,6 +1,5 @@
 package com.dvFabricio.VidaLongaFlix.categoryTest.service;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.video.Category;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;

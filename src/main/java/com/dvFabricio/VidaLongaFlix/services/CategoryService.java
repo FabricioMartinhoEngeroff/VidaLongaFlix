@@ -1,6 +1,5 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.video.Category;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;

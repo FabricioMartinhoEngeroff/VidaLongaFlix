@@ -1,5 +1,4 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryDTO;
 import com.dvFabricio.VidaLongaFlix.services.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
