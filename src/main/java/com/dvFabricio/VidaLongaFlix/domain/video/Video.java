@@ -13,7 +13,6 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Video {
 
     @Id
@@ -30,39 +29,32 @@ public class Video {
     private String url;
 
     @Column(name = "thumbnail_url")
-    private String thumbnailUrl;
+    private String cover;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Builder.Default
     private List<Comment> comments = new ArrayList<>();
 
     @Column(nullable = false)
-    @Builder.Default
     private int views = 0;
 
     @Column(nullable = false)
-    @Builder.Default
     private double watchTime = 0.0;
 
     @Column(columnDefinition = "TEXT")
     private String recipe;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private int likesCount = 0;
-
     @Column(name = "protein")
     private Double protein;
 
-    @Column(name = "carbohydrates")
-    private Double carbohydrates;
+    @Column(name = "carbs")
+    private Double carbs;
 
-    @Column(name = "fats")
-    private Double fats;
+    @Column(name = "fat")
+    private Double fat;
 
     @Column(name = "fiber")
     private Double fiber;
@@ -71,6 +63,31 @@ public class Video {
     private Double calories;
 
     @Column(nullable = false)
-    @Builder.Default
-    private boolean favorite = false;
+    private int likesCount = 0;
+
+    @Column(nullable = false)
+    private boolean favorited = false;
+
+    @Builder
+    public Video(String title, String description, String url, String cover,
+                 Category category, int views, double watchTime,
+                 String recipe, Double protein, Double carbs, Double fat,
+                 Double fiber, Double calories, int likesCount, boolean favorited) {
+        this.title = title;
+        this.description = description;
+        this.url = url;
+        this.cover = cover;
+        this.category = category;
+        this.views = views;
+        this.watchTime = watchTime;
+        this.recipe = recipe;
+        this.protein = protein;
+        this.carbs = carbs;
+        this.fat = fat;
+        this.fiber = fiber;
+        this.calories = calories;
+        this.likesCount = likesCount;
+        this.favorited = favorited;
+    }
 }
+

@@ -6,13 +6,15 @@ CREATE TABLE videos (
                         thumbnail_url VARCHAR(255) NOT NULL DEFAULT '',
                         category_id UUID NOT NULL,
                         views INT NOT NULL DEFAULT 0,
-                        watch_time DOUBLE PRECISION NOT NULL,
+                        watch_time DOUBLE PRECISION NOT NULL DEFAULT 0.0,
                         recipe TEXT,
                         protein DOUBLE PRECISION,
-                        carbohydrates DOUBLE PRECISION,
-                        fats DOUBLE PRECISION,
+                        carbs DOUBLE PRECISION,
+                        fat DOUBLE PRECISION,
                         fiber DOUBLE PRECISION,
                         calories DOUBLE PRECISION,
+                        likes_count INT NOT NULL DEFAULT 0,
+                        favorited BOOLEAN NOT NULL DEFAULT FALSE,
                         FOREIGN KEY (category_id) REFERENCES categories (id)
 );
 

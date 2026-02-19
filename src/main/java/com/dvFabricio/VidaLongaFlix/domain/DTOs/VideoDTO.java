@@ -10,7 +10,7 @@ public record VideoDTO(
         String title,
         String description,
         String url,
-        String thumbnailUrl,
+        String cover,
         CategorySummaryDTO category,
         List<CommentResponseDTO> comments,
         int commentCount,
@@ -18,12 +18,12 @@ public record VideoDTO(
         double watchTime,
         String recipe,
         Double protein,
-        Double carbohydrates,
-        Double fats,
+        Double carbs,
+        Double fat,
         Double fiber,
         Double calories,
         int likesCount,
-        boolean favorite
+        boolean favorited
 ) {
     public VideoDTO(Video video) {
         this(
@@ -31,7 +31,7 @@ public record VideoDTO(
                 video.getTitle(),
                 video.getDescription(),
                 video.getUrl(),
-                video.getThumbnailUrl(),
+                video.getCover(),
                 video.getCategory() != null ? new CategorySummaryDTO(video.getCategory()) : null,
                 video.getComments() != null
                         ? video.getComments().stream().map(CommentResponseDTO::new).toList()
@@ -41,12 +41,12 @@ public record VideoDTO(
                 video.getWatchTime(),
                 video.getRecipe(),
                 video.getProtein(),
-                video.getCarbohydrates(),
-                video.getFats(),
+                video.getCarbs(),
+                video.getFat(),
                 video.getFiber(),
                 video.getCalories(),
                 video.getLikesCount(),
-                video.isFavorite()
+                video.isFavorited()
         );
     }
 }

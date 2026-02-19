@@ -1,8 +1,10 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.services.VideoService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,15 +31,15 @@ public class VideoController {
         return ResponseEntity.ok(videoService.findById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<Void> createVideo(@RequestBody @Valid VideoDTO videoDTO) {
-        videoService.create(videoDTO);
-        return ResponseEntity.status(201).build();
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateVideo(@PathVariable UUID id, @RequestBody @Valid VideoRequestDTO request) {
+        videoService.update(id, request);
+        return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> updateVideo(@PathVariable UUID id, @RequestBody @Valid VideoDTO videoDTO) {
-        videoService.update(id, videoDTO);
+    @PatchMapping("/{id}/view")
+    public ResponseEntity<Void> registerView(@PathVariable UUID id) {
+        videoService.registerView(id);
         return ResponseEntity.ok().build();
     }
 
