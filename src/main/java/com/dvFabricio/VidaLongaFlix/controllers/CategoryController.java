@@ -19,12 +19,12 @@ public class CategoryController {
 
     @GetMapping
     public ResponseEntity<List<CategorySummaryDTO>> getAllCategories() {
-        return ResponseEntity.ok(categoryService.findAll());
+        return ResponseEntity.ok(categoryService.findAllSummary());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CategorySummaryDTO> getCategoryById(@PathVariable UUID id) {
-        return ResponseEntity.ok(categoryService.findById(id));
+        return ResponseEntity.ok(categoryService.findSummaryById(id));
     }
 
     @PostMapping

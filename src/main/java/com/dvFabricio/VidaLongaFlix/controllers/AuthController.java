@@ -70,7 +70,7 @@ public class AuthController {
             return ResponseEntity.ok(new AuthResponseDTO(token, userResponse));
 
         } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
     }
 

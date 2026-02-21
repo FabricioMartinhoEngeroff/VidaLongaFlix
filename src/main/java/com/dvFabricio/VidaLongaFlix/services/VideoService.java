@@ -32,6 +32,10 @@ public class VideoService {
 
     @Transactional
     public void create(VideoRequestDTO request) {
+        if (request.title() == null || request.title().isBlank())
+            throw new MissingRequiredFieldException("title", "Title is required.");
+        if (request.url() == null || request.url().isBlank())
+            throw new MissingRequiredFieldException("url", "URL is required.");
 
         Video video = Video.builder()
                 .title(request.title())

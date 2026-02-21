@@ -1,5 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategorySummaryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.video.Category;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
@@ -21,19 +22,14 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<CategoryDTO> findAll() {
-        try {
-            return categoryRepository.findAll()
-                    .stream()
-                    .map(CategoryDTO::new)
-                    .toList();
-        } catch (Exception e) {
-            throw new DatabaseException("Error while fetching all categories.");
-        }
+    public List<CategorySummaryDTO> findAllSummary() {
+        return categoryRepository.findAll().stream()
+                .map(CategorySummaryDTO::new)
+                .toList();
     }
 
-    public CategoryDTO findById(UUID id) {
-        return new CategoryDTO(findCategoryById(id));
+    public CategorySummaryDTO findSummaryById(UUID id) {
+        return new CategorySummaryDTO(findCategoryById(id));
     }
 
     @Transactional
