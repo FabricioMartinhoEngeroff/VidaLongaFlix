@@ -2,6 +2,7 @@ package com.dvFabricio.VidaLongaFlix.infra.exception.resource;
 
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.ErrorResponse;
+import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.InvalidCredentialsException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.JwtException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.ForbiddenException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
@@ -113,15 +114,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception ex, HttpServletRequest request) {
-        ErrorResponse error = new ErrorResponse(
-                "Erro ao processar requisição",
-                ex.getMessage(),
-                request.getRequestURI(),
-                HttpStatus.BAD_REQUEST.value(),
-                LocalDateTime.now()
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<StandardError> invalidCredentials(
+            InvalidCredentialsException e, HttpServletRequest request) {
+        StandardError err = buildStandardError(
+                HttpStatus.UNAUTHORIZED, "Unauthorized", e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(err);
     }
 }

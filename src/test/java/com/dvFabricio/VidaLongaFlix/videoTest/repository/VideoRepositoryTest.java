@@ -1,6 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.videoTest.repository;
 
-import com.dvFabricio.VidaLongaFlix.domain.video.Category;
+import com.dvFabricio.VidaLongaFlix.domain.category.Category;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;

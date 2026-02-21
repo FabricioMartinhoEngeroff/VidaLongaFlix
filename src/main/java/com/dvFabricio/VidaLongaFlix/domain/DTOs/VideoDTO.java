@@ -11,7 +11,7 @@ public record VideoDTO(
         String description,
         String url,
         String cover,
-        CategorySummaryDTO category,
+        CategoryDTO category,
         List<CommentResponseDTO> comments,
         int commentCount,
         int views,
@@ -32,7 +32,7 @@ public record VideoDTO(
                 video.getDescription(),
                 video.getUrl(),
                 video.getCover(),
-                video.getCategory() != null ? new CategorySummaryDTO(video.getCategory()) : null,
+                video.getCategory() != null ? new CategoryDTO(video.getCategory()) : null,
                 video.getComments() != null
                         ? video.getComments().stream().map(CommentResponseDTO::new).toList()
                         : List.of(),

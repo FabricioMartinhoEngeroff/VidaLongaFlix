@@ -17,18 +17,18 @@ public class AnalyticsVideoController {
 
     private final VideoService videoService;
 
-    @GetMapping("/mais-assistidos")
-    public ResponseEntity<List<VideoDTO>> getMostWatchedVideos(@RequestParam(defaultValue = "10") @Min(1) int limit) {
+    @GetMapping("/most-viewed")
+    public ResponseEntity<List<VideoDTO>> getMostViewed(@RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(videoService.getMostWatchedVideos(limit));
     }
 
-    @GetMapping("/menos-assistidos")
-    public ResponseEntity<List<VideoDTO>> getLeastWatchedVideos(@RequestParam(defaultValue = "10") @Min(1) int limit) {
+    @GetMapping("/least-viewed")
+    public ResponseEntity<List<VideoDTO>> getLeastViewed(@RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(videoService.getLeastWatchedVideos(limit));
     }
 
-    @GetMapping("/visualizacoes-por-categoria")
-    public ResponseEntity<Map<String, Long>> getTotalViewsByCategory() {
+    @GetMapping("/views-by-category")
+    public ResponseEntity<Map<String, Long>> getViewsByCategory() {
         return ResponseEntity.ok(videoService.getTotalViewsByCategory());
     }
 

@@ -1,6 +1,7 @@
-package com.dvFabricio.VidaLongaFlix.domain.video;
+package com.dvFabricio.VidaLongaFlix.domain.comment;
 
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
+import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

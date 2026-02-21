@@ -1,7 +1,8 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategorySummaryDTO;
-import com.dvFabricio.VidaLongaFlix.domain.video.Category;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryDTO;
+import com.dvFabricio.VidaLongaFlix.domain.category.Category;
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
@@ -22,42 +23,29 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<CategorySummaryDTO> findAllSummary() {
-        return categoryRepository.findAll().stream()
-                .map(CategorySummaryDTO::new)
+    public List<CategoryDTO> findAllSummary(CategoryType type) {
+        return categoryRepository.findByType(type).stream()
+                .map(CategoryDTO::new)
                 .toList();
     }
 
-    public CategorySummaryDTO findSummaryById(UUID id) {
-        return new CategorySummaryDTO(findCategoryById(id));
-    }
 
-    @Transactional
-    public void create(String name) {
+    public void create(String name, CategoryType type) {
         validateCategoryName(name);
 
-        if (categoryRepository.existsByName(name)) {
-            throw new DuplicateResourceException(
-                    "name",
-                    "A category with this name already exists."
-            );
+        if (categoryRepository.existsByNameAndType(name, type)) {
+            throw new DuplicateResourceException("name", "A category with this name already exists.");
         }
 
-        Category category = new Category(name);
-        saveCategory(category);
+        saveCategory(new Category(name, type));
     }
 
-    @Transactional
     public void update(UUID id, String name) {
-        validateCategoryName(name);
-
         Category category = findCategoryById(id);
 
-        if (!category.getName().equalsIgnoreCase(name) && categoryRepository.existsByName(name)) {
-            throw new DuplicateResourceException(
-                    "name",
-                    "A category with this name already exists."
-            );
+        if (!category.getName().equalsIgnoreCase(name) &&
+                categoryRepository.existsByNameAndType(name, category.getType())) {
+            throw new DuplicateResourceException("name", "A category with this name already exists.");
         }
 
         category.setName(name);
@@ -84,17 +72,13 @@ public class CategoryService {
 
     private Category findCategoryById(UUID id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Category with ID " + id + " not found."));
+                .orElseThrow(() -> new ResourceNotFoundExceptions(
+                        "Category with ID " + id + " not found."));
     }
-
 
     private void validateCategoryName(String name) {
-        if (isBlank(name)) {
+        if (name == null || name.isBlank()) {
             throw new MissingRequiredFieldException("name", "The category name is required.");
         }
-    }
-
-    private boolean isBlank(String field) {
-        return field == null || field.isBlank();
     }
 }

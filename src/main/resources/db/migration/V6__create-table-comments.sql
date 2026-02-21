@@ -1,11 +1,11 @@
 CREATE TABLE comments (
-    id UUID PRIMARY KEY,
-    text VARCHAR(500) NOT NULL,
-    date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    user_id UUID NOT NULL,
-    video_id UUID NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (video_id) REFERENCES videos (id) ON DELETE CASCADE
+                          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                          text VARCHAR(500) NOT NULL,
+                          date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                          user_id UUID NOT NULL,
+                          video_id UUID NOT NULL,
+                          FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+                          FOREIGN KEY (video_id) REFERENCES videos (id) ON DELETE CASCADE
 );
 
 INSERT INTO comments (id, text, date, user_id, video_id)

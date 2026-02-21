@@ -2,7 +2,7 @@ package com.dvFabricio.VidaLongaFlix.services;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoRequestDTO;
-import com.dvFabricio.VidaLongaFlix.domain.video.Category;
+import com.dvFabricio.VidaLongaFlix.domain.category.Category;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
 @Service
 public class VideoService {
 
@@ -32,11 +31,7 @@ public class VideoService {
 
     @Transactional
     public void create(VideoRequestDTO request) {
-        if (request.title() == null || request.title().isBlank())
-            throw new MissingRequiredFieldException("title", "Title is required.");
-        if (request.url() == null || request.url().isBlank())
-            throw new MissingRequiredFieldException("url", "URL is required.");
-
+        // Sem null checks manuais — @NotBlank no DTO + @Valid no controller já garantem
         Video video = Video.builder()
                 .title(request.title())
                 .description(request.description())
@@ -58,17 +53,17 @@ public class VideoService {
     public void update(UUID id, VideoRequestDTO request) {
         Video video = findVideoById(id);
 
-        if (!isBlank(request.title())) video.setTitle(request.title());
+        if (!isBlank(request.title()))       video.setTitle(request.title());
         if (!isBlank(request.description())) video.setDescription(request.description());
-        if (!isBlank(request.url())) video.setUrl(request.url());
-        if (!isBlank(request.cover())) video.setCover(request.cover());
-        if (request.categoryId() != null) video.setCategory(findCategoryById(request.categoryId()));
-        if (request.recipe() != null) video.setRecipe(request.recipe());
-        if (request.protein() != null) video.setProtein(request.protein());
-        if (request.carbs() != null) video.setCarbs(request.carbs());
-        if (request.fat() != null) video.setFat(request.fat());
-        if (request.fiber() != null) video.setFiber(request.fiber());
-        if (request.calories() != null) video.setCalories(request.calories());
+        if (!isBlank(request.url()))         video.setUrl(request.url());
+        if (!isBlank(request.cover()))       video.setCover(request.cover());
+        if (request.categoryId() != null)    video.setCategory(findCategoryById(request.categoryId()));
+        if (request.recipe() != null)        video.setRecipe(request.recipe());
+        if (request.protein() != null)       video.setProtein(request.protein());
+        if (request.carbs() != null)         video.setCarbs(request.carbs());
+        if (request.fat() != null)           video.setFat(request.fat());
+        if (request.fiber() != null)         video.setFiber(request.fiber());
+        if (request.calories() != null)      video.setCalories(request.calories());
 
         saveVideo(video);
     }
@@ -93,33 +88,11 @@ public class VideoService {
         }
     }
 
-    private void saveVideo(Video video) {
-        try {
-            videoRepository.save(video);
-        } catch (Exception e) {
-            throw new DatabaseException("Error while saving video: " + e.getMessage());
-        }
-    }
-
     @Transactional
     public void registerView(UUID id) {
         Video video = findVideoById(id);
         video.setViews(video.getViews() + 1);
         saveVideo(video);
-    }
-
-    private Video findVideoById(UUID id) {
-        return videoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Video with ID " + id + " not found."));
-    }
-
-    private Category findCategoryById(UUID categoryId) {
-        if (categoryId == null) {
-            throw new MissingRequiredFieldException("category", "The video category is required.");
-        }
-
-        return categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Category with ID " + categoryId + " not found."));
     }
 
     public List<VideoDTO> getMostWatchedVideos(int limit) {
@@ -144,7 +117,8 @@ public class VideoService {
 
     public double getAverageWatchTime(UUID videoId) {
         return videoRepository.findAverageWatchTimeByVideoId(videoId)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Video with ID " + videoId + " has no watch time data."));
+                .orElseThrow(() -> new ResourceNotFoundExceptions(
+                        "Video with ID " + videoId + " has no watch time data."));
     }
 
     public List<VideoDTO> getVideosWithMostComments(int limit) {
@@ -153,28 +127,32 @@ public class VideoService {
                 .toList();
     }
 
-    private void validateVideoFields(VideoDTO videoDTO) {
-        if (isBlank(videoDTO.title())) {
-            throw new MissingRequiredFieldException("title", "The video title is required.");
-        }
-        if (isBlank(videoDTO.description())) {
-            throw new MissingRequiredFieldException("description", "The video description is required.");
-        }
-        if (isBlank(videoDTO.url())) {
-            throw new MissingRequiredFieldException("url", "The video URL is required.");
-        }
+    // --- Métodos privados ---
 
-        if (isBlank(videoDTO.cover())) {
-            throw new MissingRequiredFieldException("cover", "The video thumbnail URL is required.");
+    private void saveVideo(Video video) {
+        try {
+            videoRepository.save(video);
+        } catch (Exception e) {
+            throw new DatabaseException("Error while saving video: " + e.getMessage());
         }
+    }
 
-        if (videoDTO.category() == null || videoDTO.category().id() == null) {
+    private Video findVideoById(UUID id) {
+        return videoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundExceptions(
+                        "Video with ID " + id + " not found."));
+    }
+
+    private Category findCategoryById(UUID categoryId) {
+        if (categoryId == null) {
             throw new MissingRequiredFieldException("category", "The video category is required.");
         }
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundExceptions(
+                        "Category with ID " + categoryId + " not found."));
     }
 
     private boolean isBlank(String field) {
         return field == null || field.isBlank();
     }
-
 }

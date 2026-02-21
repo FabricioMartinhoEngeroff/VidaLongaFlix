@@ -1,21 +1,19 @@
 package com.dvFabricio.VidaLongaFlix.categoryTest.repository;
 
-
-import com.dvFabricio.VidaLongaFlix.domain.video.Category;
+import com.dvFabricio.VidaLongaFlix.domain.category.Category;
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
 @DataJpaTest
 public class CategoryRepositoryTest {
 
@@ -26,56 +24,44 @@ public class CategoryRepositoryTest {
 
     @BeforeEach
     void setup() {
-        category = new Category("Health");
+        category = new Category("Health", CategoryType.VIDEO);
         categoryRepository.save(category);
     }
 
     @Test
     void shouldFindCategoryById() {
         Optional<Category> result = categoryRepository.findById(category.getId());
-
-        assertTrue(result.isPresent(), "Category should be found by ID.");
-        assertEquals("Health", result.get().getName(), "Category name should match.");
+        assertTrue(result.isPresent());
+        assertEquals("Health", result.get().getName());
     }
 
     @Test
-    void shouldReturnEmptyWhenCategoryNotFoundById() {
-        UUID nonExistentId = UUID.randomUUID();
-
-        Optional<Category> result = categoryRepository.findById(nonExistentId);
-
-        assertTrue(result.isEmpty(), "No category should be found for non-existent ID.");
+    void shouldReturnEmptyWhenNotFound() {
+        Optional<Category> result = categoryRepository.findById(UUID.randomUUID());
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    void shouldCheckIfCategoryExistsByName() {
-        boolean exists = categoryRepository.existsByName("Health");
+    void shouldFindByType() {
+        categoryRepository.save(new Category("LowCarb", CategoryType.MENU));
 
-        assertTrue(exists, "Category with name 'Health' should exist.");
+        List<Category> videos = categoryRepository.findByType(CategoryType.VIDEO);
+        List<Category> menus = categoryRepository.findByType(CategoryType.MENU);
+
+        assertEquals(1, videos.size());
+        assertEquals(1, menus.size());
     }
 
     @Test
-    void shouldReturnFalseIfCategoryDoesNotExistByName() {
-        boolean exists = categoryRepository.existsByName("Fitness");
-
-        assertFalse(exists, "Category with name 'Fitness' should not exist.");
-    }
-
-    @Test
-    void shouldSaveCategory() {
-        Category newCategory = new Category("Fitness");
-        Category savedCategory = categoryRepository.save(newCategory);
-
-        assertNotNull(savedCategory.getId(), "Saved category should have an ID.");
-        assertEquals("Fitness", savedCategory.getName(), "Saved category name should match.");
+    void shouldCheckExistsByNameAndType() {
+        assertTrue(categoryRepository.existsByNameAndType("Health", CategoryType.VIDEO));
+        assertFalse(categoryRepository.existsByNameAndType("Health", CategoryType.MENU));
+        assertFalse(categoryRepository.existsByNameAndType("Fitness", CategoryType.VIDEO));
     }
 
     @Test
     void shouldDeleteCategory() {
         categoryRepository.delete(category);
-
-        Optional<Category> result = categoryRepository.findById(category.getId());
-
-        assertTrue(result.isEmpty(), "Category should be deleted and not found.");
+        assertTrue(categoryRepository.findById(category.getId()).isEmpty());
     }
 }

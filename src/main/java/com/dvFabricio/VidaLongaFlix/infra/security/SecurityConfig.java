@@ -35,6 +35,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/videos/**").permitAll()
                         .requestMatchers("/categories/**").permitAll()
+                        .requestMatchers("/comments/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

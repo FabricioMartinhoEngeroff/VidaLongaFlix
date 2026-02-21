@@ -1,11 +1,14 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentResponseDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CreateCommentDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.services.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,8 +22,10 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<Void> createComment(@RequestBody @Valid CreateCommentDTO dto) {
-        commentService.create(dto); // novo método com CreateCommentDTO
+    public ResponseEntity<Void> createComment(
+            @RequestBody @Valid CreateCommentDTO dto,
+            @AuthenticationPrincipal User user) {
+        commentService.create(dto, user.getId());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

@@ -2,7 +2,7 @@ package com.dvFabricio.VidaLongaFlix.services;
 
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentResponseDTO;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CreateCommentDTO;
-import com.dvFabricio.VidaLongaFlix.domain.video.Comment;
+import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentNotFoundException;
@@ -36,25 +36,21 @@ public class CommentService {
     }
 
     @Transactional
-    public void create(CreateCommentDTO createCommentDTO) {
-        validateCommentFields(createCommentDTO);
-
-        User user = findUserById(createCommentDTO.userId());
-        Video video = findVideoById(createCommentDTO.videoId());
-
-        if (commentRepository.existsByTextAndUser_IdAndVideo_Id(createCommentDTO.text(), user.getId(), video.getId())) {
-            throw new DuplicateResourceException("text", "Duplicate comment: same user, video, and text.");
+    public void create(CreateCommentDTO dto, UUID userId) {
+        if (isBlank(dto.text())) {
+            throw new MissingRequiredFieldException("text", "The comment text is required.");
         }
 
-        Comment comment = new Comment();
-        comment.setText(createCommentDTO.text());
-        comment.setUser(user);
-        comment.setVideo(video);
-        comment.setDate(LocalDateTime.now());
+        User user = findUserById(userId);
+        Video video = findVideoById(dto.videoId());
 
+        if (commentRepository.existsByTextAndUser_IdAndVideo_Id(dto.text(), userId, video.getId())) {
+            throw new DuplicateResourceException("text", "Duplicate comment.");
+        }
+
+        Comment comment = new Comment(dto.text(), LocalDateTime.now(), user, video);
         saveComment(comment);
     }
-
 
     public long getTotalCommentsOnPlatform() {
         try {
@@ -125,12 +121,6 @@ public class CommentService {
 
     private User findUserById(UUID userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundExceptions("User with ID " + userId + " not found."));
-    }
-
-    private void validateCommentFields(CreateCommentDTO createCommentDTO) {
-        if (isBlank(createCommentDTO.text())) {
-            throw new MissingRequiredFieldException("text", "The comment text is required.");
-        }
     }
 
     private boolean isBlank(String field) {

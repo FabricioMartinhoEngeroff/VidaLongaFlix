@@ -18,7 +18,14 @@ CREATE TABLE videos (
                         FOREIGN KEY (category_id) REFERENCES categories (id)
 );
 
-INSERT INTO videos (id, title, description, url, thumbnail_url, category_id, views, watch_time, recipe, protein, carbohydrates, fats, fiber, calories)
+INSERT INTO videos (id, title, description, url, thumbnail_url, category_id, views, watch_time, recipe, protein, carbs, fat, fiber, calories, likes_count, favorited)
 VALUES
-    ('a23e4567-e89b-12d3-a456-426614174002', 'Video 1', 'Description for Video 1', 'http://example.com/video1', '', '9d8aafd4-9222-4150-aadb-5167405a7720', 100, 12.5, NULL, NULL, NULL, NULL, NULL, NULL),
-    ('a23e4567-e89b-12d3-a456-426614174003', 'Video 2', 'Description for Video 2', 'http://example.com/video2', '', '9d8aafd4-9222-4150-aadb-5167405a7721', 50, 8.0, NULL, NULL, NULL, NULL, NULL, NULL);
+    ('a23e4567-e89b-12d3-a456-426614174002',
+     'Bolo de Banana Fit', 'Receita saudável de bolo de banana',
+     'http://example.com/video1', '', '9d8aafd4-9222-4150-aadb-5167405a7720',
+     100, 12.5, NULL, NULL, NULL, NULL, NULL, NULL, 0, FALSE),
+
+    ('a23e4567-e89b-12d3-a456-426614174003',
+     'Salada Proteica', 'Salada rica em proteínas para o almoço',
+     'http://example.com/video2', '', '9d8aafd4-9222-4150-aadb-5167405a7721',
+     50, 8.0, NULL, NULL, NULL, NULL, NULL, NULL, 0, FALSE);

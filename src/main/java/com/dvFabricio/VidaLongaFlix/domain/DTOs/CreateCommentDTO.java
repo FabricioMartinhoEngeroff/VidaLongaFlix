@@ -1,18 +1,12 @@
 package com.dvFabricio.VidaLongaFlix.domain.DTOs;
 
-
-import com.dvFabricio.VidaLongaFlix.domain.video.Comment;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record CreateCommentDTO(String text, UUID userId, UUID videoId) {
-
-    public CreateCommentDTO(Comment comment) {
-        this(
-                comment.getText(),
-                comment.getUser() != null ? comment.getUser().getId() : null,
-                comment.getVideo() != null ? comment.getVideo().getId() : null
-        );
-    }
-
-}
+public record CreateCommentDTO(
+        @NotBlank(message = "Comment text is required.")
+        String text,
+        @NotNull UUID videoId
+) {}

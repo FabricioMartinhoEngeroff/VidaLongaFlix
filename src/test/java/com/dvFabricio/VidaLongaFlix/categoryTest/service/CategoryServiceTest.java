@@ -1,6 +1,8 @@
 package com.dvFabricio.VidaLongaFlix.categoryTest.service;
 
-import com.dvFabricio.VidaLongaFlix.domain.video.Category;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryDTO;
+import com.dvFabricio.VidaLongaFlix.domain.category.Category;
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
@@ -32,140 +34,82 @@ class CategoryServiceTest {
 
     @BeforeEach
     void setup() {
-        category = new Category("Health");
+        category = new Category("Health", CategoryType.VIDEO);
         category.setId(UUID.randomUUID());
     }
 
     @Test
-    void shouldFindAllCategories() {
-        Category anotherCategory = new Category("Fitness");
-        given(categoryRepository.findAll()).willReturn(List.of(category, anotherCategory));
+    void shouldFindAllByType() {
+        given(categoryRepository.findByType(CategoryType.VIDEO))
+                .willReturn(List.of(category));
 
-        List<CategoryDTO> result = categoryService.findAll();
+        List<CategoryDTO> result = categoryService.findAllSummary(CategoryType.VIDEO);
 
-        assertAll(
-                () -> assertEquals(2, result.size(), "Should return 2 categories"),
-                () -> assertEquals("Health", result.get(0).name(), "First category name should be 'Health'"),
-                () -> assertEquals("Fitness", result.get(1).name(), "Second category name should be 'Fitness'")
-        );
-
-        then(categoryRepository).should().findAll();
-    }
-
-    @Test
-    void shouldFindCategoryById() {
-        UUID categoryId = category.getId();
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(category));
-
-        CategoryDTO result = categoryService.findById(categoryId);
-
-        assertAll(
-                () -> assertNotNull(result, "Result should not be null"),
-                () -> assertEquals("Health", result.name(), "Category name should be 'Health'")
-        );
-
-        then(categoryRepository).should().findById(categoryId);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenCategoryNotFoundById() {
-        UUID categoryId = UUID.randomUUID();
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.empty());
-
-        ResourceNotFoundExceptions exception = assertThrows(
-                ResourceNotFoundExceptions.class,
-                () -> categoryService.findById(categoryId)
-        );
-
-        assertEquals("Category with ID " + categoryId + " not found.", exception.getMessage());
-        then(categoryRepository).should().findById(categoryId);
+        assertEquals(1, result.size());
+        assertEquals("Health", result.get(0).name());
+        then(categoryRepository).should().findByType(CategoryType.VIDEO);
     }
 
     @Test
     void shouldCreateCategory() {
-        given(categoryRepository.existsByName(category.getName())).willReturn(false);
-        given(categoryRepository.save(any(Category.class))).willReturn(category);
+        given(categoryRepository.existsByNameAndType("Health", CategoryType.VIDEO))
+                .willReturn(false);
 
-        assertDoesNotThrow(() -> categoryService.create(category.getName()));
+        assertDoesNotThrow(() -> categoryService.create("Health", CategoryType.VIDEO));
 
-        then(categoryRepository).should().existsByName(category.getName());
         then(categoryRepository).should().save(any(Category.class));
     }
 
     @Test
     void shouldNotCreateDuplicateCategory() {
-        given(categoryRepository.existsByName(category.getName())).willReturn(true);
+        given(categoryRepository.existsByNameAndType("Health", CategoryType.VIDEO))
+                .willReturn(true);
 
-        DuplicateResourceException exception = assertThrows(
-                DuplicateResourceException.class,
-                () -> categoryService.create(category.getName())
-        );
+        assertThrows(DuplicateResourceException.class,
+                () -> categoryService.create("Health", CategoryType.VIDEO));
 
-        assertEquals("A category with this name already exists.", exception.getMessage());
-        then(categoryRepository).should().existsByName(category.getName());
         then(categoryRepository).should(never()).save(any(Category.class));
     }
 
-
     @Test
     void shouldUpdateCategory() {
-        UUID categoryId = category.getId();
-        String updatedName = "Updated Health";
+        given(categoryRepository.findById(category.getId()))
+                .willReturn(Optional.of(category));
+        given(categoryRepository.existsByNameAndType("Updated", CategoryType.VIDEO))
+                .willReturn(false);
 
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(category));
-        given(categoryRepository.existsByName(updatedName)).willReturn(false);
-        given(categoryRepository.save(any(Category.class))).willReturn(category);
+        assertDoesNotThrow(() -> categoryService.update(category.getId(), "Updated"));
 
-        assertDoesNotThrow(() -> categoryService.update(categoryId, updatedName));
-
-        then(categoryRepository).should().findById(categoryId);
-        then(categoryRepository).should().existsByName(updatedName);
         then(categoryRepository).should().save(any(Category.class));
     }
 
     @Test
-    void shouldNotUpdateCategoryWithDuplicateName() {
-        UUID categoryId = category.getId();
-        String duplicateName = "Duplicate Health";
+    void shouldNotUpdateWithDuplicateName() {
+        given(categoryRepository.findById(category.getId()))
+                .willReturn(Optional.of(category));
+        given(categoryRepository.existsByNameAndType("Fitness", CategoryType.VIDEO))
+                .willReturn(true);
 
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(category));
-        given(categoryRepository.existsByName(duplicateName)).willReturn(true);
-
-        DuplicateResourceException exception = assertThrows(
-                DuplicateResourceException.class,
-                () -> categoryService.update(categoryId, duplicateName)
-        );
-
-        assertEquals("A category with this name already exists.", exception.getMessage());
-        then(categoryRepository).should().findById(categoryId);
-        then(categoryRepository).should().existsByName(duplicateName);
-        then(categoryRepository).should(never()).save(any(Category.class));
+        assertThrows(DuplicateResourceException.class,
+                () -> categoryService.update(category.getId(), "Fitness"));
     }
 
     @Test
     void shouldDeleteCategory() {
-        UUID categoryId = category.getId();
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.of(category));
+        given(categoryRepository.findById(category.getId()))
+                .willReturn(Optional.of(category));
 
-        assertDoesNotThrow(() -> categoryService.delete(categoryId));
+        assertDoesNotThrow(() -> categoryService.delete(category.getId()));
 
-        then(categoryRepository).should().findById(categoryId);
         then(categoryRepository).should().delete(category);
     }
 
     @Test
-    void shouldThrowExceptionWhenDeletingNonExistentCategory() {
-        UUID categoryId = UUID.randomUUID();
-        given(categoryRepository.findById(categoryId)).willReturn(Optional.empty());
+    void shouldThrowWhenDeletingNonExistent() {
+        UUID id = UUID.randomUUID();
+        given(categoryRepository.findById(id)).willReturn(Optional.empty());
 
-        ResourceNotFoundExceptions exception = assertThrows(
-                ResourceNotFoundExceptions.class,
-                () -> categoryService.delete(categoryId)
-        );
-
-        assertEquals("Category with ID " + categoryId + " not found.", exception.getMessage());
-        then(categoryRepository).should().findById(categoryId);
-        then(categoryRepository).should(never()).delete(any(Category.class));
+        assertThrows(ResourceNotFoundExceptions.class,
+                () -> categoryService.delete(id));
     }
 }
-

@@ -1,5 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.domain.video;
 
+import com.dvFabricio.VidaLongaFlix.domain.category.Category;
+import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
 import jakarta.persistence.*;
 import lombok.*;
 

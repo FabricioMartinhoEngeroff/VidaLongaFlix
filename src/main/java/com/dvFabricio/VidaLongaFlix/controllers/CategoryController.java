@@ -1,9 +1,10 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryRequestDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategorySummaryDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryDTO;
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.services.CategoryService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,35 +13,33 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/categories")
-@RequiredArgsConstructor
 public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @GetMapping
-    public ResponseEntity<List<CategorySummaryDTO>> getAllCategories() {
-        return ResponseEntity.ok(categoryService.findAllSummary());
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CategorySummaryDTO> getCategoryById(@PathVariable UUID id) {
-        return ResponseEntity.ok(categoryService.findSummaryById(id));
+    @GetMapping
+    public ResponseEntity<List<CategoryDTO>> findAllSummary(@RequestParam CategoryType type) {
+        return ResponseEntity.ok(categoryService.findAllSummary(type));
     }
 
     @PostMapping
-    public ResponseEntity<Void> createCategory(@Valid @RequestBody CategoryRequestDTO request) {
-        categoryService.create(request.name());
-        return ResponseEntity.status(201).build();
+    public ResponseEntity<Void> create(@RequestBody @Valid CategoryRequestDTO request) {
+        categoryService.create(request.name(), request.type());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateCategory(@PathVariable UUID id, @Valid @RequestBody CategoryRequestDTO request) {
+    public ResponseEntity<Void> update(@PathVariable UUID id, @RequestBody @Valid CategoryRequestDTO request) {
         categoryService.update(id, request.name());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         categoryService.delete(id);
         return ResponseEntity.noContent().build();
     }
