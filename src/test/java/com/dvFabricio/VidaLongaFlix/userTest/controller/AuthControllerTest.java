@@ -1,168 +1,155 @@
-//package com.dvFabricio.VidaLongaFlix.userTest.controller;
-//
-//import com.dvFabricio.VidaLongaFlix.controllers.AuthController;
-//import com.dvFabricio.VidaLongaFlix.domain.DTOs.LoginRequestDTO;
-//import com.dvFabricio.VidaLongaFlix.domain.DTOs.LoginResponseDTO;
-//import com.dvFabricio.VidaLongaFlix.domain.DTOs.RegisterRequestDTO;
-//import com.dvFabricio.VidaLongaFlix.domain.user.Role;
-//import com.dvFabricio.VidaLongaFlix.domain.user.User;
-//import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
-//import com.dvFabricio.VidaLongaFlix.repositories.RoleRepository;
-//import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
-//import org.junit.jupiter.api.Assertions;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.Mockito;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//
-//import java.util.Optional;
-//import java.util.UUID;
-//
-//@ExtendWith(MockitoExtension.class)
-//class AuthControllerTest {
-//
-//    @InjectMocks
-//    private AuthController authController;
-//
-//    @Mock
-//    private UserRepository userRepository;
-//
-//    @Mock
-//    private RoleRepository roleRepository;
-//
-//    @Mock
-//    private PasswordEncoder passwordEncoder;
-//
-//    @Mock
-//    private TokenService tokenService;
-//
-//    @Test
-//    void login_ShouldReturnToken_WhenValidCredentials() {
-//        String email = "user@example.com";
-//        String password = "password123";
-//        String encodedPassword = "encodedPassword123";
-//        String token = "mockToken";
-//        User user = new User("userLogin", email, encodedPassword);
-//
-//        Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-//        Mockito.when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true);
-//        Mockito.when(tokenService.generateToken(user)).thenReturn(token);
-//
-//        LoginRequestDTO request = new LoginRequestDTO(email, password);
-//        ResponseEntity<?> response = authController.login(request);
-//
-//        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-//        LoginResponseDTO responseBody = (LoginResponseDTO) response.getBody();
-//        Assertions.assertNotNull(responseBody);
-//        Assertions.assertEquals("userLogin", responseBody.login());
-//        Assertions.assertEquals(token, responseBody.token());
-//    }
-//
-//    @Test
-//    void login_ShouldReturnBadRequest_WhenEmailIsEmpty() {
-//        LoginRequestDTO request = new LoginRequestDTO("", "password123");
-//
-//        ResponseEntity<?> response = authController.login(request);
-//
-//        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-//        Assertions.assertEquals("Email cannot be empty.", response.getBody());
-//    }
-//
-//    @Test
-//    void login_ShouldReturnNotFound_WhenUserDoesNotExist() {
-//        String email = "user@example.com";
-//
-//        Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
-//
-//        LoginRequestDTO request = new LoginRequestDTO(email, "password123");
-//        ResponseEntity<?> response = authController.login(request);
-//
-//        Assertions.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-//        Assertions.assertEquals("User not found", response.getBody());
-//    }
-//
-//    @Test
-//    void login_ShouldReturnUnauthorized_WhenPasswordIsInvalid() {
-//        String email = "user@example.com";
-//        String password = "password123";
-//        String encodedPassword = "encodedPassword123";
-//        User user = new User("userLogin", email, encodedPassword);
-//
-//        Mockito.when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
-//        Mockito.when(passwordEncoder.matches(password, encodedPassword)).thenReturn(false);
-//
-//        LoginRequestDTO request = new LoginRequestDTO(email, password);
-//        ResponseEntity<?> response = authController.login(request);
-//
-//        Assertions.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//        Assertions.assertEquals("Invalid credentials", response.getBody());
-//    }
-//
-//    @Test
-//    void register_ShouldCreateUser_WhenValidInput() {
-//        String email = "newuser@example.com";
-//        String password = "password123";
-//        String encodedPassword = "encodedPassword123";
-//        String login = "newUser";
-//        String token = "mockToken";
-//
-//        Role role = new Role("ROLE_USER");
-//        role.setId(UUID.randomUUID());
-//
-//        User newUser = new User(login, email, encodedPassword);
-//        newUser.setId(UUID.randomUUID());
-//
-//        Mockito.when(userRepository.existsByEmail(email)).thenReturn(false);
-//        Mockito.when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
-//        Mockito.when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(role));
-//        Mockito.when(userRepository.save(Mockito.any(User.class))).thenAnswer(invocation -> {
-//            User savedUser = invocation.getArgument(0);
-//            savedUser.setId(UUID.randomUUID());
-//            return savedUser;
-//        });
-//        Mockito.when(tokenService.generateToken(Mockito.any(User.class))).thenReturn(token);
-//
-//        RegisterRequestDTO request = new RegisterRequestDTO(login, email, password);
-//
-//        ResponseEntity<?> response = authController.register(request);
-//
-//        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
-//        LoginResponseDTO responseBody = (LoginResponseDTO) response.getBody();
-//        Assertions.assertNotNull(responseBody);
-//        Assertions.assertEquals(login, responseBody.login());
-//        Assertions.assertEquals(token, responseBody.token());
-//    }
-//
-//    @Test
-//    void register_ShouldReturnBadRequest_WhenEmailAlreadyExists() {
-//        String email = "existinguser@example.com";
-//        Mockito.when(userRepository.existsByEmail(email)).thenReturn(true);
-//
-//        RegisterRequestDTO request = new RegisterRequestDTO("login", email, "password123");
-//        ResponseEntity<?> response = authController.register(request);
-//
-//        Assertions.assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-//        Assertions.assertEquals("Email is already in use.", response.getBody());
-//    }
-//
-//    @Test
-//    void register_ShouldReturnInternalServerError_WhenRoleNotFound() {
-//        String email = "newuser@example.com";
-//        String password = "password123";
-//        String login = "newUser";
-//
-//        Mockito.when(userRepository.existsByEmail(email)).thenReturn(false);
-//        Mockito.when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.empty());
-//
-//        RegisterRequestDTO request = new RegisterRequestDTO(login, email, password);
-//        ResponseEntity<?> response = authController.register(request);
-//
-//        Assertions.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-//        Assertions.assertEquals("Role 'ROLE_USER' not found", response.getBody());
-//    }
-//}
+package com.dvFabricio.VidaLongaFlix.userTest.controller;
+
+import com.dvFabricio.VidaLongaFlix.controllers.AuthController;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.AuthResponseDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.LoginRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.DTOs.RegisterRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.Role;
+import com.dvFabricio.VidaLongaFlix.domain.user.User;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
+import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
+import com.dvFabricio.VidaLongaFlix.repositories.RoleRepository;
+import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
+import com.dvFabricio.VidaLongaFlix.services.WelcomeService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@ExtendWith(MockitoExtension.class)
+class AuthControllerTest {
+
+    private MockMvc mockMvc;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @InjectMocks private AuthController authController;
+    @Mock private UserRepository repository;
+    @Mock private RoleRepository roleRepository;
+    @Mock private PasswordEncoder passwordEncoder;
+    @Mock private TokenService tokenService;
+    @Mock private WelcomeService welcomeService;
+
+    private User user;
+    private Role role;
+
+    @BeforeEach
+    void setUp() {
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(authController)
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+
+        user = new User("João Silva", "joao@example.com", "encodedPassword", "(11) 99999-9999");
+        user.setId(UUID.randomUUID());
+
+        role = new Role("ROLE_USER");
+        role.setId(UUID.randomUUID());
+        user.setRoles(List.of(role));
+    }
+
+    @Test
+    void shouldLoginSuccessfully() throws Exception {
+        when(repository.findByEmail("joao@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("Password1@", "encodedPassword")).thenReturn(true);
+        when(tokenService.generateToken(user)).thenReturn("mockToken");
+
+        LoginRequestDTO request = new LoginRequestDTO("joao@example.com", "Password1@");
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("mockToken"))
+                .andExpect(jsonPath("$.user.name").value("João Silva"));
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenPasswordWrong() throws Exception {
+        when(repository.findByEmail("joao@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("WrongPass1@", "encodedPassword")).thenReturn(false);
+
+        LoginRequestDTO request = new LoginRequestDTO("joao@example.com", "WrongPass1@");
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenUserNotFound() throws Exception {
+        when(repository.findByEmail("notfound@example.com")).thenReturn(Optional.empty());
+
+        LoginRequestDTO request = new LoginRequestDTO("notfound@example.com", "Password1@");
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldRegisterSuccessfully() throws Exception {
+        when(repository.existsByEmail("joao@example.com")).thenReturn(false);
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(role));
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+        when(repository.save(any(User.class))).thenAnswer(invocation -> {
+            User savedUser = invocation.getArgument(0);
+            ReflectionTestUtils.setField(savedUser, "id", UUID.randomUUID());
+            return savedUser;
+        });
+        when(tokenService.generateToken(any(User.class))).thenReturn("mockToken");
+        doNothing().when(welcomeService).sendWelcomeMessage(any(), any());
+
+        RegisterRequestDTO request = new RegisterRequestDTO(
+                "João Silva", "joao@example.com", "Password1@", "(11) 99999-9999");
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.token").value("mockToken"));
+    }
+
+    @Test
+    void shouldReturnConflictWhenEmailAlreadyExists() throws Exception {
+        when(repository.existsByEmail("joao@example.com")).thenReturn(true);
+
+        RegisterRequestDTO request = new RegisterRequestDTO(
+                "João Silva", "joao@example.com", "Password1@", "(11) 99999-9999");
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenPasswordTooWeak() throws Exception {
+        RegisterRequestDTO request = new RegisterRequestDTO(
+                "João Silva", "joao@example.com", "fraca", "(11) 99999-9999");
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+}

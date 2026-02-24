@@ -1,56 +1,47 @@
-//package com.dvFabricio.VidaLongaFlix.userTest.domain;
-//
-//
-//import com.dvFabricio.VidaLongaFlix.domain.user.Role;
-//import com.dvFabricio.VidaLongaFlix.domain.user.User;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.TestInstance;
-//
-//import java.util.List;
-//
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-//class UserTest {
-//
-//    @Test
-//    void testUserCreation() {
-//        User user = new User("fabricio", "fabricio@example.com", "password123");
-//
-//        assertNotNull(user);
-//        assertEquals("fabricio", user.getLogin());
-//        assertEquals("fabricio@example.com", user.getEmail());
-//        assertEquals("password123", user.getPassword());
-//    }
-//
-//    @Test
-//    void testUserRolesAssociation() {
-//        Role adminRole = new Role("ROLE_ADMIN");
-//        Role userRole = new Role("ROLE_USER");
-//
-//        User user = new User("fabricio", "fabricio@example.com", "password123");
-//        user.setRoles(List.of(adminRole, userRole));
-//
-//        assertNotNull(user.getRoles());
-//        assertEquals(2, user.getRoles().size());
-//        assertTrue(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN")));
-//        assertTrue(user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_USER")));
-//    }
-//
-//    @Test
-//    void testUserDetailsImplementation() {
-//        Role userRole = new Role("ROLE_USER");
-//        User user = new User("fabricio", "fabricio@example.com", "password123");
-//        user.setRoles(List.of(userRole));
-//
-//        assertTrue(user.isAccountNonExpired());
-//        assertTrue(user.isAccountNonLocked());
-//        assertTrue(user.isCredentialsNonExpired());
-//        assertTrue(user.isEnabled());
-//        assertEquals("fabricio", user.getUsername());
-//        assertEquals(1, user.getAuthorities().size());
-//        assertEquals("ROLE_USER", user.getAuthorities().iterator().next().getAuthority());
-//    }
-//}
-//
+package com.dvFabricio.VidaLongaFlix.userTest.domain;
+
+import com.dvFabricio.VidaLongaFlix.domain.user.Role;
+import com.dvFabricio.VidaLongaFlix.domain.user.User;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class UserTest {
+
+    @Test
+    void shouldCreateUserWithBasicConstructor() {
+        User user = new User("João Silva", "joao@example.com", "Password1@", "(11) 99999-9999");
+
+        assertEquals("João Silva", user.getName());
+        assertEquals("joao@example.com", user.getEmail());
+        assertEquals("Password1@", user.getPassword());
+        assertFalse(user.isProfileComplete());
+        assertNotNull(user.getRoles());
+    }
+
+    @Test
+    void shouldAssociateRoles() {
+        User user = new User("João Silva", "joao@example.com", "Password1@", "(11) 99999-9999");
+        user.setRoles(List.of(new Role("ROLE_USER"), new Role("ROLE_ADMIN")));
+
+        assertEquals(2, user.getRoles().size());
+        assertTrue(user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_USER")));
+        assertTrue(user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_ADMIN")));
+    }
+
+    @Test
+    void shouldImplementUserDetailsCorrectly() {
+        User user = new User("João Silva", "joao@example.com", "Password1@", "(11) 99999-9999");
+        user.setRoles(List.of(new Role("ROLE_USER")));
+
+        assertTrue(user.isAccountNonExpired());
+        assertTrue(user.isAccountNonLocked());
+        assertTrue(user.isCredentialsNonExpired());
+        assertTrue(user.isEnabled());
+        assertEquals("joao@example.com", user.getUsername());
+        assertEquals(1, user.getAuthorities().size());
+        assertEquals("ROLE_USER", user.getAuthorities().iterator().next().getAuthority());
+    }
+}

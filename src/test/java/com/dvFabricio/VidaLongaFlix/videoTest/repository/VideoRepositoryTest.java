@@ -1,6 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.videoTest.repository;
 
 import com.dvFabricio.VidaLongaFlix.domain.category.Category;
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;
@@ -43,7 +44,7 @@ class VideoRepositoryTest {
         videoRepository.deleteAll();
         categoryRepository.deleteAll();
 
-        category = new Category();
+        category = new Category("Education", CategoryType.VIDEO);
         category.setName("Education");
         categoryRepository.saveAndFlush(category);
 
