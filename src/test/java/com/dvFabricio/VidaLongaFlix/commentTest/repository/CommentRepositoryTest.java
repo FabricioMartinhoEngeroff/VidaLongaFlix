@@ -35,23 +35,32 @@ class CommentRepositoryTest {
         Category category = new Category("Education", CategoryType.VIDEO);
         categoryRepository.saveAndFlush(category);
 
-        user1 = new User("user1", "user1@example.com", "password", "11999999991");
-        user2 = new User("user2", "user2@example.com", "password", "11999999992");
+        user1 = new User("user1", "user1@example.com", "password", "11111111111", "11999999991", null);
+        user2 = new User("user2", "user2@example.com", "password", "22222222222", "11999999992", null);
         em.persistAndFlush(user1);
         em.persistAndFlush(user2);
 
         video = Video.builder()
-                .title("Video").description("Desc")
+                .title("Video")
+                .description("Desc")
                 .url("http://example.com")
-                .category(category).views(0).watchTime(0).build();
+                .category(category)
+                .views(0)
+                .watchTime(0)
+                .build();
         videoRepository.saveAndFlush(video);
 
         em.persistAndFlush(Comment.builder()
-                .text("Ótimo!").date(LocalDateTime.now())
-                .user(user1).video(video).build());
+                .text("Ótimo!")
+                .user(user1)
+                .video(video)
+                .build());
+
         em.persistAndFlush(Comment.builder()
-                .text("Muito bom!").date(LocalDateTime.now())
-                .user(user2).video(video).build());
+                .text("Muito bom!")
+                .user(user2)
+                .video(video)
+                .build());
     }
 
     @Test

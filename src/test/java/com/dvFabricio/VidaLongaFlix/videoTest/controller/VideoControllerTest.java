@@ -4,26 +4,21 @@ import com.dvFabricio.VidaLongaFlix.controllers.VideoController;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.domain.video.VideoDTO;
-import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.services.VideoService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -32,7 +27,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class VideoControllerTest {
 
     private MockMvc mockMvc;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks private VideoController videoController;
     @Mock private VideoService videoService;
@@ -83,41 +77,10 @@ class VideoControllerTest {
     @Test
     void shouldReturnNotFoundWhenVideoDoesNotExist() throws Exception {
         when(videoService.findById(videoId))
-                .thenThrow(new ResourceNotFoundExceptions("Video with ID " + videoId + " not found."));
+                .thenThrow(new ResourceNotFoundExceptions(
+                        "Video with ID " + videoId + " not found."));
 
         mockMvc.perform(get("/videos/{id}", videoId))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    void shouldCreateVideo() throws Exception {
-        VideoRequestDTO request = new VideoRequestDTO(
-                "Video 1", "Desc 1", "http://example.com",
-                "http://cover.com", categoryId,
-                null, null, null, null, null, null);
-
-        doNothing().when(videoService).create(any(VideoRequestDTO.class));
-
-        mockMvc.perform(post("/videos")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
-    }
-
-    @Test
-    void shouldDeleteVideo() throws Exception {
-        doNothing().when(videoService).delete(videoId);
-
-        mockMvc.perform(delete("/videos/{id}", videoId))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenDeletingNonExistent() throws Exception {
-        doThrow(new ResourceNotFoundExceptions("Video with ID " + videoId + " not found."))
-                .when(videoService).delete(videoId);
-
-        mockMvc.perform(delete("/videos/{id}", videoId))
                 .andExpect(status().isNotFound());
     }
 
@@ -130,17 +93,12 @@ class VideoControllerTest {
     }
 
     @Test
-    void shouldUpdateVideo() throws Exception {
-        VideoRequestDTO request = new VideoRequestDTO(
-                "Updated", "Updated Desc", "http://new.com",
-                "http://cover.com", categoryId,
-                null, null, null, null, null, null);
+    void shouldReturnNotFoundWhenRegisteringViewForNonExistentVideo() throws Exception {
+        doThrow(new ResourceNotFoundExceptions(
+                "Video with ID " + videoId + " not found."))
+                .when(videoService).registerView(videoId);
 
-        doNothing().when(videoService).update(eq(videoId), any(VideoRequestDTO.class));
-
-        mockMvc.perform(put("/videos/{id}", videoId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk());
+        mockMvc.perform(patch("/videos/{id}/view", videoId))
+                .andExpect(status().isNotFound());
     }
 }

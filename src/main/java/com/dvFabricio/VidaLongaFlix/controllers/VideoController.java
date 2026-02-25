@@ -1,9 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.video.VideoDTO;
-import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.services.VideoService;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+// Rotas públicas — leitura e registro de view
+// Criação, edição e exclusão ficam no AdminVideoController
 @RestController
 @RequestMapping("/videos")
 public class VideoController {
@@ -31,25 +31,7 @@ public class VideoController {
         return ResponseEntity.ok(videoService.findById(id));
     }
 
-    @PostMapping
-    public ResponseEntity<Void> createVideo(@RequestBody @Valid VideoRequestDTO request) {
-        videoService.create(request);
-        return ResponseEntity.status(201).build();
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> updateVideo(@PathVariable UUID id,
-                                            @RequestBody @Valid VideoRequestDTO request) {
-        videoService.update(id, request);
-        return ResponseEntity.ok().build();
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteVideo(@PathVariable UUID id) {
-        videoService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
-
+    // Qualquer usuário autenticado registra view ao assistir
     @PatchMapping("/{id}/view")
     public ResponseEntity<Void> registerView(@PathVariable UUID id) {
         videoService.registerView(id);
