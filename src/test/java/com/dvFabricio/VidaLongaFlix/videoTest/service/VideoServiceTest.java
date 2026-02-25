@@ -1,10 +1,10 @@
 package com.dvFabricio.VidaLongaFlix.videoTest.service;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.category.Category;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
+import com.dvFabricio.VidaLongaFlix.domain.video.VideoDTO;
+import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;

@@ -92,4 +92,3 @@ public class Video {
         this.favorited = favorited;
     }
 }
-

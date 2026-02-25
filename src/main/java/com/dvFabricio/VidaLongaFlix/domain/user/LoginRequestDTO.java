@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.domain.DTOs;
+package com.dvFabricio.VidaLongaFlix.domain.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

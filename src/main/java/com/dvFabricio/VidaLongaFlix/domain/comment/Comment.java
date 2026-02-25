@@ -40,11 +40,14 @@ public class Comment {
     private Video video;
 
     @Builder
-    public Comment(String text, LocalDateTime date, User user, Video video) {
+    public Comment(String text, User user, Video video) {
         this.text = text;
-        this.date = date;
         this.user = user;
         this.video = video;
     }
 
+    @PrePersist
+    public void onCreate() {
+        this.date = LocalDateTime.now();
+    }
 }

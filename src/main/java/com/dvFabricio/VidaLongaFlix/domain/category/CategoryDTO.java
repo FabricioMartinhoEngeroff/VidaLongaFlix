@@ -1,7 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.domain.DTOs;
-
-import com.dvFabricio.VidaLongaFlix.domain.category.Category;
-import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
+package com.dvFabricio.VidaLongaFlix.domain.category;
 
 import java.util.UUID;
 

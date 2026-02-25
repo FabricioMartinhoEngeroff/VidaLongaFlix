@@ -35,11 +35,12 @@ class CommentDomainTest {
     void shouldCreateCommentSuccessfully() {
         Comment comment = Comment.builder()
                 .text("Ótimo vídeo!")
-                .date(LocalDateTime.now())
-                .user(user).video(video).build();
+                .user(user)
+                .video(video)
+                .build();
 
         assertNotNull(comment.getText());
-        assertNotNull(comment.getDate());
+        assertNull(comment.getDate()); // date só é setado no @PrePersist ao persistir
         assertNotNull(comment.getUser());
         assertNotNull(comment.getVideo());
     }
@@ -54,8 +55,10 @@ class CommentDomainTest {
     @Test
     void shouldUpdateProperties() {
         Comment comment = Comment.builder()
-                .text("original").date(LocalDateTime.now())
-                .user(user).video(video).build();
+                .text("original")
+                .user(user)
+                .video(video)
+                .build();
 
         comment.setText("atualizado");
         assertEquals("atualizado", comment.getText());

@@ -1,86 +1,17 @@
-2026-02-23 06:32:29 [main] INFO  c.d.V.v.r.VideoRepositoryTest - Starting VideoRepositoryTest using Java 21.0.9 with PID 8346 (started by fabricio in /home/fabricio/IdeaProjects/VidaLongaFlix)
-2026-02-23 06:32:29 [main] DEBUG c.d.V.v.r.VideoRepositoryTest - Running with Spring Boot v3.3.3, Spring v6.1.12
-2026-02-23 06:32:29 [main] INFO  c.d.V.v.r.VideoRepositoryTest - The following 1 profile is active: "local"
-2026-02-23 06:32:30 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-02-23 06:32:30 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 240 ms. Found 5 JPA repository interfaces.
-2026-02-23 06:32:30 [main] INFO  o.s.b.t.a.j.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
-2026-02-23 06:32:31 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:fb5b88c8-98ef-4744-968f-05bdb99ae3ab;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
-2026-02-23 06:32:32 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-02-23 06:32:32 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.2.Final
-2026-02-23 06:32:32 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
-2026-02-23 06:32:33 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-02-23 06:32:33 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-02-23 06:32:34 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-02-23 06:32:35 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-02-23 06:32:36 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-02-23 06:32:37 [main] INFO  c.d.V.v.r.VideoRepositoryTest - Started VideoRepositoryTest in 8.559 seconds (process running for 11.398)
-2026-02-23 06:32:38 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
-2026-02-23 06:32:38 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "TYPE"; SQL statement:
-insert into categories (name,type,id) values (?,?,?) [23502-224]
-2026-02-23 06:32:38 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
-2026-02-23 06:32:38 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "TYPE"; SQL statement:
-insert into categories (name,type,id) values (?,?,?) [23502-224]
-2026-02-23 06:32:38 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
-2026-02-23 06:32:38 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "TYPE"; SQL statement:
-insert into categories (name,type,id) values (?,?,?) [23502-224]
-2026-02-23 06:32:38 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
-2026-02-23 06:32:38 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "TYPE"; SQL statement:
-insert into categories (name,type,id) values (?,?,?) [23502-224]
-2026-02-23 06:32:38 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
-2026-02-23 06:32:38 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "TYPE"; SQL statement:
-insert into categories (name,type,id) values (?,?,?) [23502-224]
-2026-02-23 06:32:38 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 23502, SQLState: 23502
-2026-02-23 06:32:38 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - NULL not allowed for column "TYPE"; SQL statement:
-insert into categories (name,type,id) values (?,?,?) [23502-224]
-2026-02-23 06:32:38 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
-2026-02-23 06:37:00 [main] INFO  c.d.V.v.r.VideoRepositoryTest - Starting VideoRepositoryTest using Java 21.0.9 with PID 8995 (started by fabricio in /home/fabricio/IdeaProjects/VidaLongaFlix)
-2026-02-23 06:37:00 [main] DEBUG c.d.V.v.r.VideoRepositoryTest - Running with Spring Boot v3.3.3, Spring v6.1.12
-2026-02-23 06:37:00 [main] INFO  c.d.V.v.r.VideoRepositoryTest - The following 1 profile is active: "local"
-2026-02-23 06:37:01 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-02-23 06:37:01 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 174 ms. Found 5 JPA repository interfaces.
-2026-02-23 06:37:01 [main] INFO  o.s.b.t.a.j.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
-2026-02-23 06:37:01 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:880d443d-135c-450f-8fc6-f1c9cf24369d;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
-2026-02-23 06:37:02 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-02-23 06:37:02 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.2.Final
-2026-02-23 06:37:02 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
-2026-02-23 06:37:02 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-02-23 06:37:03 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-02-23 06:37:04 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-02-23 06:37:04 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-02-23 06:37:05 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-02-23 06:37:07 [main] INFO  c.d.V.v.r.VideoRepositoryTest - Started VideoRepositoryTest in 7.874 seconds (process running for 10.386)
-2026-02-23 06:37:08 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
-2026-02-23 07:01:51 [main] INFO  c.d.V.u.r.RoleRepositoryTest - Starting RoleRepositoryTest using Java 21.0.9 with PID 12376 (started by fabricio in /home/fabricio/IdeaProjects/VidaLongaFlix)
-2026-02-23 07:01:51 [main] DEBUG c.d.V.u.r.RoleRepositoryTest - Running with Spring Boot v3.3.3, Spring v6.1.12
-2026-02-23 07:01:51 [main] INFO  c.d.V.u.r.RoleRepositoryTest - The following 1 profile is active: "local"
-2026-02-23 07:01:52 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-02-23 07:01:52 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 119 ms. Found 5 JPA repository interfaces.
-2026-02-23 07:01:52 [main] INFO  o.s.b.t.a.j.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
-2026-02-23 07:01:52 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:01badeca-dd71-4b03-8b7e-c63675f7fc7a;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
-2026-02-23 07:01:53 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-02-23 07:01:53 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.2.Final
-2026-02-23 07:01:53 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
-2026-02-23 07:01:54 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-02-23 07:01:54 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-02-23 07:01:56 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-02-23 07:01:56 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-02-23 07:01:57 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-02-23 07:01:58 [main] INFO  c.d.V.u.r.RoleRepositoryTest - Started RoleRepositoryTest in 7.782 seconds (process running for 9.74)
-2026-02-23 07:01:59 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
-2026-02-23 07:02:09 [main] INFO  c.d.V.u.r.UserRepositoryTest - Starting UserRepositoryTest using Java 21.0.9 with PID 12500 (started by fabricio in /home/fabricio/IdeaProjects/VidaLongaFlix)
-2026-02-23 07:02:09 [main] DEBUG c.d.V.u.r.UserRepositoryTest - Running with Spring Boot v3.3.3, Spring v6.1.12
-2026-02-23 07:02:09 [main] INFO  c.d.V.u.r.UserRepositoryTest - The following 1 profile is active: "local"
-2026-02-23 07:02:10 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-02-23 07:02:10 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 140 ms. Found 5 JPA repository interfaces.
-2026-02-23 07:02:10 [main] INFO  o.s.b.t.a.j.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
-2026-02-23 07:02:11 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:90d99b56-f28e-4fa9-bea1-e1718af3c5e0;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
-2026-02-23 07:02:11 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-02-23 07:02:11 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.2.Final
-2026-02-23 07:02:11 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
-2026-02-23 07:02:12 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-02-23 07:02:12 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-02-23 07:02:14 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-02-23 07:02:14 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-02-23 07:02:15 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-02-23 07:02:17 [main] INFO  c.d.V.u.r.UserRepositoryTest - Started UserRepositoryTest in 8.336 seconds (process running for 10.379)
-2026-02-23 07:02:19 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-02-25 06:18:56 [main] INFO  c.d.V.f.r.FavoriteRepositoryTest - Starting FavoriteRepositoryTest using Java 21.0.9 with PID 7808 (started by fabricio in /home/fabricio/IdeaProjects/VidaLongaFlix)
+2026-02-25 06:18:56 [main] DEBUG c.d.V.f.r.FavoriteRepositoryTest - Running with Spring Boot v3.3.3, Spring v6.1.12
+2026-02-25 06:18:56 [main] INFO  c.d.V.f.r.FavoriteRepositoryTest - The following 1 profile is active: "local"
+2026-02-25 06:18:58 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-02-25 06:18:58 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 132 ms. Found 6 JPA repository interfaces.
+2026-02-25 06:18:58 [main] INFO  o.s.b.t.a.j.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
+2026-02-25 06:18:58 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:7e8139d0-0c34-482e-b63c-59a033b6fc5d;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2026-02-25 06:18:59 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-02-25 06:18:59 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-02-25 06:18:59 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-02-25 06:19:00 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-02-25 06:19:00 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-02-25 06:19:02 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-02-25 06:19:02 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-02-25 06:19:03 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-02-25 06:19:04 [main] INFO  c.d.V.f.r.FavoriteRepositoryTest - Started FavoriteRepositoryTest in 9.038 seconds (process running for 11.348)
+2026-02-25 06:19:06 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'

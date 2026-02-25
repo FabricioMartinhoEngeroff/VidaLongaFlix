@@ -1,5 +1,7 @@
-package com.dvFabricio.VidaLongaFlix.domain.DTOs;
+package com.dvFabricio.VidaLongaFlix.domain.video;
 
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryDTO;
+import com.dvFabricio.VidaLongaFlix.domain.comment.CommentResponseDTO;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 
 import java.util.List;

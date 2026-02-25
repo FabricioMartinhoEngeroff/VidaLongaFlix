@@ -1,9 +1,8 @@
 package com.dvFabricio.VidaLongaFlix.userTest.controller;
 
 import com.dvFabricio.VidaLongaFlix.controllers.AuthController;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.AuthResponseDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.LoginRequestDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.RegisterRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.LoginRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.RegisterRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;

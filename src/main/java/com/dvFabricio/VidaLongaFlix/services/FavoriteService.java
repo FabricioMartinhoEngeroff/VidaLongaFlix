@@ -31,8 +31,7 @@ public class FavoriteService {
     public boolean toggle(UUID userId, String itemId, FavoriteContentType itemType) {
         User user = findUser(userId);
 
-        Optional<UserFavorite> existing = favoriteRepository
-                .findByUser_IdAndItemIdAndFavoriteContentType(userId, itemId, itemType);
+        Optional<UserFavorite> existing = favoriteRepository.findByUser_IdAndItemIdAndItemType(userId, itemId, itemType);
 
         if (existing.isPresent()) {
             favoriteRepository.delete(existing.get());
@@ -46,35 +45,35 @@ public class FavoriteService {
                 .build();
 
         favoriteRepository.save(favorite);
-        return true; // adicionado
+        return true;
     }
 
     // Lista todos os favoritos do usuário
     public List<FavoriteDTO> listAll(UUID userId) {
         return favoriteRepository.findByUser_Id(userId)
                 .stream()
-                .map(FavoriteDTO::new)
+                .map(FavoriteDTO::from)
                 .toList();
     }
 
     // Lista favoritos por tipo (VIDEO, MENU, RECIPE, etc.)
     public List<FavoriteDTO> listByType(UUID userId, FavoriteContentType itemType) {
-        return favoriteRepository.findByUser_IdAndFavoriteContentType(userId, itemType)
+        return favoriteRepository.findByUser_IdAndItemType(userId, itemType)
                 .stream()
-                .map(FavoriteDTO::new)
+                .map(FavoriteDTO::from)
                 .toList();
     }
 
     // Verifica se um item específico está favoritado
     public boolean isFavorited(UUID userId, String itemId, FavoriteContentType itemType) {
-        return favoriteRepository
-                .existsByUser_IdAndItemIdAndFavoriteContentType(userId, itemId, itemType);
+        return favoriteRepository.existsByUser_IdAndItemIdAndItemType(userId, itemId, itemType);
     }
 
     // Conta quantos usuários favoritaram um item (likes count)
     public long countLikes(String itemId, FavoriteContentType itemType) {
-        return favoriteRepository.countByItemIdAndFavoriteContentType(itemId, itemType);
+        return favoriteRepository.countByItemIdAndItemType(itemId, itemType);
     }
+
 
     private User findUser(UUID userId) {
         return userRepository.findById(userId)

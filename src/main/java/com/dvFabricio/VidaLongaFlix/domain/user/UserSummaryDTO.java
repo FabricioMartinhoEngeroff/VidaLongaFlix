@@ -1,7 +1,5 @@
-package com.dvFabricio.VidaLongaFlix.domain.DTOs;
+package com.dvFabricio.VidaLongaFlix.domain.user;
 
-
-import com.dvFabricio.VidaLongaFlix.domain.user.User;
 
 public record UserSummaryDTO(String id, String name) {
 

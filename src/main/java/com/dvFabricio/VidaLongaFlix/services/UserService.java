@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.UserDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.UserRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;

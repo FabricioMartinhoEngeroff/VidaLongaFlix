@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CommentResponseDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CreateCommentDTO;
+import com.dvFabricio.VidaLongaFlix.domain.comment.CommentResponseDTO;
+import com.dvFabricio.VidaLongaFlix.domain.comment.CreateCommentDTO;
 import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
@@ -16,7 +16,6 @@ import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -48,7 +47,12 @@ public class CommentService {
             throw new DuplicateResourceException("text", "Duplicate comment.");
         }
 
-        Comment comment = new Comment(dto.text(), LocalDateTime.now(), user, video);
+        Comment comment = Comment.builder()
+                .text(dto.text())
+                .user(user)
+                .video(video)
+                .build();
+
         saveComment(comment);
     }
 

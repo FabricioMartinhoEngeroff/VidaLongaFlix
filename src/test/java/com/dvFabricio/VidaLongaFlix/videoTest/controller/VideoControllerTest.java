@@ -1,10 +1,10 @@
 package com.dvFabricio.VidaLongaFlix.videoTest.controller;
 
 import com.dvFabricio.VidaLongaFlix.controllers.VideoController;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
+import com.dvFabricio.VidaLongaFlix.domain.video.VideoDTO;
+import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.services.VideoService;

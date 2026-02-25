@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.userTest.controller;
 
 import com.dvFabricio.VidaLongaFlix.controllers.UserController;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;

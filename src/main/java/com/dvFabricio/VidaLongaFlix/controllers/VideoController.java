@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.VideoRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.video.VideoDTO;
+import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.services.VideoService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

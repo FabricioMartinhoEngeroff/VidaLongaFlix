@@ -738,7 +738,7 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 		com.dvFabricio.VidaLongaFlix.domain.comment.Comment
 		com.dvFabricio.VidaLongaFlix.domain.user.Role
 		com.dvFabricio.VidaLongaFlix.domain.user.User
-		com.dvFabricio.VidaLongaFlix.domain.video.Video]
+		com.dvFabricio.VidaLongaFlix.domain.user.video.Video]
 	Mapping files names []
 	Properties []
 2025-01-24T08:22:32.305-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.i.internal.IntegratorServiceImpl     : Adding Integrator [org.hibernate.boot.beanvalidation.BeanValidationIntegrator].
@@ -1045,15 +1045,15 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:22:49.424-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Collection role: com.dvFabricio.VidaLongaFlix.domain.user.User.roles
 2025-01-24T08:22:49.425-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property roles
 2025-01-24T08:22:49.429-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.r.c.i.ClassLoaderServiceImpl       : HHH000194: Package not found or no package-info.java: com.dvFabricio.VidaLongaFlix.domain.user
-2025-01-24T08:22:49.430-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.EntityBinder     : Binding entity from annotated class: com.dvFabricio.VidaLongaFlix.domain.video.Video
+2025-01-24T08:22:49.430-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.EntityBinder     : Binding entity from annotated class: com.dvFabricio.VidaLongaFlix.domain.user.video.Video
 2025-01-24T08:22:49.431-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.EntityBinder     : Import with entity name Video
-2025-01-24T08:22:49.431-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.EntityBinder     : Bind entity com.dvFabricio.VidaLongaFlix.domain.video.Video on table videos
+2025-01-24T08:22:49.431-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.EntityBinder     : Bind entity com.dvFabricio.VidaLongaFlix.domain.user.video.Video on table videos
 2025-01-24T08:22:49.432-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedDiscriminatorColumn(column='DTYPE')
 2025-01-24T08:22:49.435-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedColumn()
-2025-01-24T08:22:49.436-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.video.Video] is safe
-2025-01-24T08:22:49.436-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.video.Video
+2025-01-24T08:22:49.436-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.video.Video] is safe
+2025-01-24T08:22:49.436-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.video.Video
 2025-01-24T08:22:49.436-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : MetadataSourceProcessor property id with lazy=false
-2025-01-24T08:22:49.436-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.video.Video:id]
+2025-01-24T08:22:49.436-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.user.video.Video:id]
 2025-01-24T08:22:49.436-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : building BasicValue for id
 2025-01-24T08:22:49.436-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.mapping.BasicValue         : Skipping column re-registration: videos.id
 2025-01-24T08:22:49.436-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property id
@@ -1069,33 +1069,33 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:22:49.439-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedJoinColumn(column='comments_KEY')
 2025-01-24T08:22:49.439-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedJoinColumn()
 2025-01-24T08:22:49.439-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedJoinColumn()
-2025-01-24T08:22:49.439-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Collection role: com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
+2025-01-24T08:22:49.439-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Collection role: com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
 2025-01-24T08:22:49.439-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property comments
 2025-01-24T08:22:49.439-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedColumn()
 2025-01-24T08:22:49.440-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : MetadataSourceProcessor property description with lazy=false
-2025-01-24T08:22:49.440-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.video.Video:description]
+2025-01-24T08:22:49.440-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.user.video.Video:description]
 2025-01-24T08:22:49.440-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : building BasicValue for description
 2025-01-24T08:22:49.440-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.mapping.BasicValue         : Skipping column re-registration: videos.description
 2025-01-24T08:22:49.440-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property description
 2025-01-24T08:22:49.441-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedColumn()
 2025-01-24T08:22:49.441-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : MetadataSourceProcessor property title with lazy=false
-2025-01-24T08:22:49.441-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.video.Video:title]
+2025-01-24T08:22:49.441-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.user.video.Video:title]
 2025-01-24T08:22:49.441-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : building BasicValue for title
 2025-01-24T08:22:49.441-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.mapping.BasicValue         : Skipping column re-registration: videos.title
 2025-01-24T08:22:49.441-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property title
 2025-01-24T08:22:49.442-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedColumn()
 2025-01-24T08:22:49.442-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : MetadataSourceProcessor property url with lazy=false
-2025-01-24T08:22:49.442-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.video.Video:url]
+2025-01-24T08:22:49.442-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.user.video.Video:url]
 2025-01-24T08:22:49.442-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : building BasicValue for url
 2025-01-24T08:22:49.442-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.mapping.BasicValue         : Skipping column re-registration: videos.url
 2025-01-24T08:22:49.442-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property url
 2025-01-24T08:22:49.443-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedColumn()
 2025-01-24T08:22:49.444-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : MetadataSourceProcessor property uuid with lazy=false
-2025-01-24T08:22:49.444-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.video.Video:uuid]
+2025-01-24T08:22:49.444-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.user.video.Video:uuid]
 2025-01-24T08:22:49.445-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : building BasicValue for uuid
 2025-01-24T08:22:49.445-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.mapping.BasicValue         : Skipping column re-registration: videos.uuid
 2025-01-24T08:22:49.445-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property uuid
-2025-01-24T08:22:49.449-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.r.c.i.ClassLoaderServiceImpl       : HHH000194: Package not found or no package-info.java: com.dvFabricio.VidaLongaFlix.domain.video
+2025-01-24T08:22:49.449-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.r.c.i.ClassLoaderServiceImpl       : HHH000194: Package not found or no package-info.java: com.dvFabricio.VidaLongaFlix.domain.user.video
 2025-01-24T08:22:49.451-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : Starting `BasicValueBinder#fillSimpleValue` for uuid
 2025-01-24T08:22:49.454-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : Starting `BasicValueBinder#fillSimpleValue` for name
 2025-01-24T08:22:49.455-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : Starting `BasicValueBinder#fillSimpleValue` for id
@@ -1124,11 +1124,11 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:22:50.144-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Second pass for collection: com.dvFabricio.VidaLongaFlix.domain.category.Category.videos
 2025-01-24T08:22:50.153-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Binding a OneToMany: com.dvFabricio.VidaLongaFlix.domain.category.Category.videos through a foreign key
 2025-01-24T08:22:50.154-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Mapping collection: com.dvFabricio.VidaLongaFlix.domain.category.Category.videos -> videos
-2025-01-24T08:22:50.155-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.TableBinder      : Retrieving property com.dvFabricio.VidaLongaFlix.domain.video.Video.category
-2025-01-24T08:22:50.155-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Mapped collection key: category_id, one-to-many: com.dvFabricio.VidaLongaFlix.domain.video.Video
-2025-01-24T08:22:50.156-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Second pass for collection: com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
-2025-01-24T08:22:50.156-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Binding a OneToMany: com.dvFabricio.VidaLongaFlix.domain.video.Video.comments through a foreign key
-2025-01-24T08:22:50.156-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Mapping collection: com.dvFabricio.VidaLongaFlix.domain.video.Video.comments -> comments
+2025-01-24T08:22:50.155-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.TableBinder      : Retrieving property com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category
+2025-01-24T08:22:50.155-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Mapped collection key: category_id, one-to-many: com.dvFabricio.VidaLongaFlix.domain.user.video.Video
+2025-01-24T08:22:50.156-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Second pass for collection: com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
+2025-01-24T08:22:50.156-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Binding a OneToMany: com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments through a foreign key
+2025-01-24T08:22:50.156-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Mapping collection: com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments -> comments
 2025-01-24T08:22:50.157-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.model.internal.TableBinder      : Retrieving property com.dvFabricio.VidaLongaFlix.domain.comment.Comment.video
 2025-01-24T08:22:50.157-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Mapped collection key: video_id, one-to-many: com.dvFabricio.VidaLongaFlix.domain.comment.Comment
 2025-01-24T08:22:51.091-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.internal.SessionFactoryImpl  : Building session factory
@@ -1153,8 +1153,8 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:22:51.467-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.comment.Comment
 2025-01-24T08:22:51.548-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.Role] is safe
 2025-01-24T08:22:51.549-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.Role
-2025-01-24T08:22:51.554-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.video.Video] is safe
-2025-01-24T08:22:51.554-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.video.Video
+2025-01-24T08:22:51.554-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.video.Video] is safe
+2025-01-24T08:22:51.554-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.video.Video
 2025-01-24T08:22:52.379-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.User] is safe
 2025-01-24T08:22:52.380-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.User
 2025-01-24T08:22:52.391-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.category.Category] is safe
@@ -1526,9 +1526,9 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:22:57.819-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.Role] is safe
 2025-01-24T08:22:57.820-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.Role
 2025-01-24T08:22:57.850-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.i.bytebuddy.BytecodeProviderImpl   : HHH000513: Unable to create the ReflectionOptimizer for [com.dvFabricio.VidaLongaFlix.domain.user.Role]: private accessor [name]
-2025-01-24T08:22:57.853-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.video.Video] is safe
-2025-01-24T08:22:57.854-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.video.Video
-2025-01-24T08:22:57.892-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.i.bytebuddy.BytecodeProviderImpl   : HHH000513: Unable to create the ReflectionOptimizer for [com.dvFabricio.VidaLongaFlix.domain.video.Video]: private accessor [category]
+2025-01-24T08:22:57.853-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.video.Video] is safe
+2025-01-24T08:22:57.854-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.video.Video
+2025-01-24T08:22:57.892-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.i.bytebuddy.BytecodeProviderImpl   : HHH000513: Unable to create the ReflectionOptimizer for [com.dvFabricio.VidaLongaFlix.domain.user.video.Video]: private accessor [category]
 2025-01-24T08:22:57.895-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.User] is safe
 2025-01-24T08:22:57.895-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.User
 2025-01-24T08:22:57.932-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.b.i.bytebuddy.BytecodeProviderImpl   : HHH000513: Unable to create the ReflectionOptimizer for [com.dvFabricio.VidaLongaFlix.domain.user.User]: private accessor [email]
@@ -1539,19 +1539,19 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:22:58.784-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection row deletions - com.dvFabricio.VidaLongaFlix.domain.category.Category.videos
 2025-01-24T08:22:58.785-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection removals - com.dvFabricio.VidaLongaFlix.domain.category.Category.videos
 2025-01-24T08:22:58.796-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection row updates - com.dvFabricio.VidaLongaFlix.domain.user.User.roles
-2025-01-24T08:22:58.801-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection (re)creation - com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
-2025-01-24T08:22:58.801-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection row deletions - com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
-2025-01-24T08:22:58.801-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection removals - com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
+2025-01-24T08:22:58.801-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection (re)creation - com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
+2025-01-24T08:22:58.801-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection row deletions - com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
+2025-01-24T08:22:58.801-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection removals - com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
 2025-01-24T08:22:59.528-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting post-init callbacks
 2025-01-24T08:22:59.529-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : To-one key - NavigableRole[com.dvFabricio.VidaLongaFlix.domain.comment.Comment.user]
 2025-01-24T08:22:59.543-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : To-one key - NavigableRole[com.dvFabricio.VidaLongaFlix.domain.comment.Comment.video]
 2025-01-24T08:22:59.543-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : Entity(com.dvFabricio.VidaLongaFlix.domain.comment.Comment) `staticFetchableList` generator
 2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : Entity(com.dvFabricio.VidaLongaFlix.domain.user.Role) `staticFetchableList` generator
-2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : To-one key - NavigableRole[com.dvFabricio.VidaLongaFlix.domain.video.Video.category]
-2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.video.Video.comments#{element}]) - element descriptor
-2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.video.Video.comments)#finishInitialization
-2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.video.Video.comments) - key descriptor
-2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : Entity(com.dvFabricio.VidaLongaFlix.domain.video.Video) `staticFetchableList` generator
+2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : To-one key - NavigableRole[com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category]
+2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments#{element}]) - element descriptor
+2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments)#finishInitialization
+2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments) - key descriptor
+2025-01-24T08:22:59.544-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : Entity(com.dvFabricio.VidaLongaFlix.domain.user.video.Video) `staticFetchableList` generator
 2025-01-24T08:22:59.546-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.user.User.roles#{element}]) - element descriptor
 2025-01-24T08:22:59.546-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.user.User.roles)#finishInitialization
 2025-01-24T08:22:59.546-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.user.User.roles) - key descriptor
@@ -1560,7 +1560,7 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:22:59.547-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.category.Category.videos)#finishInitialization
 2025-01-24T08:22:59.547-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.category.Category.videos) - key descriptor
 2025-01-24T08:22:59.548-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : Entity(com.dvFabricio.VidaLongaFlix.domain.category.Category) `staticFetchableList` generator
-2025-01-24T08:22:59.548-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.video.Video.comments#{element}]) - element descriptor
+2025-01-24T08:22:59.548-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments#{element}]) - element descriptor
 2025-01-24T08:22:59.548-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.category.Category.videos#{element}]) - element descriptor
 2025-01-24T08:23:00.730-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Created new SQL alias : c1_0
 2025-01-24T08:23:00.736-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [StandardTableGroup(com.dvFabricio.VidaLongaFlix.domain.comment.Comment)] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.comment.Comment] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.comment.Comment]
@@ -1614,31 +1614,31 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:23:01.375-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     :  Update (0): update roles set name=? where id=?
 2025-01-24T08:23:01.375-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     :  Delete (0): delete from roles where id=?
 2025-01-24T08:23:01.375-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Created new SQL alias : v1_0
-2025-01-24T08:23:01.375-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [StandardTableGroup(com.dvFabricio.VidaLongaFlix.domain.video.Video)] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video] 
-2025-01-24T08:23:01.376-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@5d24703e] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video.category] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video.category] 
+2025-01-24T08:23:01.375-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [StandardTableGroup(com.dvFabricio.VidaLongaFlix.domain.user.video.Video)] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video]
+2025-01-24T08:23:01.376-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@5d24703e] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category]
 2025-01-24T08:23:01.379-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.results.graph.AST      : DomainResult Graph:
- \-EntityResultImpl [com.dvFabricio.VidaLongaFlix.domain.video.Video]
- |  +-EntityDelayedFetchImpl [com.dvFabricio.VidaLongaFlix.domain.video.Video.category]
- |  +-DelayedCollectionFetch [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments]
- |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.video.Video.description]
- |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.video.Video.title]
- |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.video.Video.url]
- |  \-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.video.Video.uuid]
+ \-EntityResultImpl [com.dvFabricio.VidaLongaFlix.domain.user.video.Video]
+ |  +-EntityDelayedFetchImpl [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category]
+ |  +-DelayedCollectionFetch [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments]
+ |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.description]
+ |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.title]
+ |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.url]
+ |  \-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.uuid]
 
 2025-01-24T08:23:01.380-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.tree           : SQL AST Tree:
     SelectStatement {
       FromClause {
-        StandardTableGroup (v1 : com.dvFabricio.VidaLongaFlix.domain.video.Video) {
+        StandardTableGroup (v1 : com.dvFabricio.VidaLongaFlix.domain.user.video.Video) {
           primaryTableReference : videos as v1_0
           TableGroupJoins {
-            left  join LazyTableGroup (c1 : com.dvFabricio.VidaLongaFlix.domain.video.Video.category) {
+            left  join LazyTableGroup (c1 : com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category) {
             }
           }
         }
       }
     }
 
-2025-01-24T08:23:01.380-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     : Static SQL for entity: com.dvFabricio.VidaLongaFlix.domain.video.Video
+2025-01-24T08:23:01.380-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     : Static SQL for entity: com.dvFabricio.VidaLongaFlix.domain.user.video.Video
 2025-01-24T08:23:01.380-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     :  Version select: select id from videos where id=?
 2025-01-24T08:23:01.380-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     :  Insert (0): insert into videos (category_id,description,title,url,uuid,id) values (?,?,?,?,?,default)
 2025-01-24T08:23:01.380-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     :  Update (0): update videos set category_id=?,description=?,title=?,url=? where id=?
@@ -1749,29 +1749,29 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:23:02.027-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          :  Row delete: delete from users_roles where user_id=? and role_id=?
 2025-01-24T08:23:02.028-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          :  One-shot delete: delete from users_roles where user_id=?
 2025-01-24T08:23:02.029-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Created new SQL alias : c1_0
-2025-01-24T08:23:02.029-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.OneToManyTableGroup@31daf094] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments] 
-2025-01-24T08:23:02.029-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [StandardTableGroup(com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element})] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}] 
-2025-01-24T08:23:02.030-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@74267ece] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.user] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.user] 
-2025-01-24T08:23:02.030-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@3e265811] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.video] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.video] 
+2025-01-24T08:23:02.029-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.OneToManyTableGroup@31daf094] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments]
+2025-01-24T08:23:02.029-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [StandardTableGroup(com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element})] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}]
+2025-01-24T08:23:02.030-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@74267ece] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.user] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.user]
+2025-01-24T08:23:02.030-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@3e265811] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.video] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.video]
 2025-01-24T08:23:02.030-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.results.graph.AST      : DomainResult Graph:
- \-CollectionDomainResult [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments]
+ \-CollectionDomainResult [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments]
 
 2025-01-24T08:23:02.030-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.tree           : SQL AST Tree:
     SelectStatement {
       FromClause {
-        OneToManyTableGroup (c1 : com.dvFabricio.VidaLongaFlix.domain.video.Video.comments) {
+        OneToManyTableGroup (c1 : com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments) {
           primaryTableReference : comments as c1_0
           TableGroupJoins {
-            left  join LazyTableGroup (u1 : com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.user) {
+            left  join LazyTableGroup (u1 : com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.user) {
             }
-            left  join LazyTableGroup (v1 : com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.video) {
+            left  join LazyTableGroup (v1 : com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.video) {
             }
           }
         }
       }
     }
 
-2025-01-24T08:23:02.031-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Static SQL for collection: com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
+2025-01-24T08:23:02.031-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Static SQL for collection: com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
 2025-01-24T08:23:02.135-03:00  INFO 16684 --- [VidaLongaFlix] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
 2025-01-24T08:23:02.136-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.type.spi.TypeConfiguration$Scope     : Scoping TypeConfiguration [org.hibernate.type.spi.TypeConfiguration@6b0ba697] to SessionFactoryImplementor [org.hibernate.internal.SessionFactoryImpl@89178b4]
 2025-01-24T08:23:02.139-03:00 DEBUG 16684 --- [VidaLongaFlix] [main] o.h.query.named.NamedObjectRepository    : Checking 0 named HQL queries
@@ -3036,7 +3036,7 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 		com.dvFabricio.VidaLongaFlix.domain.comment.Comment
 		com.dvFabricio.VidaLongaFlix.domain.user.Role
 		com.dvFabricio.VidaLongaFlix.domain.user.User
-		com.dvFabricio.VidaLongaFlix.domain.video.Video]
+		com.dvFabricio.VidaLongaFlix.domain.user.video.Video]
 	Mapping files names []
 	Properties []
 2025-01-24T08:34:09.134-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.i.internal.IntegratorServiceImpl     : Adding Integrator [org.hibernate.boot.beanvalidation.BeanValidationIntegrator].
@@ -3343,15 +3343,15 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:34:12.166-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Collection role: com.dvFabricio.VidaLongaFlix.domain.user.User.roles
 2025-01-24T08:34:12.166-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property roles
 2025-01-24T08:34:12.170-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.r.c.i.ClassLoaderServiceImpl       : HHH000194: Package not found or no package-info.java: com.dvFabricio.VidaLongaFlix.domain.user
-2025-01-24T08:34:12.173-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.EntityBinder     : Binding entity from annotated class: com.dvFabricio.VidaLongaFlix.domain.video.Video
+2025-01-24T08:34:12.173-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.EntityBinder     : Binding entity from annotated class: com.dvFabricio.VidaLongaFlix.domain.user.video.Video
 2025-01-24T08:34:12.173-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.EntityBinder     : Import with entity name Video
-2025-01-24T08:34:12.174-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.EntityBinder     : Bind entity com.dvFabricio.VidaLongaFlix.domain.video.Video on table videos
+2025-01-24T08:34:12.174-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.EntityBinder     : Bind entity com.dvFabricio.VidaLongaFlix.domain.user.video.Video on table videos
 2025-01-24T08:34:12.175-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedDiscriminatorColumn(column='DTYPE')
 2025-01-24T08:34:12.181-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedColumn()
-2025-01-24T08:34:12.181-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.video.Video] is safe
-2025-01-24T08:34:12.181-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.video.Video
+2025-01-24T08:34:12.181-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.video.Video] is safe
+2025-01-24T08:34:12.181-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.video.Video
 2025-01-24T08:34:12.182-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : MetadataSourceProcessor property id with lazy=false
-2025-01-24T08:34:12.182-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.video.Video:id]
+2025-01-24T08:34:12.182-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.user.video.Video:id]
 2025-01-24T08:34:12.182-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : building BasicValue for id
 2025-01-24T08:34:12.182-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.mapping.BasicValue         : Skipping column re-registration: videos.id
 2025-01-24T08:34:12.183-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property id
@@ -3367,33 +3367,33 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:34:12.188-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedJoinColumn(column='comments_KEY')
 2025-01-24T08:34:12.188-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedJoinColumn()
 2025-01-24T08:34:12.189-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedJoinColumn()
-2025-01-24T08:34:12.189-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Collection role: com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
+2025-01-24T08:34:12.189-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Collection role: com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
 2025-01-24T08:34:12.189-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property comments
 2025-01-24T08:34:12.190-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedColumn()
 2025-01-24T08:34:12.190-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : MetadataSourceProcessor property description with lazy=false
-2025-01-24T08:34:12.190-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.video.Video:description]
+2025-01-24T08:34:12.190-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.user.video.Video:description]
 2025-01-24T08:34:12.191-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : building BasicValue for description
 2025-01-24T08:34:12.191-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.mapping.BasicValue         : Skipping column re-registration: videos.description
 2025-01-24T08:34:12.191-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property description
 2025-01-24T08:34:12.192-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedColumn()
 2025-01-24T08:34:12.192-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : MetadataSourceProcessor property title with lazy=false
-2025-01-24T08:34:12.192-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.video.Video:title]
+2025-01-24T08:34:12.192-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.user.video.Video:title]
 2025-01-24T08:34:12.192-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : building BasicValue for title
 2025-01-24T08:34:12.193-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.mapping.BasicValue         : Skipping column re-registration: videos.title
 2025-01-24T08:34:12.193-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property title
 2025-01-24T08:34:12.194-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedColumn()
 2025-01-24T08:34:12.194-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : MetadataSourceProcessor property url with lazy=false
-2025-01-24T08:34:12.194-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.video.Video:url]
+2025-01-24T08:34:12.194-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.user.video.Video:url]
 2025-01-24T08:34:12.194-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : building BasicValue for url
 2025-01-24T08:34:12.195-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.mapping.BasicValue         : Skipping column re-registration: videos.url
 2025-01-24T08:34:12.195-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property url
 2025-01-24T08:34:12.196-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.AnnotatedColumn  : Binding column: AnnotatedColumn()
 2025-01-24T08:34:12.197-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : MetadataSourceProcessor property uuid with lazy=false
-2025-01-24T08:34:12.197-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.video.Video:uuid]
+2025-01-24T08:34:12.197-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.AbstractPropertyHolder  : Attempting to locate auto-apply AttributeConverter for property [com.dvFabricio.VidaLongaFlix.domain.user.video.Video:uuid]
 2025-01-24T08:34:12.197-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : building BasicValue for uuid
 2025-01-24T08:34:12.197-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.mapping.BasicValue         : Skipping column re-registration: videos.uuid
 2025-01-24T08:34:12.197-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.PropertyBinder   : Building property uuid
-2025-01-24T08:34:12.202-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.r.c.i.ClassLoaderServiceImpl       : HHH000194: Package not found or no package-info.java: com.dvFabricio.VidaLongaFlix.domain.video
+2025-01-24T08:34:12.202-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.r.c.i.ClassLoaderServiceImpl       : HHH000194: Package not found or no package-info.java: com.dvFabricio.VidaLongaFlix.domain.user.video
 2025-01-24T08:34:12.206-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : Starting `BasicValueBinder#fillSimpleValue` for uuid
 2025-01-24T08:34:12.210-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : Starting `BasicValueBinder#fillSimpleValue` for name
 2025-01-24T08:34:12.210-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.BasicValueBinder    : Starting `BasicValueBinder#fillSimpleValue` for id
@@ -3422,11 +3422,11 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:34:12.252-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Second pass for collection: com.dvFabricio.VidaLongaFlix.domain.category.Category.videos
 2025-01-24T08:34:12.256-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Binding a OneToMany: com.dvFabricio.VidaLongaFlix.domain.category.Category.videos through a foreign key
 2025-01-24T08:34:12.257-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Mapping collection: com.dvFabricio.VidaLongaFlix.domain.category.Category.videos -> videos
-2025-01-24T08:34:12.257-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.TableBinder      : Retrieving property com.dvFabricio.VidaLongaFlix.domain.video.Video.category
-2025-01-24T08:34:12.258-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Mapped collection key: category_id, one-to-many: com.dvFabricio.VidaLongaFlix.domain.video.Video
-2025-01-24T08:34:12.259-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Second pass for collection: com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
-2025-01-24T08:34:12.259-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Binding a OneToMany: com.dvFabricio.VidaLongaFlix.domain.video.Video.comments through a foreign key
-2025-01-24T08:34:12.259-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Mapping collection: com.dvFabricio.VidaLongaFlix.domain.video.Video.comments -> comments
+2025-01-24T08:34:12.257-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.TableBinder      : Retrieving property com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category
+2025-01-24T08:34:12.258-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Mapped collection key: category_id, one-to-many: com.dvFabricio.VidaLongaFlix.domain.user.video.Video
+2025-01-24T08:34:12.259-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Second pass for collection: com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
+2025-01-24T08:34:12.259-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Binding a OneToMany: com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments through a foreign key
+2025-01-24T08:34:12.259-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.model.internal.CollectionBinder    : Mapping collection: com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments -> comments
 2025-01-24T08:34:12.260-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.model.internal.TableBinder      : Retrieving property com.dvFabricio.VidaLongaFlix.domain.comment.Comment.video
 2025-01-24T08:34:12.260-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.m.internal.CollectionSecondPass    : Mapped collection key: video_id, one-to-many: com.dvFabricio.VidaLongaFlix.domain.comment.Comment
 2025-01-24T08:34:12.393-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.internal.SessionFactoryImpl  : Building session factory
@@ -3451,8 +3451,8 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:34:12.520-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.comment.Comment
 2025-01-24T08:34:12.637-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.Role] is safe
 2025-01-24T08:34:12.638-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.Role
-2025-01-24T08:34:12.647-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.video.Video] is safe
-2025-01-24T08:34:12.647-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.video.Video
+2025-01-24T08:34:12.647-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.video.Video] is safe
+2025-01-24T08:34:12.647-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.video.Video
 2025-01-24T08:34:12.713-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.User] is safe
 2025-01-24T08:34:12.713-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.User
 2025-01-24T08:34:12.722-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.category.Category] is safe
@@ -3824,9 +3824,9 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:34:14.118-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.Role] is safe
 2025-01-24T08:34:14.118-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.Role
 2025-01-24T08:34:14.135-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.i.bytebuddy.BytecodeProviderImpl   : HHH000513: Unable to create the ReflectionOptimizer for [com.dvFabricio.VidaLongaFlix.domain.user.Role]: private accessor [name]
-2025-01-24T08:34:14.139-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.video.Video] is safe
-2025-01-24T08:34:14.139-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.video.Video
-2025-01-24T08:34:14.219-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.i.bytebuddy.BytecodeProviderImpl   : HHH000513: Unable to create the ReflectionOptimizer for [com.dvFabricio.VidaLongaFlix.domain.video.Video]: private accessor [category]
+2025-01-24T08:34:14.139-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.video.Video] is safe
+2025-01-24T08:34:14.139-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.video.Video
+2025-01-24T08:34:14.219-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.i.bytebuddy.BytecodeProviderImpl   : HHH000513: Unable to create the ReflectionOptimizer for [com.dvFabricio.VidaLongaFlix.domain.user.video.Video]: private accessor [category]
 2025-01-24T08:34:14.221-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : Not known whether passed class name [com.dvFabricio.VidaLongaFlix.domain.user.User] is safe
 2025-01-24T08:34:14.221-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.boot.internal.ClassLoaderAccessImpl  : No temp ClassLoader provided; using live ClassLoader for loading potentially unsafe class : com.dvFabricio.VidaLongaFlix.domain.user.User
 2025-01-24T08:34:14.249-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.b.i.bytebuddy.BytecodeProviderImpl   : HHH000513: Unable to create the ReflectionOptimizer for [com.dvFabricio.VidaLongaFlix.domain.user.User]: private accessor [email]
@@ -3837,19 +3837,19 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:34:14.458-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection row deletions - com.dvFabricio.VidaLongaFlix.domain.category.Category.videos
 2025-01-24T08:34:14.459-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection removals - com.dvFabricio.VidaLongaFlix.domain.category.Category.videos
 2025-01-24T08:34:14.481-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection row updates - com.dvFabricio.VidaLongaFlix.domain.user.User.roles
-2025-01-24T08:34:14.486-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection (re)creation - com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
-2025-01-24T08:34:14.486-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection row deletions - com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
-2025-01-24T08:34:14.486-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection removals - com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
+2025-01-24T08:34:14.486-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection (re)creation - com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
+2025-01-24T08:34:14.486-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection row deletions - com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
+2025-01-24T08:34:14.486-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Skipping collection removals - com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
 2025-01-24T08:34:14.557-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting post-init callbacks
 2025-01-24T08:34:14.557-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : To-one key - NavigableRole[com.dvFabricio.VidaLongaFlix.domain.comment.Comment.user]
 2025-01-24T08:34:14.566-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : To-one key - NavigableRole[com.dvFabricio.VidaLongaFlix.domain.comment.Comment.video]
 2025-01-24T08:34:14.566-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : Entity(com.dvFabricio.VidaLongaFlix.domain.comment.Comment) `staticFetchableList` generator
 2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : Entity(com.dvFabricio.VidaLongaFlix.domain.user.Role) `staticFetchableList` generator
-2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : To-one key - NavigableRole[com.dvFabricio.VidaLongaFlix.domain.video.Video.category]
-2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.video.Video.comments#{element}]) - element descriptor
-2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.video.Video.comments)#finishInitialization
-2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.video.Video.comments) - key descriptor
-2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : Entity(com.dvFabricio.VidaLongaFlix.domain.video.Video) `staticFetchableList` generator
+2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : To-one key - NavigableRole[com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category]
+2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments#{element}]) - element descriptor
+2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments)#finishInitialization
+2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments) - key descriptor
+2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : Entity(com.dvFabricio.VidaLongaFlix.domain.user.video.Video) `staticFetchableList` generator
 2025-01-24T08:34:14.567-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.user.User.roles#{element}]) - element descriptor
 2025-01-24T08:34:14.568-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.user.User.roles)#finishInitialization
 2025-01-24T08:34:14.568-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.user.User.roles) - key descriptor
@@ -3858,7 +3858,7 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:34:14.569-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.category.Category.videos)#finishInitialization
 2025-01-24T08:34:14.569-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping(com.dvFabricio.VidaLongaFlix.domain.category.Category.videos) - key descriptor
 2025-01-24T08:34:14.569-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : Entity(com.dvFabricio.VidaLongaFlix.domain.category.Category) `staticFetchableList` generator
-2025-01-24T08:34:14.569-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.video.Video.comments#{element}]) - element descriptor
+2025-01-24T08:34:14.569-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments#{element}]) - element descriptor
 2025-01-24T08:34:14.569-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.hibernate.orm.model.mapping.creation   : Starting PostInitCallbackEntry : PluralAttributeMapping( NavigableRole[com.dvFabricio.VidaLongaFlix.domain.category.Category.videos#{element}]) - element descriptor
 2025-01-24T08:34:14.745-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Created new SQL alias : c1_0
 2025-01-24T08:34:14.748-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [StandardTableGroup(com.dvFabricio.VidaLongaFlix.domain.comment.Comment)] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.comment.Comment] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.comment.Comment]
@@ -3912,31 +3912,31 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:34:14.816-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     :  Update (0): update roles set name=? where id=?
 2025-01-24T08:34:14.816-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     :  Delete (0): delete from roles where id=?
 2025-01-24T08:34:14.816-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Created new SQL alias : v1_0
-2025-01-24T08:34:14.816-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [StandardTableGroup(com.dvFabricio.VidaLongaFlix.domain.video.Video)] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video] 
-2025-01-24T08:34:14.816-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@2487b621] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video.category] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video.category] 
+2025-01-24T08:34:14.816-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [StandardTableGroup(com.dvFabricio.VidaLongaFlix.domain.user.video.Video)] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video]
+2025-01-24T08:34:14.816-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@2487b621] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category]
 2025-01-24T08:34:14.820-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.results.graph.AST      : DomainResult Graph:
- \-EntityResultImpl [com.dvFabricio.VidaLongaFlix.domain.video.Video]
- |  +-EntityDelayedFetchImpl [com.dvFabricio.VidaLongaFlix.domain.video.Video.category]
- |  +-DelayedCollectionFetch [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments]
- |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.video.Video.description]
- |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.video.Video.title]
- |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.video.Video.url]
- |  \-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.video.Video.uuid]
+ \-EntityResultImpl [com.dvFabricio.VidaLongaFlix.domain.user.video.Video]
+ |  +-EntityDelayedFetchImpl [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category]
+ |  +-DelayedCollectionFetch [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments]
+ |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.description]
+ |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.title]
+ |  +-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.url]
+ |  \-BasicFetch [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.uuid]
 
 2025-01-24T08:34:14.820-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.tree           : SQL AST Tree:
     SelectStatement {
       FromClause {
-        StandardTableGroup (v1 : com.dvFabricio.VidaLongaFlix.domain.video.Video) {
+        StandardTableGroup (v1 : com.dvFabricio.VidaLongaFlix.domain.user.video.Video) {
           primaryTableReference : videos as v1_0
           TableGroupJoins {
-            left  join LazyTableGroup (c1 : com.dvFabricio.VidaLongaFlix.domain.video.Video.category) {
+            left  join LazyTableGroup (c1 : com.dvFabricio.VidaLongaFlix.domain.user.video.Video.category) {
             }
           }
         }
       }
     }
 
-2025-01-24T08:34:14.821-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     : Static SQL for entity: com.dvFabricio.VidaLongaFlix.domain.video.Video
+2025-01-24T08:34:14.821-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     : Static SQL for entity: com.dvFabricio.VidaLongaFlix.domain.user.video.Video
 2025-01-24T08:34:14.821-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     :  Version select: select id from videos where id=?
 2025-01-24T08:34:14.821-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     :  Insert (0): insert into videos (category_id,description,title,url,uuid,id) values (?,?,?,?,?,default)
 2025-01-24T08:34:14.821-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.p.entity.AbstractEntityPersister     :  Update (0): update videos set category_id=?,description=?,title=?,url=? where id=?
@@ -4047,29 +4047,29 @@ jdk.internal.loader.ClassLoaders$AppClassLoader@266474c2
 2025-01-24T08:34:14.874-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          :  Row delete: delete from users_roles where user_id=? and role_id=?
 2025-01-24T08:34:14.876-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          :  One-shot delete: delete from users_roles where user_id=?
 2025-01-24T08:34:14.876-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Created new SQL alias : c1_0
-2025-01-24T08:34:14.876-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.OneToManyTableGroup@7827cdfc] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments] 
-2025-01-24T08:34:14.876-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [StandardTableGroup(com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element})] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}] 
-2025-01-24T08:34:14.877-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@4a0f4282] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.user] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.user] 
-2025-01-24T08:34:14.877-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@19d3f4fb] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.video] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.video] 
+2025-01-24T08:34:14.876-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.OneToManyTableGroup@7827cdfc] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments]
+2025-01-24T08:34:14.876-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [StandardTableGroup(com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element})] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}]
+2025-01-24T08:34:14.877-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@4a0f4282] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.user] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.user]
+2025-01-24T08:34:14.877-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.create         : Registration of TableGroup [org.hibernate.sql.ast.tree.from.LazyTableGroup@19d3f4fb] with identifierForTableGroup [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.video] for NavigablePath [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.video]
 2025-01-24T08:34:14.878-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.results.graph.AST      : DomainResult Graph:
- \-CollectionDomainResult [com.dvFabricio.VidaLongaFlix.domain.video.Video.comments]
+ \-CollectionDomainResult [com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments]
 
 2025-01-24T08:34:14.878-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.sql.ast.tree           : SQL AST Tree:
     SelectStatement {
       FromClause {
-        OneToManyTableGroup (c1 : com.dvFabricio.VidaLongaFlix.domain.video.Video.comments) {
+        OneToManyTableGroup (c1 : com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments) {
           primaryTableReference : comments as c1_0
           TableGroupJoins {
-            left  join LazyTableGroup (u1 : com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.user) {
+            left  join LazyTableGroup (u1 : com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.user) {
             }
-            left  join LazyTableGroup (v1 : com.dvFabricio.VidaLongaFlix.domain.video.Video.comments.{element}.video) {
+            left  join LazyTableGroup (v1 : com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments.{element}.video) {
             }
           }
         }
       }
     }
 
-2025-01-24T08:34:14.878-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Static SQL for collection: com.dvFabricio.VidaLongaFlix.domain.video.Video.comments
+2025-01-24T08:34:14.878-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] org.hibernate.orm.jdbc.mutation          : Static SQL for collection: com.dvFabricio.VidaLongaFlix.domain.user.video.Video.comments
 2025-01-24T08:34:14.959-03:00  INFO 20524 --- [VidaLongaFlix] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
 2025-01-24T08:34:14.961-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.type.spi.TypeConfiguration$Scope     : Scoping TypeConfiguration [org.hibernate.type.spi.TypeConfiguration@6b64429e] to SessionFactoryImplementor [org.hibernate.internal.SessionFactoryImpl@2319c1e0]
 2025-01-24T08:34:14.964-03:00 DEBUG 20524 --- [VidaLongaFlix] [main] o.h.query.named.NamedObjectRepository    : Checking 0 named HQL queries

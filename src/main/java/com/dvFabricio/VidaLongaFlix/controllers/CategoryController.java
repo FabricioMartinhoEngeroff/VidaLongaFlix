@@ -1,6 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryRequestDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CategoryDTO;
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.services.CategoryService;
 import jakarta.validation.Valid;

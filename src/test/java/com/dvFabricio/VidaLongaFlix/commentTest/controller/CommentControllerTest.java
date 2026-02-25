@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.commentTest.controller;
 
 import com.dvFabricio.VidaLongaFlix.controllers.CommentController;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CreateCommentDTO;
+import com.dvFabricio.VidaLongaFlix.domain.comment.CreateCommentDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;

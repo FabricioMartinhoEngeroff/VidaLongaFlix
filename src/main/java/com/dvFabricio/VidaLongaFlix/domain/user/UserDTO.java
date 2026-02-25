@@ -1,8 +1,6 @@
-package com.dvFabricio.VidaLongaFlix.domain.DTOs;
+package com.dvFabricio.VidaLongaFlix.domain.user;
 
 import com.dvFabricio.VidaLongaFlix.domain.address.Address;
-import com.dvFabricio.VidaLongaFlix.domain.user.Role;
-import com.dvFabricio.VidaLongaFlix.domain.user.User;
 
 import java.util.List;
 import java.util.Optional;

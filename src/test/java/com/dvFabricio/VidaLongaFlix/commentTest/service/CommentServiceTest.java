@@ -1,6 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.commentTest.service;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.CreateCommentDTO;
+import com.dvFabricio.VidaLongaFlix.domain.comment.CreateCommentDTO;
 import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;

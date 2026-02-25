@@ -1,6 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.UserDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.UserRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
 import com.dvFabricio.VidaLongaFlix.services.UserService;

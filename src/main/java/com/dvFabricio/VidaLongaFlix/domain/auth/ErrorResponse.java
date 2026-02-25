@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.domain.DTOs;
+package com.dvFabricio.VidaLongaFlix.domain.auth;
 
 
 import java.time.LocalDateTime;

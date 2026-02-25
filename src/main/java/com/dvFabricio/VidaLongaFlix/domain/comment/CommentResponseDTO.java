@@ -1,6 +1,5 @@
-package com.dvFabricio.VidaLongaFlix.domain.DTOs;
+package com.dvFabricio.VidaLongaFlix.domain.comment;
 
-import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
 import java.util.UUID;
 
 public record CommentResponseDTO(

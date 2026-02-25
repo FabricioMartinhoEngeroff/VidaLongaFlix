@@ -1,15 +1,12 @@
 package com.dvFabricio.VidaLongaFlix.infra.exception.resource;
 
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.ErrorResponse;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.InvalidCredentialsException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.JwtException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.ForbiddenException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.*;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -18,7 +15,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 
 @ControllerAdvice

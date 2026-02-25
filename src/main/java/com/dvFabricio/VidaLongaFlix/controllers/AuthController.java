@@ -1,9 +1,9 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.AuthResponseDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.LoginRequestDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.RegisterRequestDTO;
-import com.dvFabricio.VidaLongaFlix.domain.DTOs.UserResponseDTO;
+import com.dvFabricio.VidaLongaFlix.domain.auth.AuthResponseDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.LoginRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.RegisterRequestDTO;
+import com.dvFabricio.VidaLongaFlix.domain.user.UserResponseDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.InvalidCredentialsException;
