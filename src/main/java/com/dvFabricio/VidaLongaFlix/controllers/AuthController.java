@@ -17,11 +17,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -34,15 +33,15 @@ public class AuthController {
     private final TokenService tokenService;
     private final WelcomeService welcomeService;
 
+    // @AuthenticationPrincipal injeta o usuário já autenticado pelo SecurityFilter
+    // Não precisa mais extrair token manualmente — o Spring já fez isso
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> me(
-            @RequestHeader("Authorization") String bearerToken) {
+            @AuthenticationPrincipal User user) {
 
-        String token = bearerToken.replace("Bearer ", "");
-        UUID userId = tokenService.getUserIdFromToken(token);
-
-        User user = repository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundExceptions("User not found"));
+        if (user == null) {
+            throw new ResourceNotFoundExceptions("User not authenticated");
+        }
 
         return ResponseEntity.ok(new UserResponseDTO(user));
     }

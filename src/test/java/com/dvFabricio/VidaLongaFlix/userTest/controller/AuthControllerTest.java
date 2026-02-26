@@ -11,6 +11,7 @@ import com.dvFabricio.VidaLongaFlix.repositories.RoleRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import com.dvFabricio.VidaLongaFlix.services.WelcomeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +19,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -29,8 +33,8 @@ import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,6 +58,7 @@ class AuthControllerTest {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(authController)
                 .setControllerAdvice(new GlobalExceptionHandler())
+                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .build();
 
         user = new User("João Silva", "joao@example.com", "encodedPassword", "(11) 99999-9999");
@@ -62,6 +67,11 @@ class AuthControllerTest {
         role = new Role("ROLE_USER");
         role.setId(UUID.randomUUID());
         user.setRoles(List.of(role));
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -151,4 +161,27 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void shouldReturnAuthenticatedUser() throws Exception {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        user, null, user.getAuthorities()
+                )
+        );
+
+        mockMvc.perform(get("/auth/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("João Silva"))
+                .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenUserNotAuthenticated() throws Exception {
+        SecurityContextHolder.clearContext();
+
+        mockMvc.perform(get("/auth/me"))
+                .andExpect(status().isNotFound());
+    }
+
 }
