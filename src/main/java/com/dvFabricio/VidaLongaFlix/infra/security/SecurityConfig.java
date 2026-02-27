@@ -2,6 +2,7 @@ package com.dvFabricio.VidaLongaFlix.infra.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -36,6 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/videos/**").permitAll()
                         .requestMatchers("/menus/**").permitAll()
                         .requestMatchers("/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/comments/**").hasRole("ADMIN")
                         .requestMatchers("/comments/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

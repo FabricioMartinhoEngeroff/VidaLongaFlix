@@ -159,8 +159,8 @@ class EndToEndFlowIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.favorited").value(false))
                 .andExpect(jsonPath("$.likesCount").value(0));
 
-        // 10. Admin deleta o comentário
-        mockMvc.perform(delete("/comments/{id}", commentId))
+        // 10. Admin deleta o comentário (DELETE /comments agora exige ROLE_ADMIN)
+        mockMvc.perform(bearer(delete("/comments/{id}", commentId), adminToken))
                 .andExpect(status().isNoContent());
 
         // 11. Verifica lista de comentários vazia

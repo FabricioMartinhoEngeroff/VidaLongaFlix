@@ -141,7 +141,7 @@ class CommentFlowIntegrationTest extends BaseIntegrationTest {
         UUID commentId = commentRepository.findByVideo_Id(videoId)
                 .stream().findFirst().orElseThrow().getId();
 
-        mockMvc.perform(delete("/comments/{id}", commentId))
+        mockMvc.perform(bearer(delete("/comments/{id}", commentId), adminToken))
                 .andExpect(status().isNoContent());
 
         // Verifica remoção
@@ -150,8 +150,14 @@ class CommentFlowIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void shouldReturn404WhenDeletingNonExistentComment() throws Exception {
+    void shouldReturn403WhenDeletingCommentWithoutToken() throws Exception {
         mockMvc.perform(delete("/comments/{id}", UUID.randomUUID()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldReturn404WhenDeletingNonExistentComment() throws Exception {
+        mockMvc.perform(bearer(delete("/comments/{id}", UUID.randomUUID()), adminToken))
                 .andExpect(status().isNotFound());
     }
 

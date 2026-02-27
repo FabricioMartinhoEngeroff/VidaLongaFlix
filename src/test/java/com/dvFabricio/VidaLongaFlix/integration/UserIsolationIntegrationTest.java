@@ -175,20 +175,10 @@ class UserIsolationIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.favorited").value(false));
     }
 
-    // ─────────────────── GAP DE SEGURANÇA: OWNERSHIP DE COMENTÁRIOS ───────
+    // ─────────────────── OWNERSHIP DE COMENTÁRIOS ─────────────────────────
 
-    /**
-     * FALHA DE SEGURANÇA DOCUMENTADA:
-     * DELETE /comments/{id} está sob /comments/** que é permitAll().
-     * O endpoint não exige autenticação nem verifica se o comentário
-     * pertence ao usuário que está deletando.
-     * <p>
-     * Resultado: User B consegue deletar comentário do User A sem token.
-     * <p>
-     * Recomendação: adicionar autenticação ao DELETE e checar ownership no service.
-     */
     @Test
-    void documentedGap_anyoneCanDeleteAnyCommentWithoutAuth() throws Exception {
+    void shouldBlockCommentDeletionWithoutToken() throws Exception {
         // User A cria um comentário
         String body = String.format("{\"text\":\"Comentário do User A\",\"videoId\":\"%s\"}", videoId);
         mockMvc.perform(bearer(post("/comments")
@@ -200,11 +190,50 @@ class UserIsolationIntegrationTest extends BaseIntegrationTest {
         UUID commentId = commentRepository.findByVideo_Id(videoId)
                 .stream().findFirst().orElseThrow().getId();
 
-        // User B deleta o comentário do User A — SEM TOKEN (gap de segurança)
+        // Sem token → 403
         mockMvc.perform(delete("/comments/{id}", commentId))
-                .andExpect(status().isNoContent()); // Deveria ser 403, mas atualmente é 204
+                .andExpect(status().isForbidden());
+    }
 
-        // Confirma que o comentário foi de fato deletado
+    @Test
+    void shouldBlockCommentDeletionForNonAdminUser() throws Exception {
+        // User A (admin) cria um comentário
+        String body = String.format("{\"text\":\"Comentário do Admin\",\"videoId\":\"%s\"}", videoId);
+        mockMvc.perform(bearer(post("/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body),
+                        adminToken))
+                .andExpect(status().isCreated());
+
+        UUID commentId = commentRepository.findByVideo_Id(videoId)
+                .stream().findFirst().orElseThrow().getId();
+
+        // User B (ROLE_USER) tenta deletar → 403
+        mockMvc.perform(bearer(delete("/comments/{id}", commentId), userBToken))
+                .andExpect(status().isForbidden());
+
+        // Confirma que o comentário ainda existe
+        mockMvc.perform(get("/comments/video/{videoId}", videoId))
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
+    @Test
+    void shouldAllowAdminToDeleteAnyComment() throws Exception {
+        // User B cria um comentário
+        String body = String.format("{\"text\":\"Comentário do User B\",\"videoId\":\"%s\"}", videoId);
+        mockMvc.perform(bearer(post("/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body),
+                        userBToken))
+                .andExpect(status().isCreated());
+
+        UUID commentId = commentRepository.findByVideo_Id(videoId)
+                .stream().findFirst().orElseThrow().getId();
+
+        // Admin deleta o comentário do User B → 204
+        mockMvc.perform(bearer(delete("/comments/{id}", commentId), adminToken))
+                .andExpect(status().isNoContent());
+
         mockMvc.perform(get("/comments/video/{videoId}", videoId))
                 .andExpect(jsonPath("$.length()").value(0));
     }
