@@ -17,32 +17,32 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Testes de integração para o fluxo completo de categorias:
- * GET, POST, PUT, DELETE e validação de duplicatas.
+ * Testes de integração para o fluxo completo de categorias.
  * <p>
- * O endpoint /categories/** é permitAll, portanto não exige token.
+ * GET /categories → público (sem token)
+ * POST/PUT/DELETE /categories → somente ROLE_ADMIN
  */
 class CategoryFlowIntegrationTest extends BaseIntegrationTest {
 
     @Autowired private CategoryRepository categoryRepository;
 
+    private String adminToken;
     private String uniqueName;
-    private UUID createdCategoryId;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
+        adminToken = getAdminToken();
         uniqueName = "Cat-IT-" + UUID.randomUUID();
     }
 
     @AfterEach
     void cleanup() {
-        // Remove categorias criadas nos testes
         categoryRepository.findAll().stream()
                 .filter(c -> c.getName().startsWith("Cat-IT-"))
                 .forEach(categoryRepository::delete);
     }
 
-    // ─────────────────────────── GET ──────────────────────────────────────
+    // ─────────────────────────── GET (público) ────────────────────────────
 
     @Test
     void shouldReturnCategoriesByVideoType() throws Exception {
@@ -70,18 +70,17 @@ class CategoryFlowIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // ─────────────────────────── POST ─────────────────────────────────────
+    // ─────────────────────────── POST (só admin) ──────────────────────────
 
     @Test
     void shouldCreateVideoCategorySuccessfully() throws Exception {
         CategoryRequestDTO request = new CategoryRequestDTO(uniqueName, CategoryType.VIDEO);
 
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(bearer(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request)), adminToken))
                 .andExpect(status().isCreated());
 
-        // Verifica persistência
         mockMvc.perform(get("/categories").param("type", "VIDEO"))
                 .andExpect(jsonPath("$[*].name", hasItem(uniqueName)));
     }
@@ -91,23 +90,31 @@ class CategoryFlowIntegrationTest extends BaseIntegrationTest {
         String menuName = "Cat-IT-MENU-NEW-" + UUID.randomUUID();
         CategoryRequestDTO request = new CategoryRequestDTO(menuName, CategoryType.MENU);
 
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(bearer(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request)), adminToken))
                 .andExpect(status().isCreated());
     }
 
     @Test
-    void shouldReturnConflictForDuplicateCategoryNameAndType() throws Exception {
-        // Cria a categoria uma primeira vez
-        categoryRepository.save(new Category(uniqueName, CategoryType.VIDEO));
-
-        // Tenta criar novamente com mesmo nome e tipo
+    void shouldReturn403WhenCreatingCategoryWithoutToken() throws Exception {
         CategoryRequestDTO request = new CategoryRequestDTO(uniqueName, CategoryType.VIDEO);
 
         mockMvc.perform(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void shouldReturnConflictForDuplicateCategoryNameAndType() throws Exception {
+        categoryRepository.save(new Category(uniqueName, CategoryType.VIDEO));
+
+        CategoryRequestDTO request = new CategoryRequestDTO(uniqueName, CategoryType.VIDEO);
+
+        mockMvc.perform(bearer(post("/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)), adminToken))
                 .andExpect(status().isConflict());
     }
 
@@ -115,9 +122,9 @@ class CategoryFlowIntegrationTest extends BaseIntegrationTest {
     void shouldReturnBadRequestWhenNameIsBlank() throws Exception {
         CategoryRequestDTO request = new CategoryRequestDTO("", CategoryType.VIDEO);
 
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(bearer(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(objectMapper.writeValueAsString(request)), adminToken))
                 .andExpect(status().isBadRequest());
     }
 
@@ -125,13 +132,13 @@ class CategoryFlowIntegrationTest extends BaseIntegrationTest {
     void shouldReturnBadRequestWhenTypeIsNull() throws Exception {
         String body = "{\"name\":\"Sem Tipo\"}";
 
-        mockMvc.perform(post("/categories")
+        mockMvc.perform(bearer(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
+                        .content(body), adminToken))
                 .andExpect(status().isBadRequest());
     }
 
-    // ─────────────────────────── PUT ──────────────────────────────────────
+    // ─────────────────────────── PUT (só admin) ───────────────────────────
 
     @Test
     void shouldUpdateCategoryName() throws Exception {
@@ -140,44 +147,61 @@ class CategoryFlowIntegrationTest extends BaseIntegrationTest {
         String updatedName = uniqueName + "-UPDATED";
         CategoryRequestDTO update = new CategoryRequestDTO(updatedName, CategoryType.VIDEO);
 
+        mockMvc.perform(bearer(put("/categories/{id}", saved.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(update)), adminToken))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/categories").param("type", "VIDEO"))
+                .andExpect(jsonPath("$[*].name", hasItem(updatedName)));
+    }
+
+    @Test
+    void shouldReturn403WhenUpdatingCategoryWithoutToken() throws Exception {
+        Category saved = categoryRepository.save(new Category(uniqueName, CategoryType.VIDEO));
+        CategoryRequestDTO update = new CategoryRequestDTO(uniqueName + "-X", CategoryType.VIDEO);
+
         mockMvc.perform(put("/categories/{id}", saved.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(update)))
-                .andExpect(status().isNoContent());
-
-        // Verifica que o nome foi atualizado
-        mockMvc.perform(get("/categories").param("type", "VIDEO"))
-                .andExpect(jsonPath("$[*].name", hasItem(updatedName)));
+                .andExpect(status().isForbidden());
     }
 
     @Test
     void shouldReturn404WhenUpdatingNonExistentCategory() throws Exception {
         CategoryRequestDTO update = new CategoryRequestDTO("Qualquer", CategoryType.VIDEO);
 
-        mockMvc.perform(put("/categories/{id}", UUID.randomUUID())
+        mockMvc.perform(bearer(put("/categories/{id}", UUID.randomUUID())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(update)))
+                        .content(objectMapper.writeValueAsString(update)), adminToken))
                 .andExpect(status().isNotFound());
     }
 
-    // ─────────────────────────── DELETE ───────────────────────────────────
+    // ─────────────────────────── DELETE (só admin) ────────────────────────
 
     @Test
     void shouldDeleteCategorySuccessfully() throws Exception {
         Category saved = categoryRepository.save(new Category(uniqueName, CategoryType.VIDEO));
 
-        mockMvc.perform(delete("/categories/{id}", saved.getId()))
+        mockMvc.perform(bearer(delete("/categories/{id}", saved.getId()), adminToken))
                 .andExpect(status().isNoContent());
 
-        // Verifica que não existe mais na listagem
         mockMvc.perform(get("/categories").param("type", "VIDEO"))
                 .andExpect(jsonPath("$[*].name").value(
                         org.hamcrest.Matchers.not(hasItem(uniqueName))));
     }
 
     @Test
+    void shouldReturn403WhenDeletingCategoryWithoutToken() throws Exception {
+        Category saved = categoryRepository.save(new Category(uniqueName, CategoryType.VIDEO));
+
+        mockMvc.perform(delete("/categories/{id}", saved.getId()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void shouldReturn404WhenDeletingNonExistentCategory() throws Exception {
-        mockMvc.perform(delete("/categories/{id}", UUID.randomUUID()))
+        mockMvc.perform(bearer(delete("/categories/{id}", UUID.randomUUID()), adminToken))
                 .andExpect(status().isNotFound());
     }
 }

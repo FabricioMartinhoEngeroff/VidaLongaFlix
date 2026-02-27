@@ -40,9 +40,8 @@ class InvalidInputIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void shouldReturn400ForInvalidUuidInCategoryDeletePath() throws Exception {
-        String adminToken = getAdminToken();
-
-        mockMvc.perform(delete("/categories/{id}", "uuid-invalido"))
+        // DELETE /categories agora exige ROLE_ADMIN — passa token para testar a validação do UUID
+        mockMvc.perform(bearer(delete("/categories/{id}", "uuid-invalido"), getAdminToken()))
                 .andExpect(status().isBadRequest());
     }
 
@@ -66,9 +65,10 @@ class InvalidInputIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void shouldReturn400ForMalformedJsonOnCategoryCreate() throws Exception {
-        mockMvc.perform(post("/categories")
+        // POST /categories agora exige ROLE_ADMIN — passa token para testar a validação do body
+        mockMvc.perform(bearer(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{chave sem aspas: valor}"))
+                        .content("{chave sem aspas: valor}"), getAdminToken()))
                 .andExpect(status().isBadRequest());
     }
 
