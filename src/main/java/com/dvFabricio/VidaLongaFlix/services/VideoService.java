@@ -111,7 +111,10 @@ public class VideoService {
         return categoryRepository.findAll().stream()
                 .collect(Collectors.toMap(
                         Category::getName,
-                        category -> videoRepository.countViewsByCategoryId(category.getId())
+                        category -> {
+                            Long views = videoRepository.countViewsByCategoryId(category.getId());
+                            return views != null ? views : 0L;
+                        }
                 ));
     }
 

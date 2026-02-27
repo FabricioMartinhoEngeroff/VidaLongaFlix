@@ -48,15 +48,19 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
 
     private void authenticateWithToken(String token) {
-        UUID userId = tokenService.getUserIdFromToken(token);
-        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            Optional<User> userOptional = userRepository.findById(userId);
-            if (userOptional.isPresent()) {
-                UserDetails userDetails = userOptional.get();
-                var authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            UUID userId = tokenService.getUserIdFromToken(token);
+            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                Optional<User> userOptional = userRepository.findById(userId);
+                if (userOptional.isPresent()) {
+                    UserDetails userDetails = userOptional.get();
+                    var authentication = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
+        } catch (Exception e) {
+            // Invalid or expired token — leave request unauthenticated; Spring Security handles the rest
         }
     }
 }

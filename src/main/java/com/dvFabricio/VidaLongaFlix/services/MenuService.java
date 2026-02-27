@@ -26,6 +26,7 @@ public class MenuService {
     }
 
     // Busca todos os menus — rota pública
+    @Transactional(readOnly = true)
     public List<MenuDTO> findAll() {
         return menuRepository.findAll().stream()
                 .map(MenuDTO::new)
@@ -33,6 +34,7 @@ public class MenuService {
     }
 
     // Busca um menu por ID — rota pública
+    @Transactional(readOnly = true)
     public MenuDTO findById(UUID id) {
         return new MenuDTO(findMenuById(id));
     }

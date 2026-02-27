@@ -4,6 +4,7 @@ package com.dvFabricio.VidaLongaFlix.infra.exception.resource;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.InvalidCredentialsException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.JwtException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.ForbiddenException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentNotFoundException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -32,6 +34,18 @@ public class GlobalExceptionHandler {
     public ResponseEntity<StandardError> resourceNotFound(ResourceNotFoundExceptions e, HttpServletRequest request) {
         StandardError err = buildStandardError(HttpStatus.NOT_FOUND, "Resource not found", e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+    }
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<StandardError> commentNotFound(CommentNotFoundException e, HttpServletRequest request) {
+        StandardError err = buildStandardError(HttpStatus.NOT_FOUND, "Comment not found", e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<StandardError> missingParam(MissingServletRequestParameterException e, HttpServletRequest request) {
+        StandardError err = buildStandardError(HttpStatus.BAD_REQUEST, "Missing parameter", e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
     @ExceptionHandler(DuplicateResourceException.class)

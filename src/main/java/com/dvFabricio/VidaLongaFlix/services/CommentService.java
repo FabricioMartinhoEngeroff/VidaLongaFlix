@@ -81,11 +81,9 @@ public class CommentService {
     }
 
     public List<CommentResponseDTO> getCommentsByVideo(UUID videoId) {
-        List<Comment> comments = commentRepository.findByVideo_Id(videoId);
-        if (comments.isEmpty()) {
-            throw new ResourceNotFoundExceptions("No comments found for video with ID " + videoId);
-        }
-        return comments.stream().map(CommentResponseDTO::new).toList();
+        return commentRepository.findByVideo_Id(videoId).stream()
+                .map(CommentResponseDTO::new)
+                .toList();
     }
 
     public int getCommentCountByVideo(UUID videoId) {

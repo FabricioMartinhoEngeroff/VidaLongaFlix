@@ -1,5 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.domain.category;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Setter
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Category {
 
     @Id
