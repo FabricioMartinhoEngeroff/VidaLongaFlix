@@ -81,10 +81,11 @@ public class AuthController {
         newUser.setRoles(List.of(userRole));
         repository.save(newUser);
 
+        // WhatsApp é fire-and-forget — falha não impede o cadastro
         try {
             welcomeService.sendWelcomeMessage(newUser.getName(), newUser.getPhone());
         } catch (Exception e) {
-            System.out.println("WhatsApp não enviado: " + e.getMessage());
+            System.err.println("WhatsApp não enviado: " + e.getMessage());
         }
 
         String token = tokenService.generateToken(newUser);
