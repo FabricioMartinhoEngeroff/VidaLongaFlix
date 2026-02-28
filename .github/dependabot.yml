@@ -1,0 +1,15 @@
+version: 2
+
+updates:
+  # Monitora dependências do Maven (pom.xml)
+  - package-ecosystem: "maven"
+    directory: "/"              # raiz do projeto onde está o pom.xml
+    schedule:
+      interval: "weekly"        # verifica toda semana (segunda-feira)
+    open-pull-requests-limit: 5 # máximo de 5 PRs abertos ao mesmo tempo
+
+  # Monitora as próprias Actions do GitHub (.github/workflows)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
