@@ -42,8 +42,9 @@ public class WhatsAppService {
             return;
         }
 
-        // Remove tudo que não for dígito: "(51) 99640-7776" → "5551996407776"
-        String toNumber = message.getDestination().replaceAll("[^0-9]", "");
+        // Remove formatação e garante código do país 55 (Brasil)
+        String digits = message.getDestination().replaceAll("[^0-9]", "");
+        String toNumber = digits.startsWith("55") ? digits : "55" + digits;
 
         String url = "https://graph.facebook.com/" + apiVersion + "/" + phoneNumberId + "/messages";
 

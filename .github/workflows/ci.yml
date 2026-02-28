@@ -1,0 +1,36 @@
+name: Integração Contínua
+
+# GATILHO: quando executar esse workflow?
+on:
+  push:
+    branches: [ "main", "feat/*" ]   # a cada push na main ou branches feat/
+  pull_request:
+    branches: [ "main" ]             # a cada PR aberto para a main
+
+jobs:
+  test:
+    name: Rodar Testes
+    runs-on: ubuntu-latest           # máquina limpa Ubuntu (igual ao vídeo)
+
+    steps:
+      # 1. Baixa o código do repositório para a máquina do GitHub
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # 2. Instala o Java 17 (mesma versão do seu projeto)
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'    # distribuição gratuita do Java
+
+      # 3. Cache do Maven para não baixar as dependências do zero toda vez
+      - name: Cache das dependências Maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+
+      # 4. Roda todos os testes (equivalente ao "npm test" do vídeo)
+      - name: Executar testes
+        run: ./mvnw test

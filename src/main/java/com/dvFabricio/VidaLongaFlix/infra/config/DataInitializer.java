@@ -5,6 +5,7 @@ import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.repositories.RoleRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,13 @@ public class DataInitializer implements ApplicationRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    // Lê do application.properties → que lê das variáveis de ambiente na AWS
+    @Value("${admin.email}")
+    private String adminEmail;
+
+    @Value("${admin.password}")
+    private String adminPassword;
+
     @Override
     public void run(ApplicationArguments args) {
         Role userRole = roleRepository.findByName("ROLE_USER")
@@ -28,11 +36,11 @@ public class DataInitializer implements ApplicationRunner {
         Role adminRole = roleRepository.findByName("ROLE_ADMIN")
                 .orElseGet(() -> roleRepository.save(new Role("ROLE_ADMIN")));
 
-        if (!userRepository.existsByEmail("admin@vidalongaflix.com")) {
+        if (!userRepository.existsByEmail(adminEmail)) {
             User admin = new User(
                     "Admin User",
-                    "admin@vidalongaflix.com",
-                    passwordEncoder.encode("Admin@123456"),
+                    adminEmail,
+                    passwordEncoder.encode(adminPassword), // nunca salva a senha em texto puro
                     "(51)99999-9999"
             );
             admin.setTaxId("987.654.321-00");
