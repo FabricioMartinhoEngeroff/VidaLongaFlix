@@ -23,10 +23,13 @@ public class VideoService {
 
     private final VideoRepository videoRepository;
     private final CategoryRepository categoryRepository;
+    private final NotificationService notificationService;
 
-    public VideoService(VideoRepository videoRepository, CategoryRepository categoryRepository) {
+    public VideoService(VideoRepository videoRepository, CategoryRepository categoryRepository,
+                        NotificationService notificationService) {
         this.videoRepository = videoRepository;
         this.categoryRepository = categoryRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -47,6 +50,7 @@ public class VideoService {
                 .build();
 
         saveVideo(video);
+        notificationService.createForVideo(video);
     }
 
     @Transactional

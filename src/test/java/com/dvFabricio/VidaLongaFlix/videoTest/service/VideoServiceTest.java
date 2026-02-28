@@ -8,6 +8,7 @@ import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;
+import com.dvFabricio.VidaLongaFlix.services.NotificationService;
 import com.dvFabricio.VidaLongaFlix.services.VideoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ class VideoServiceTest {
     @InjectMocks private VideoService videoService;
     @Mock private VideoRepository videoRepository;
     @Mock private CategoryRepository categoryRepository;
+    @Mock private NotificationService notificationService;
 
     private Video video;
     private Category category;

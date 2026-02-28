@@ -19,10 +19,13 @@ public class MenuService {
 
     private final MenuRepository menuRepository;
     private final CategoryRepository categoryRepository;
+    private final NotificationService notificationService;
 
-    public MenuService(MenuRepository menuRepository, CategoryRepository categoryRepository) {
+    public MenuService(MenuRepository menuRepository, CategoryRepository categoryRepository,
+                       NotificationService notificationService) {
         this.menuRepository = menuRepository;
         this.categoryRepository = categoryRepository;
+        this.notificationService = notificationService;
     }
 
     // Busca todos os menus — rota pública
@@ -57,6 +60,7 @@ public class MenuService {
                 .build();
 
         saveMenu(menu);
+        notificationService.createForMenu(menu);
     }
 
     // Atualiza só os campos enviados — só ADMIN
