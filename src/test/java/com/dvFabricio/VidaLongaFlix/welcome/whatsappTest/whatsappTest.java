@@ -19,10 +19,12 @@ class WhatsAppServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Injeta valores fake — não chama Twilio de verdade
-        ReflectionTestUtils.setField(whatsAppService, "accountSid", "fake-sid");
-        ReflectionTestUtils.setField(whatsAppService, "authToken", "fake-token");
-        ReflectionTestUtils.setField(whatsAppService, "fromNumber", "+14155238886");
+        // Injeta valores fake — não chama a API do Meta de verdade
+        ReflectionTestUtils.setField(whatsAppService, "phoneNumberId", "fake-phone-id");
+        ReflectionTestUtils.setField(whatsAppService, "accessToken", "fake-token");
+        ReflectionTestUtils.setField(whatsAppService, "apiVersion", "v22.0");
+        ReflectionTestUtils.setField(whatsAppService, "templateName", "hello_world");
+        ReflectionTestUtils.setField(whatsAppService, "templateLanguage", "en_US");
         ReflectionTestUtils.setField(whatsAppService, "enabled", false); // <- modo dev
     }
 
