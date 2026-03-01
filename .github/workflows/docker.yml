@@ -1,0 +1,63 @@
+name: Docker
+
+on:
+  workflow_call:
+    inputs:
+      push:
+        description: "Se true, faz push da imagem no Docker Hub (requer secrets)."
+        type: boolean
+        required: false
+        default: false
+      image:
+        description: "Nome completo da imagem (ex: usuario/vidalongaflix). Se vazio, usa DOCKERHUB_USERNAME/vidalongaflix."
+        type: string
+        required: false
+        default: ""
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: false
+      DOCKERHUB_TOKEN:
+        required: false
+
+jobs:
+  docker:
+    name: Build (e opcionalmente Push)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      IMAGE_NAME: ${{ inputs.image != '' && inputs.image || (secrets.DOCKERHUB_USERNAME != '' && format('{0}/vidalongaflix', secrets.DOCKERHUB_USERNAME) || 'vidalongaflix') }}
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validar secrets do Docker Hub (quando push=true)
+        if: ${{ inputs.push }}
+        run: |
+          test -n "${{ secrets.DOCKERHUB_USERNAME }}" || (echo "Missing secret: DOCKERHUB_USERNAME" && exit 1)
+          test -n "${{ secrets.DOCKERHUB_TOKEN }}" || (echo "Missing secret: DOCKERHUB_TOKEN" && exit 1)
+
+      - name: Login no Docker Hub
+        if: ${{ inputs.push }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build (e Push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: ${{ inputs.push }}
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+

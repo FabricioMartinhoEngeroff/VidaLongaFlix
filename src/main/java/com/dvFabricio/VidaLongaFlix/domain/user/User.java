@@ -11,11 +11,12 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -38,7 +39,7 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "tax_id", nullable = false, unique = true, length = 14)
+    @Column(name = "tax_id", nullable = true, unique = true, length = 14)
     private String taxId;
 
     @Column(name = "phone", nullable = false, length = 15)
@@ -58,6 +59,9 @@ public class User implements UserDetails {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "notifications_last_read_at")
+    private Instant notificationsLastReadAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

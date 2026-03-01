@@ -2,54 +2,95 @@ package com.dvFabricio.VidaLongaFlix.services;
 
 import com.dvFabricio.VidaLongaFlix.domain.message.DeliveryStatus;
 import com.dvFabricio.VidaLongaFlix.domain.message.Message;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceAccessException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class WhatsAppService {
 
-    @Value("${twilio.account-sid}")
-    private String accountSid;
+    @Value("${whatsapp.phone-number-id}")
+    private String phoneNumberId;
 
-    @Value("${twilio.auth-token}")
-    private String authToken;
+    @Value("${whatsapp.access-token}")
+    private String accessToken;
 
-    @Value("${twilio.whatsapp-from}")
-    private String fromNumber;
+    @Value("${whatsapp.api-version:v22.0}")
+    private String apiVersion;
 
-    @Async
+    @Value("${whatsapp.template.name:hello_world}")
+    private String templateName;
+
+    @Value("${whatsapp.template.language:en_US}")
+    private String templateLanguage;
+
+    @Value("${whatsapp.enabled:false}")
+    private boolean enabled;
+
     public void send(Message message) {
-        RestTemplate restTemplate = new RestTemplate();
+        if (!enabled) {
+            System.out.println("[DEV] WhatsApp simulado para: " + message.getDestination());
+            message.setDeliveryStatus(DeliveryStatus.SENT);
+            return;
+        }
 
-        // Twilio expects form-urlencoded, not JSON.
-        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-        body.add("From", "whatsapp:" + fromNumber);
-        body.add("To", "whatsapp:+55" + message.getDestination().replaceAll("[^0-9]", ""));
-        body.add("Body", message.getBody());
+        // Remove formatação e garante código do país 55 (Brasil)
+        String digits = message.getDestination().replaceAll("[^0-9]", "");
+        String toNumber = digits.startsWith("55") ? digits : "55" + digits;
+
+        String url = "https://graph.facebook.com/" + apiVersion + "/" + phoneNumberId + "/messages";
+
+        System.out.println("📱 Enviando WhatsApp Business...");
+        System.out.println("   URL: " + url);
+        System.out.println("   To:  " + toNumber);
+
+        Map<String, Object> payload = buildTemplatePayload(toNumber);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setBasicAuth(accountSid, authToken);  // Twilio uses Basic Auth.
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setBearerAuth(accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
 
-        String url = "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/Messages.json";
+        RestTemplate restTemplate = new RestTemplate();
 
         try {
-            restTemplate.postForEntity(url, request, String.class);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            System.out.println("✅ Status: " + response.getStatusCode());
+            System.out.println("✅ Body:   " + response.getBody());
             message.setDeliveryStatus(DeliveryStatus.SENT);
-            System.out.println("WhatsApp enviado com sucesso para " + message.getDestination());
-        } catch (Exception e) {
+        } catch (HttpClientErrorException e) {
+            System.err.println("❌ HTTP Error: " + e.getStatusCode());
+            System.err.println("❌ Response:   " + e.getResponseBodyAsString());
             message.setDeliveryStatus(DeliveryStatus.SEND_ERROR);
-            throw new ResourceAccessException("Falha ao enviar WhatsApp via Twilio: " + e.getMessage(), e);
+        } catch (Exception e) {
+            System.err.println("❌ Erro geral: " + e.getMessage());
+            message.setDeliveryStatus(DeliveryStatus.SEND_ERROR);
         }
+    }
+
+    private Map<String, Object> buildTemplatePayload(String toNumber) {
+        Map<String, Object> language = new LinkedHashMap<>();
+        language.put("code", templateLanguage);
+
+        Map<String, Object> template = new LinkedHashMap<>();
+        template.put("name", templateName);
+        template.put("language", language);
+
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("messaging_product", "whatsapp");
+        payload.put("to", toNumber);
+        payload.put("type", "template");
+        payload.put("template", template);
+
+        return payload;
     }
 }

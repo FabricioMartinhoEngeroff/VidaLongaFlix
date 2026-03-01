@@ -5,34 +5,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class WelcomeService {
-    private final WhatsAppService whatsAppService;
 
-    private static final String AMANDA_PHONE = "(XX) XXXXX-XXXX";
+    private final WhatsAppService whatsAppService;
 
     public WelcomeService(WhatsAppService whatsAppService) {
         this.whatsAppService = whatsAppService;
     }
 
+    // O conteúdo da mensagem é definido pelo template aprovado no WhatsApp Manager
     public void sendWelcomeMessage(String name, String phone) {
-        String body = String.format("""
-            Olá %s! Bem-vindo(a) ao *VidaLongaFlix*! 🎬🥗
-            
-            Aqui você encontra os melhores conteúdos sobre 
-            saúde, nutrição e qualidade de vida!
-            
-            ---
-            
-            🌿 *Dica especial para você:*
-            Conheça a *Amanda Nutri* - Nutricionista especializada 
-            em longevidade e alimentação saudável!
-            
-            📱 Entre em contato: %s
-            👉 https://wa.me/%s
-            
-            Cuide da sua saúde com quem entende! 💚
-            """, name, AMANDA_PHONE, AMANDA_PHONE.replaceAll("[^0-9]", ""));
-
-        Message message = new Message(phone, body);
+        Message message = new Message(phone, "welcome_template");
         whatsAppService.send(message);
     }
 }

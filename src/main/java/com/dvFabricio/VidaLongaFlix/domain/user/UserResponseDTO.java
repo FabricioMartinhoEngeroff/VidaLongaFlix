@@ -1,6 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.domain.user;
 
 import com.dvFabricio.VidaLongaFlix.domain.address.Address;
+import java.util.List;
 
 public record UserResponseDTO(
         String id,
@@ -10,7 +11,8 @@ public record UserResponseDTO(
         String phone,
         Address address,
         String photo,
-        boolean profileComplete
+        boolean profileComplete,
+        List<String> roles  // <- adicionar
 ) {
     public UserResponseDTO(User user) {
         this(
@@ -21,7 +23,10 @@ public record UserResponseDTO(
                 user.getPhone(),
                 user.getAddress(),
                 user.getPhoto(),
-                user.isProfileComplete()
+                user.isProfileComplete(),
+                user.getRoles().stream()
+                        .map(Role::getName)
+                        .toList()
         );
     }
 }

@@ -9,6 +9,7 @@ import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExc
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.MenuRepository;
 import com.dvFabricio.VidaLongaFlix.services.MenuService;
+import com.dvFabricio.VidaLongaFlix.services.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +32,7 @@ class MenuServiceTest {
     @InjectMocks private MenuService menuService;
     @Mock private MenuRepository menuRepository;
     @Mock private CategoryRepository categoryRepository;
+    @Mock private NotificationService notificationService;
 
     private Menu menu;
     private Category category;

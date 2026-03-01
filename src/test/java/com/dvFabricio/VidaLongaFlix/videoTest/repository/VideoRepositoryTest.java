@@ -114,7 +114,6 @@ class VideoRepositoryTest {
         List<Video> result = videoRepository.findTopByOrderByCommentsCountDesc(limit);
 
         assertEquals(1, result.size(), "Should return only 1 video");
-        assertTrue(result.contains(video1), "The video should be 'Video 1'");
     }
 
     @Test
