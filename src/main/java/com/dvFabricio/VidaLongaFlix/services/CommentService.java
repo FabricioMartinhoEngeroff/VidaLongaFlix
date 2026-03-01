@@ -43,10 +43,6 @@ public class CommentService {
         User user = findUserById(userId);
         Video video = findVideoById(dto.videoId());
 
-        if (commentRepository.existsByTextAndUser_IdAndVideo_Id(dto.text(), userId, video.getId())) {
-            throw new DuplicateResourceException("text", "Duplicate comment.");
-        }
-
         Comment comment = Comment.builder()
                 .text(dto.text())
                 .user(user)

@@ -4,7 +4,6 @@ import com.dvFabricio.VidaLongaFlix.domain.comment.CreateCommentDTO;
 import com.dvFabricio.VidaLongaFlix.domain.comment.Comment;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.repositories.CommentRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;
@@ -41,7 +40,8 @@ class CommentServiceTest {
 
     @BeforeEach
     void setup() {
-        user = new User("user1", "user1@example.com", "password", "11999999999");
+        user = new User("user1", "user1@example.com", "password",
+                "11999999999");
         ReflectionTestUtils.setField(user, "id", UUID.randomUUID());
         userId = user.getId();
 
@@ -57,24 +57,11 @@ class CommentServiceTest {
     @Test
     void shouldCreateComment() {
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
+
         given(videoRepository.findById(videoId)).willReturn(Optional.of(video));
-        given(commentRepository.existsByTextAndUser_IdAndVideo_Id(
-                dto.text(), userId, videoId)).willReturn(false);
 
         assertDoesNotThrow(() -> commentService.create(dto, userId));
         then(commentRepository).should().save(any(Comment.class));
-    }
-
-    @Test
-    void shouldThrowOnDuplicate() {
-        given(userRepository.findById(userId)).willReturn(Optional.of(user));
-        given(videoRepository.findById(videoId)).willReturn(Optional.of(video));
-        given(commentRepository.existsByTextAndUser_IdAndVideo_Id(
-                dto.text(), userId, videoId)).willReturn(true);
-
-        assertThrows(DuplicateResourceException.class,
-                () -> commentService.create(dto, userId));
-        then(commentRepository).should(never()).save(any());
     }
 
     @Test
