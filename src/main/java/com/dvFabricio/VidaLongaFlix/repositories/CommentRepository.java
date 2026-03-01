@@ -21,5 +21,7 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
     boolean existsByTextAndUser_IdAndVideo_Id(String text, UUID userId, UUID videoId);
 
+    boolean existsByUser_IdAndVideo_Id(UUID userId, UUID videoId);
+
 
 }

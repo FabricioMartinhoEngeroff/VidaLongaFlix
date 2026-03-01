@@ -40,6 +40,13 @@ public class CommentService {
             throw new MissingRequiredFieldException("text", "The comment text is required.");
         }
 
+        if (commentRepository.existsByUser_IdAndVideo_Id(userId, dto.videoId())) {
+            throw new DuplicateResourceException(
+                    "videoId",
+                    "User has already created a comment for this video."
+            );
+        }
+
         User user = findUserById(userId);
         Video video = findVideoById(dto.videoId());
 
@@ -125,6 +132,5 @@ public class CommentService {
         return field == null || field.isBlank();
     }
 }
-
 
 

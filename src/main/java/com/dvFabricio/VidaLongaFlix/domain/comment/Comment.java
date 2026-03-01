@@ -11,7 +11,13 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "comments")
+@Table(
+        name = "comments",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_comments_user_video",
+                columnNames = {"user_id", "video_id"}
+        )
+)
 @Getter
 @Setter
 @EqualsAndHashCode(of = "id")
