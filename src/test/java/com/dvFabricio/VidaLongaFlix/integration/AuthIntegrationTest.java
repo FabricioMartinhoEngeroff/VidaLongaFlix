@@ -35,14 +35,14 @@ class AuthIntegrationTest extends BaseIntegrationTest {
     @Test
     void shouldLoginWithAdminCredentials() throws Exception {
         LoginRequestDTO request = new LoginRequestDTO(
-                "admin@vidalongaflix.com", "Admin@123456");
+                ADMIN_EMAIL, ADMIN_PASSWORD);
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isNotEmpty())
-                .andExpect(jsonPath("$.user.email").value("admin@vidalongaflix.com"))
+                .andExpect(jsonPath("$.user.email").value(ADMIN_EMAIL))
                 .andExpect(jsonPath("$.user.roles").isArray());
     }
 
@@ -70,7 +70,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void shouldReturnBadRequestForLoginWithBlankEmail() throws Exception {
-        String body = "{\"email\":\"\",\"password\":\"Admin@123456\"}";
+        String body = "{\"email\":\"\",\"password\":\"" + ADMIN_PASSWORD + "\"}";
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -80,7 +80,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void shouldReturnBadRequestForLoginWithInvalidEmailFormat() throws Exception {
-        String body = "{\"email\":\"email-invalido\",\"password\":\"Admin@123456\"}";
+        String body = "{\"email\":\"email-invalido\",\"password\":\"" + ADMIN_PASSWORD + "\"}";
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

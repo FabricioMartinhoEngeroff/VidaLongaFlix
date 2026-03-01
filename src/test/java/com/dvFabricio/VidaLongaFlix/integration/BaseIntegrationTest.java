@@ -23,10 +23,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-        properties = {"twilio.enabled=false"}
+        properties = {
+                "whatsapp.enabled=false",
+                // Credenciais de admin usadas apenas nos testes de integração
+                "admin.email=admin@vidalongaflix.com",
+                "admin.password=AdminTest@123"
+        }
 )
 @AutoConfigureMockMvc
 public abstract class BaseIntegrationTest {
+
+    protected static final String ADMIN_EMAIL = "admin@vidalongaflix.com";
+    protected static final String ADMIN_PASSWORD = "AdminTest@123";
 
     @Autowired
     protected MockMvc mockMvc;
@@ -38,7 +46,7 @@ public abstract class BaseIntegrationTest {
      * Faz login com o admin padrão (criado pelo DataInitializer) e retorna o token JWT.
      */
     protected String getAdminToken() throws Exception {
-        return loginAs("admin@vidalongaflix.com", "Admin@123456");
+        return loginAs(ADMIN_EMAIL, ADMIN_PASSWORD);
     }
 
     /**
