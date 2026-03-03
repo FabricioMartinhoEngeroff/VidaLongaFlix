@@ -38,6 +38,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/actuator/health/**").permitAll()
+                        .requestMatchers("/actuator/info").permitAll()
                         .requestMatchers("/whatsapp/webhook").permitAll()
                         .requestMatchers("/videos/**").permitAll()
                         .requestMatchers("/menus/**").permitAll()

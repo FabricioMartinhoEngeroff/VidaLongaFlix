@@ -30,14 +30,15 @@ public class CategoryService {
     }
 
 
-    public void create(String name, CategoryType type) {
+    public CategoryDTO create(String name, CategoryType type) {
         validateCategoryName(name);
 
         if (categoryRepository.existsByNameAndType(name, type)) {
             throw new DuplicateResourceException("name", "A category with this name already exists.");
         }
 
-        saveCategory(new Category(name, type));
+        Category saved = categoryRepository.save(new Category(name, type));
+        return new CategoryDTO(saved);
     }
 
     public void update(UUID id, String name) {

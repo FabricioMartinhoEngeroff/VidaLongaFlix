@@ -33,6 +33,10 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
 
+      - name: Normalizar tag da branch
+        shell: bash
+        run: echo "REF_TAG=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_ENV"
+
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -58,6 +62,6 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:${{ env.REF_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-

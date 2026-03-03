@@ -1,6 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.domain.menu;
 
-import com.dvFabricio.VidaLongaFlix.domain.category.Category;
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryDTO;
 
 import java.util.UUID;
 
@@ -9,7 +9,7 @@ public record MenuDTO(
         String title,
         String description,
         String cover,
-        Category category,
+        CategoryDTO category,
         String recipe,
         String nutritionistTips,
         Double protein,
@@ -18,14 +18,13 @@ public record MenuDTO(
         Double fiber,
         Double calories
 ) {
-    // Construtor que converte entidade Menu em MenuDTO
     public MenuDTO(Menu menu) {
         this(
                 menu.getId(),
                 menu.getTitle(),
                 menu.getDescription(),
                 menu.getCover(),
-                menu.getCategory(),
+                menu.getCategory() != null ? new CategoryDTO(menu.getCategory()) : null,
                 menu.getRecipe(),
                 menu.getNutritionistTips(),
                 menu.getProtein(),

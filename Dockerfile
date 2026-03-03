@@ -15,10 +15,11 @@ RUN mvn -B -DskipTests package && \
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
+RUN mkdir -p /app/logs
+
 EXPOSE 8090
 
 COPY --from=build /workspace/app.jar ./app.jar
 
 ENV JAVA_OPTS=""
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
-
