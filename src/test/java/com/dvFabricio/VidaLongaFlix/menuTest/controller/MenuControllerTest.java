@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.menuTest.controller;
 
 import com.dvFabricio.VidaLongaFlix.controllers.MenuController;
-import com.dvFabricio.VidaLongaFlix.domain.category.Category;
+import com.dvFabricio.VidaLongaFlix.domain.category.CategoryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.domain.menu.MenuDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
@@ -45,7 +45,7 @@ class MenuControllerTest {
         menuId = UUID.randomUUID();
         categoryId = UUID.randomUUID();
 
-        Category category = new Category("Almoço", CategoryType.MENU);
+        CategoryDTO category = new CategoryDTO(null, "Almoço", CategoryType.MENU);
 
         menuDTO = new MenuDTO(
                 menuId,
