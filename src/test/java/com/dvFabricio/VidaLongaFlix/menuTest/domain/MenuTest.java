@@ -58,7 +58,7 @@ class MenuTest {
                 () -> assertEquals(menu.getCover(), dto.cover()),
                 () -> assertEquals(menu.getProtein(), dto.protein()),
                 () -> assertEquals(menu.getCalories(), dto.calories()),
-                () -> assertEquals(menu.getCategory(), dto.category())
+                () -> assertEquals(menu.getCategory().getName(), dto.category().name())
         );
     }
 

@@ -54,6 +54,7 @@ class CategoryServiceTest {
     void shouldCreateCategory() {
         given(categoryRepository.existsByNameAndType("Health", CategoryType.VIDEO))
                 .willReturn(false);
+        given(categoryRepository.save(any(Category.class))).willReturn(category);
 
         assertDoesNotThrow(() -> categoryService.create("Health", CategoryType.VIDEO));
 

@@ -59,7 +59,8 @@ public class CategoryControllerTest {
 
     @Test
     void shouldCreateCategory() throws Exception {
-        doNothing().when(categoryService).create("Health", CategoryType.VIDEO);
+        when(categoryService.create("Health", CategoryType.VIDEO))
+                .thenReturn(new CategoryDTO(UUID.randomUUID(), "Health", CategoryType.VIDEO));
 
         mockMvc.perform(post("/categories")
                         .contentType(MediaType.APPLICATION_JSON)
