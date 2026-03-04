@@ -1,0 +1,14 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "fabricioengeroff/vidalongaflix:latest",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 8090,
+      "HostPort": 80
+    }
+  ],
+  "Logging": "/var/log/app"
+}
