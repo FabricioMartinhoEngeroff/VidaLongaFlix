@@ -1,7 +1,8 @@
-package com.dvFabricio.VidaLongaFlix.integration;
+package com.dvFabricio.VidaLongaFlix.integration.auth;
 
 import com.dvFabricio.VidaLongaFlix.domain.user.LoginRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.RegisterRequestDTO;
+import com.dvFabricio.VidaLongaFlix.integration.base.BaseIntegrationTest;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

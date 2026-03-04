@@ -1,8 +1,9 @@
-package com.dvFabricio.VidaLongaFlix.integration;
+package com.dvFabricio.VidaLongaFlix.integration.category;
 
 import com.dvFabricio.VidaLongaFlix.domain.category.Category;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
+import com.dvFabricio.VidaLongaFlix.integration.base.BaseIntegrationTest;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

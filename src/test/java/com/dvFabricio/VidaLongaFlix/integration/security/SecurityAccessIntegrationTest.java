@@ -1,10 +1,11 @@
-package com.dvFabricio.VidaLongaFlix.integration;
+package com.dvFabricio.VidaLongaFlix.integration.security;
 
 import com.dvFabricio.VidaLongaFlix.domain.category.Category;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
+import com.dvFabricio.VidaLongaFlix.integration.base.BaseIntegrationTest;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.RoleRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;

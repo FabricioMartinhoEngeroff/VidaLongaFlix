@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.integration;
+package com.dvFabricio.VidaLongaFlix.integration.auth;
 
 import com.dvFabricio.VidaLongaFlix.domain.category.Category;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
@@ -6,6 +6,7 @@ import com.dvFabricio.VidaLongaFlix.domain.favorite.FavoriteContentType;
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
+import com.dvFabricio.VidaLongaFlix.integration.base.BaseIntegrationTest;
 import com.dvFabricio.VidaLongaFlix.repositories.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,5 +1,6 @@
-package com.dvFabricio.VidaLongaFlix.integration;
+package com.dvFabricio.VidaLongaFlix.integration.validation;
 
+import com.dvFabricio.VidaLongaFlix.integration.base.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 

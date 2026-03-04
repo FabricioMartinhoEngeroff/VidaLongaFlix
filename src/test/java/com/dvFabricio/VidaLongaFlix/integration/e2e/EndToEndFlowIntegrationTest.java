@@ -1,9 +1,10 @@
-package com.dvFabricio.VidaLongaFlix.integration;
+package com.dvFabricio.VidaLongaFlix.integration.e2e;
 
 import com.dvFabricio.VidaLongaFlix.domain.category.Category;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.domain.favorite.FavoriteContentType;
 import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
+import com.dvFabricio.VidaLongaFlix.integration.base.BaseIntegrationTest;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.CommentRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.FavoriteRepository;

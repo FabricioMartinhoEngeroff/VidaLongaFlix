@@ -1,6 +1,7 @@
-package com.dvFabricio.VidaLongaFlix.integration;
+package com.dvFabricio.VidaLongaFlix.integration.favorite;
 
 import com.dvFabricio.VidaLongaFlix.domain.favorite.FavoriteContentType;
+import com.dvFabricio.VidaLongaFlix.integration.base.BaseIntegrationTest;
 import com.dvFabricio.VidaLongaFlix.repositories.FavoriteRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import org.junit.jupiter.api.AfterEach;

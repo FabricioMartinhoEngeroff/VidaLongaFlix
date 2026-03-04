@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.integration;
+package com.dvFabricio.VidaLongaFlix.integration.base;
 
 import com.dvFabricio.VidaLongaFlix.domain.user.LoginRequestDTO;
 import com.fasterxml.jackson.databind.JsonNode;

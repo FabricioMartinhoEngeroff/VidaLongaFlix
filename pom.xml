@@ -105,6 +105,13 @@
             <artifactId>java-jwt</artifactId>
         </dependency>
 
+        <!-- OpenCSV — leitura de arquivos CSV para importação -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>5.9</version>
+        </dependency>
+
         <!-- SpringDoc OpenAPI -->
         <dependency>
             <groupId>org.springdoc</groupId>
