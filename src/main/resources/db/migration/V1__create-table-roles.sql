@@ -1,4 +1,8 @@
--- Admin recebe ROLE_ADMIN e ROLE_USER
-INSERT INTO users_roles (user_id, role_id) VALUES
-                                               ('e293afd4-9222-4150-aadb-5167405a771d', '123e4567-e89b-12d3-a456-426614174001'),
-                                               ('e293afd4-9222-4150-aadb-5167405a771d', '123e4567-e89b-12d3-a456-426614174000');
+CREATE TABLE roles (
+    id   UUID         PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+INSERT INTO roles (id, name) VALUES
+    ('123e4567-e89b-12d3-a456-426614174000', 'ROLE_USER'),
+    ('123e4567-e89b-12d3-a456-426614174001', 'ROLE_ADMIN');

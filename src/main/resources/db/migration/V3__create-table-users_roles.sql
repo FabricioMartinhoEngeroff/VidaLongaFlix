@@ -8,3 +8,8 @@ CREATE TABLE users_roles (
 
 INSERT INTO users_roles (user_id, role_id)
 VALUES ('d193afd4-9222-4150-aadb-5167405a771c', '123e4567-e89b-12d3-a456-426614174000');
+
+-- Admin recebe ROLE_ADMIN e ROLE_USER
+INSERT INTO users_roles (user_id, role_id) VALUES
+    ('e293afd4-9222-4150-aadb-5167405a771d', '123e4567-e89b-12d3-a456-426614174001'),
+    ('e293afd4-9222-4150-aadb-5167405a771d', '123e4567-e89b-12d3-a456-426614174000');
