@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class ImportService {
@@ -75,19 +74,15 @@ public class ImportService {
                     continue;
                 }
 
-                Optional<Category> categoryOpt = categoryRepository.findByNameAndType(categoryName, CategoryType.VIDEO);
-                if (categoryOpt.isEmpty()) {
-                    errors.add("Linha " + rowNum + ": categoria '" + categoryName + "' não encontrada (tipo VIDEO). Crie a categoria antes de importar.");
-                    skipped++;
-                    continue;
-                }
+                Category category = categoryRepository.findByNameAndType(categoryName, CategoryType.VIDEO)
+                        .orElseGet(() -> categoryRepository.save(new Category(categoryName, CategoryType.VIDEO)));
 
                 Video video = Video.builder()
                         .title(title)
                         .description(description)
                         .url(url)
                         .cover(cover)
-                        .category(categoryOpt.get())
+                        .category(category)
                         .recipe(trim(row.get("recipe")))
                         .protein(parseDouble(row.get("protein")))
                         .carbs(parseDouble(row.get("carbs")))
@@ -140,18 +135,14 @@ public class ImportService {
                     continue;
                 }
 
-                Optional<Category> categoryOpt = categoryRepository.findByNameAndType(categoryName, CategoryType.MENU);
-                if (categoryOpt.isEmpty()) {
-                    errors.add("Linha " + rowNum + ": categoria '" + categoryName + "' não encontrada (tipo MENU). Crie a categoria antes de importar.");
-                    skipped++;
-                    continue;
-                }
+                Category category = categoryRepository.findByNameAndType(categoryName, CategoryType.MENU)
+                        .orElseGet(() -> categoryRepository.save(new Category(categoryName, CategoryType.MENU)));
 
                 Menu menu = Menu.builder()
                         .title(title)
                         .description(description)
                         .cover(trim(row.get("cover")))
-                        .category(categoryOpt.get())
+                        .category(category)
                         .recipe(trim(row.get("recipe")))
                         .nutritionistTips(trim(row.get("nutritionistTips")))
                         .protein(parseDouble(row.get("protein")))
