@@ -61,8 +61,11 @@ class ImportFlowIntegrationTest extends BaseIntegrationTest {
                 .filter(m -> m.getTitle().startsWith("Import-IT-"))
                 .forEach(menuRepository::delete);
 
-        categoryRepository.deleteById(videoCategoryId);
-        categoryRepository.deleteById(menuCategoryId);
+        categoryRepository.findAll().stream()
+                .filter(c -> c.getId().equals(videoCategoryId)
+                        || c.getId().equals(menuCategoryId)
+                        || c.getName().startsWith("AutoCreate-"))
+                .forEach(categoryRepository::delete);
     }
 
     // ─────────────────────── IMPORT VIDEOS ───────────────────────
@@ -115,17 +118,18 @@ class ImportFlowIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void shouldSkipVideoRowWhenCategoryDoesNotExist() throws Exception {
+    void shouldAutoCreateCategoryAndImportVideoWhenCategoryDoesNotExist() throws Exception {
+        String newCategory = "AutoCreate-Video-" + UUID.randomUUID();
         String csv = "title,description,url,cover,categoryName\n" +
-                "Import-IT-Video,Desc,https://url.com,https://cover.com,CategoriaQueNaoExiste";
+                "Import-IT-Video,Desc,https://url.com,https://cover.com," + newCategory;
 
         mockMvc.perform(bearer(
                         multipart("/admin/import/videos").file(csvMultipart(csv)),
                         adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.imported").value(0))
-                .andExpect(jsonPath("$.skipped").value(1))
-                .andExpect(jsonPath("$.errors.length()").value(1));
+                .andExpect(jsonPath("$.imported").value(1))
+                .andExpect(jsonPath("$.skipped").value(0))
+                .andExpect(jsonPath("$.errors.length()").value(0));
     }
 
     @Test
@@ -183,16 +187,18 @@ class ImportFlowIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void shouldSkipMenuRowWhenCategoryDoesNotExist() throws Exception {
+    void shouldAutoCreateCategoryAndImportMenuWhenCategoryDoesNotExist() throws Exception {
+        String newCategory = "AutoCreate-Menu-" + UUID.randomUUID();
         String csv = "title,description,cover,categoryName\n" +
-                "Import-IT-Menu,Desc,https://cover.com,CategoriaQueNaoExiste";
+                "Import-IT-Menu,Desc,https://cover.com," + newCategory;
 
         mockMvc.perform(bearer(
                         multipart("/admin/import/menus").file(csvMultipart(csv)),
                         adminToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.imported").value(0))
-                .andExpect(jsonPath("$.skipped").value(1));
+                .andExpect(jsonPath("$.imported").value(1))
+                .andExpect(jsonPath("$.skipped").value(0))
+                .andExpect(jsonPath("$.errors.length()").value(0));
     }
 
     @Test

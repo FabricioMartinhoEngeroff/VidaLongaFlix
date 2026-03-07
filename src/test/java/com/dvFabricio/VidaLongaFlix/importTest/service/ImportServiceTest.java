@@ -150,20 +150,26 @@ class ImportServiceTest {
     }
 
     @Test
-    void shouldSkipVideoWhenCategoryNotFound() throws IOException, CsvValidationException {
+    void shouldAutoCreateVideoCategoryWhenNotFound() throws IOException, CsvValidationException {
         String csv = "title,description,url,cover,categoryName\n" +
                 "Yoga Matinal,Descrição,https://url.com,https://cover.com,CategoriaInexistente";
         MockMultipartFile file = csvFile(csv);
 
+        Category created = new Category("CategoriaInexistente", CategoryType.VIDEO);
+        created.setId(UUID.randomUUID());
+
         given(categoryRepository.findByNameAndType("CategoriaInexistente", CategoryType.VIDEO))
                 .willReturn(Optional.empty());
+        given(categoryRepository.save(any(Category.class))).willReturn(created);
+        given(videoRepository.save(any(Video.class))).willAnswer(inv -> inv.getArgument(0));
 
         ImportResultDTO result = importService.importVideos(file);
 
-        assertEquals(0, result.imported());
-        assertEquals(1, result.skipped());
-        assertTrue(result.errors().get(0).contains("CategoriaInexistente"));
-        then(videoRepository).should(never()).save(any(Video.class));
+        assertEquals(1, result.imported());
+        assertEquals(0, result.skipped());
+        assertTrue(result.errors().isEmpty());
+        then(categoryRepository).should().save(any(Category.class));
+        then(videoRepository).should().save(any(Video.class));
     }
 
     @Test
@@ -264,20 +270,26 @@ class ImportServiceTest {
     }
 
     @Test
-    void shouldSkipMenuWhenCategoryNotFound() throws IOException, CsvValidationException {
+    void shouldAutoCreateMenuCategoryWhenNotFound() throws IOException, CsvValidationException {
         String csv = "title,description,cover,categoryName\n" +
                 "Frango Grelhado,Desc,https://cover.com,CategoriaInexistente";
         MockMultipartFile file = csvFile(csv);
 
+        Category created = new Category("CategoriaInexistente", CategoryType.MENU);
+        created.setId(UUID.randomUUID());
+
         given(categoryRepository.findByNameAndType("CategoriaInexistente", CategoryType.MENU))
                 .willReturn(Optional.empty());
+        given(categoryRepository.save(any(Category.class))).willReturn(created);
+        given(menuRepository.save(any(Menu.class))).willAnswer(inv -> inv.getArgument(0));
 
         ImportResultDTO result = importService.importMenus(file);
 
-        assertEquals(0, result.imported());
-        assertEquals(1, result.skipped());
-        assertTrue(result.errors().get(0).contains("CategoriaInexistente"));
-        then(menuRepository).should(never()).save(any(Menu.class));
+        assertEquals(1, result.imported());
+        assertEquals(0, result.skipped());
+        assertTrue(result.errors().isEmpty());
+        then(categoryRepository).should().save(any(Category.class));
+        then(menuRepository).should().save(any(Menu.class));
     }
 
     @Test

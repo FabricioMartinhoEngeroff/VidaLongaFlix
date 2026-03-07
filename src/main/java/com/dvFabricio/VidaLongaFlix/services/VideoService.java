@@ -118,7 +118,8 @@ public class VideoService {
                         category -> {
                             Long views = videoRepository.countViewsByCategoryId(category.getId());
                             return views != null ? views : 0L;
-                        }
+                        },
+                        Long::sum
                 ));
     }
 
