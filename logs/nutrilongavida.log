@@ -1,31 +1,251 @@
-2026-03-06 06:07:27 [main] INFO  c.d.V.VidaLongaFlixApplication - Starting VidaLongaFlixApplication using Java 21.0.9 with PID 68794 (/home/fabricio/IdeaProjects/VidaLongaFlix/target/classes started by fabricio in /home/fabricio/IdeaProjects/VidaLongaFlix)
-2026-03-06 06:07:27 [main] DEBUG c.d.V.VidaLongaFlixApplication - Running with Spring Boot v3.3.3, Spring v6.1.12
-2026-03-06 06:07:27 [main] INFO  c.d.V.VidaLongaFlixApplication - The following 1 profile is active: "local"
-2026-03-06 06:07:29 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-03-06 06:07:29 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 88 ms. Found 8 JPA repository interfaces.
-2026-03-06 06:07:30 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
-2026-03-06 06:07:30 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
-2026-03-06 06:07:30 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.28]
-2026-03-06 06:07:30 [main] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
-2026-03-06 06:07:30 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3068 ms
-2026-03-06 06:07:31 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2026-03-06 06:07:31 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
-2026-03-06 06:07:31 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
-2026-03-06 06:07:31 [main] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
-2026-03-06 06:07:31 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-03-06 06:07:31 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.2.Final
-2026-03-06 06:07:31 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
-2026-03-06 06:07:32 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-03-06 06:07:32 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-03-06 06:07:33 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-03-06 06:07:33 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-03-06 06:07:34 [main] DEBUG c.d.V.infra.security.SecurityFilter - Filter 'securityFilter' configured for use
-2026-03-06 06:07:34 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-03-06 06:07:35 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-03-06 06:07:35 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name authorizationService
-2026-03-06 06:07:36 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
-2026-03-06 06:07:38 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/api'
-2026-03-06 06:07:38 [main] INFO  c.d.V.VidaLongaFlixApplication - Started VidaLongaFlixApplication in 11.488 seconds (process running for 12.261)
-2026-03-06 06:07:56 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
-2026-03-06 06:07:56 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
-2026-03-06 06:07:56 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-03-07 16:55:37 [main] INFO  c.d.V.m.r.MenuRepositoryTest - Starting MenuRepositoryTest using Java 21.0.9 with PID 64975 (started by fabricio in /home/fabricio/IdeaProjects/VidaLongaFlix)
+2026-03-07 16:55:37 [main] DEBUG c.d.V.m.r.MenuRepositoryTest - Running with Spring Boot v3.3.3, Spring v6.1.12
+2026-03-07 16:55:37 [main] INFO  c.d.V.m.r.MenuRepositoryTest - The following 1 profile is active: "local"
+2026-03-07 16:55:38 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-07 16:55:39 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 142 ms. Found 8 JPA repository interfaces.
+2026-03-07 16:55:39 [main] INFO  o.s.b.t.a.j.TestDatabaseAutoConfiguration$EmbeddedDataSourceBeanFactoryPostProcessor - Replacing 'dataSource' DataSource bean with embedded version
+2026-03-07 16:55:39 [main] INFO  o.s.j.d.e.EmbeddedDatabaseFactory - Starting embedded database: url='jdbc:h2:mem:c0fffa82-1b63-42eb-812c-33987c5196a8;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+2026-03-07 16:55:40 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-07 16:55:40 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.2.Final
+2026-03-07 16:55:40 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-03-07 16:55:40 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-07 16:55:40 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-07 16:55:43 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-07 16:55:43 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-07 16:55:45 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-03-07 16:55:46 [main] INFO  c.d.V.m.r.MenuRepositoryTest - Started MenuRepositoryTest in 9.619 seconds (process running for 26.656)
+2026-03-07 16:55:47 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:55:47 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:55:47 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 3 ms
+2026-03-07 16:55:47 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:55:47 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:55:47 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:55:47 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:55:47 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:55:47 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:55:48 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-07 16:55:48 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:55:48 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:55:48 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:55:48 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:55:48 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:55:48 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:55:48 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.favorite.FavoriteFlowIntegrationTest]: FavoriteFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:55:48 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.favorite.FavoriteFlowIntegrationTest
+2026-03-07 16:55:48 [main] INFO  c.d.V.i.f.FavoriteFlowIntegrationTest - Starting FavoriteFlowIntegrationTest using Java 21.0.9 with PID 64975 (started by fabricio in /home/fabricio/IdeaProjects/VidaLongaFlix)
+2026-03-07 16:55:48 [main] DEBUG c.d.V.i.f.FavoriteFlowIntegrationTest - Running with Spring Boot v3.3.3, Spring v6.1.12
+2026-03-07 16:55:48 [main] INFO  c.d.V.i.f.FavoriteFlowIntegrationTest - The following 1 profile is active: "local"
+2026-03-07 16:55:51 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-07 16:55:51 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 48 ms. Found 8 JPA repository interfaces.
+2026-03-07 16:55:52 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-07 16:55:52 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-03-07 16:55:52 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-07 16:55:52 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-03-07 16:55:52 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection conn11: url=jdbc:h2:mem:testdb user=SA
+2026-03-07 16:55:52 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-03-07 16:55:52 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-07 16:55:52 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-07 16:55:53 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-07 16:55:54 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-07 16:55:54 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name authorizationService
+2026-03-07 16:55:56 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-03-07 16:55:58 [main] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2026-03-07 16:55:59 [main] DEBUG c.d.V.infra.security.SecurityFilter - Filter 'securityFilter' configured for use
+2026-03-07 16:55:59 [main] INFO  o.s.b.t.m.w.SpringBootMockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:55:59 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:55:59 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 3 ms
+2026-03-07 16:55:59 [main] INFO  c.d.V.i.f.FavoriteFlowIntegrationTest - Started FavoriteFlowIntegrationTest in 10.64 seconds (process running for 39.675)
+2026-03-07 16:56:02 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.e2e.EndToEndFlowIntegrationTest]: EndToEndFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:02 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.e2e.EndToEndFlowIntegrationTest
+2026-03-07 16:56:03 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.validation.InvalidInputIntegrationTest]: InvalidInputIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:03 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.validation.InvalidInputIntegrationTest
+2026-03-07 16:56:04 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.video.VideoFlowIntegrationTest]: VideoFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:04 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.video.VideoFlowIntegrationTest
+2026-03-07 16:56:06 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.category.CategoryFlowIntegrationTest]: CategoryFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:06 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.category.CategoryFlowIntegrationTest
+2026-03-07 16:56:09 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.imports.ImportFlowIntegrationTest]: ImportFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:09 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.imports.ImportFlowIntegrationTest
+2026-03-07 16:56:11 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.comment.CommentFlowIntegrationTest]: CommentFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:11 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.comment.CommentFlowIntegrationTest
+2026-03-07 16:56:13 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.auth.UserIsolationIntegrationTest]: UserIsolationIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:13 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.auth.UserIsolationIntegrationTest
+2026-03-07 16:56:16 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.auth.AuthIntegrationTest]: AuthIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:16 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.auth.AuthIntegrationTest
+2026-03-07 16:56:16 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.security.SecurityAccessIntegrationTest]: SecurityAccessIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:16 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.security.SecurityAccessIntegrationTest
+2026-03-07 16:56:22 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.menu.MenuFlowIntegrationTest]: MenuFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:22 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.menu.MenuFlowIntegrationTest
+2026-03-07 16:56:24 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.integration.notification.NotificationFlowIntegrationTest]: NotificationFlowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:24 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.integration.notification.NotificationFlowIntegrationTest
+2026-03-07 16:56:26 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.commentTest.repository.CommentRepositoryTest]: CommentRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:26 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.commentTest.repository.CommentRepositoryTest
+2026-03-07 16:56:26 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:26 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:26 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:26 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:26 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:26 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:26 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:26 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:26 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:26 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.categoryTest.repository.CategoryRepositoryTest]: CategoryRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:26 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.categoryTest.repository.CategoryRepositoryTest
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.favoriteTest.repository.FavoriteRepositoryTest]: FavoriteRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:27 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.favoriteTest.repository.FavoriteRepositoryTest
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 4 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:27 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:27 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.welcome.whatsappTest.WhatsAppIntegrationTest]: WhatsAppIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:27 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.welcome.whatsappTest.WhatsAppIntegrationTest
+2026-03-07 16:56:27 [main] INFO  c.d.V.w.w.WhatsAppIntegrationTest - Starting WhatsAppIntegrationTest using Java 21.0.9 with PID 64975 (started by fabricio in /home/fabricio/IdeaProjects/VidaLongaFlix)
+2026-03-07 16:56:27 [main] DEBUG c.d.V.w.w.WhatsAppIntegrationTest - Running with Spring Boot v3.3.3, Spring v6.1.12
+2026-03-07 16:56:27 [main] INFO  c.d.V.w.w.WhatsAppIntegrationTest - The following 1 profile is active: "local"
+2026-03-07 16:56:28 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-03-07 16:56:28 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 37 ms. Found 8 JPA repository interfaces.
+2026-03-07 16:56:29 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-03-07 16:56:29 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-03-07 16:56:29 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-03-07 16:56:29 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Starting...
+2026-03-07 16:56:29 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-2 - Added connection conn36: url=jdbc:h2:mem:testdb user=SA
+2026-03-07 16:56:29 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Start completed.
+2026-03-07 16:56:29 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-03-07 16:56:29 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-03-07 16:56:29 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-03-07 16:56:30 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-03-07 16:56:30 [main] INFO  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with UserDetailsService bean with name authorizationService
+2026-03-07 16:56:30 [main] INFO  o.s.b.a.e.web.EndpointLinksResolver - Exposing 1 endpoint beneath base path '/actuator'
+2026-03-07 16:56:31 [main] INFO  o.s.b.a.h.H2ConsoleAutoConfiguration - H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2026-03-07 16:56:31 [main] INFO  c.d.V.w.w.WhatsAppIntegrationTest - Started WhatsAppIntegrationTest in 3.824 seconds (process running for 71.916)
+2026-03-07 16:56:32 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplicationTests]: VidaLongaFlixApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:32 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplicationTests
+2026-03-07 16:56:32 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.videoTest.repository.VideoRepositoryTest]: VideoRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:32 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.videoTest.repository.VideoRepositoryTest
+2026-03-07 16:56:32 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:32 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:32 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:32 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:32 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:32 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-07 16:56:32 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:32 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:32 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:32 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:32 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:32 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:32 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:32 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:32 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:32 [main] DEBUG c.d.V.services.UserService - Before update: com.dvFabricio.VidaLongaFlix.domain.user.User@6f5db8ff
+2026-03-07 16:56:32 [main] DEBUG c.d.V.services.UserService - After update: com.dvFabricio.VidaLongaFlix.domain.user.User@6f5db8ff
+2026-03-07 16:56:32 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.userTest.repository.RoleRepositoryTest]: RoleRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:33 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.userTest.repository.RoleRepositoryTest
+2026-03-07 16:56:33 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.dvFabricio.VidaLongaFlix.userTest.repository.UserRepositoryTest]: UserRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-03-07 16:56:33 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.dvFabricio.VidaLongaFlix.VidaLongaFlixApplication for test class com.dvFabricio.VidaLongaFlix.userTest.repository.UserRepositoryTest
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 0 ms
+2026-03-07 16:56:33 [main] INFO  o.s.mock.web.MockServletContext - Initializing Spring TestDispatcherServlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Initializing Servlet ''
+2026-03-07 16:56:33 [main] INFO  o.s.t.w.s.TestDispatcherServlet - Completed initialization in 1 ms
+2026-03-07 16:56:33 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-07 16:56:33 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-07 16:56:33 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-03-07 16:56:33 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-03-07 16:56:33 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-07 16:56:33 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2026-03-07 16:56:33 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
