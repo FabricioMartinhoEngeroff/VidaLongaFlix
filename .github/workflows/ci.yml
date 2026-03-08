@@ -43,3 +43,40 @@ jobs:
     with:
       push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     secrets: inherit
+
+  deploy:
+    name: Deploy no Elastic Beanstalk
+    needs: docker
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    environment: production      # aguarda aprovação manual antes de deployar
+
+    steps:
+      - name: Gerar Dockerrun.aws.json
+        run: |
+          cat > Dockerrun.aws.json << EOF
+          {
+            "AWSEBDockerrunVersion": "1",
+            "Image": {
+              "Name": "${{ secrets.DOCKERHUB_USERNAME }}/vidalongaflix:${{ github.sha }}",
+              "Update": "true"
+            },
+            "Ports": [{ "ContainerPort": 8090 }]
+          }
+          EOF
+
+      - name: Zipar pacote de deploy
+        run: zip deploy.zip Dockerrun.aws.json
+
+      - name: Deploy no Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: vidalongaflix-backend
+          environment_name: Vidalongaflix-backend-env
+          version_label: ${{ github.sha }}
+          region: us-east-2
+          deployment_package: deploy.zip
+          existing_bucket_name: elasticbeanstalk-us-east-2-359598898309
+          wait_for_environment_recovery: 120

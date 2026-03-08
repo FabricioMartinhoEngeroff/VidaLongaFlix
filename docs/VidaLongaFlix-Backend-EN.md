@@ -2,9 +2,13 @@
 
 ## 1. Revision History
 
-| Date       | Revision Summary          | Author  | Development Notes |
-|------------|---------------------------|---------|-------------------|
-| 02/28/2026 | Initial document creation | Fabricio| -                 |
+| Date       | Revision Summary                                                             | Author  | Development Notes |
+|------------|------------------------------------------------------------------------------|---------|-------------------|
+| 02/28/2026 | Initial document creation                                                    | Fabricio| -                 |
+| 03/03/2026 | Fixes: CommentResponseDTO shape, configurable CORS, CategoryController       | Fabricio| -                 |
+| 03/07/2026 | CPF (taxId) becomes optional on user registration                            | Fabricio| -                 |
+| 03/08/2026 | Automated CD pipeline: GitHub Actions deploy job to Elastic Beanstalk        | Fabricio| -                 |
+| 03/08/2026 | GitHub Environment "production" with manual approval gate before deploy       | Fabricio| -                 |
 
 ---
 
@@ -158,7 +162,7 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 | name    | String  | Yes      | Not blank                               |
 | email   | String  | Yes      | Valid email format                      |
 | password| String  | Yes      | Minimum 8 characters, complexity rules  |
-| taxId   | String  | Yes      | Format XXX.XXX.XXX-XX (CPF)            |
+| taxId   | String  | No       | Format XXX.XXX.XXX-XX (CPF)            |
 | phone   | String  | Yes      | Format (XX) XXXXX-XXXX                 |
 | address | Address | Yes      | Street, neighborhood, city, state, zip  |
 
@@ -166,7 +170,7 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 **BR-USR-01** - Email is unique per user. Duplicates return HTTP 409.
 
-**BR-USR-02** - Tax ID (taxId/CPF) is unique per user. Duplicates return HTTP 409.
+**BR-USR-02** - Tax ID (taxId/CPF) is optional. When provided, it must be unique per user. Duplicates return HTTP 409.
 
 **BR-USR-03** - New users are automatically assigned the ROLE_USER profile.
 
@@ -418,7 +422,7 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 **Access:** Public.
 
-**Response:** List of CommentResponseDTO with id, text, userId, videoId.
+**Response:** List of CommentResponseDTO with id, text, date (ISO 8601), user: { id, name }.
 
 ---
 
@@ -667,7 +671,135 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 ---
 
-## 16. HTTP Response Codes
+## 16. CI/CD Pipeline
+
+The project uses GitHub Actions for continuous integration and delivery. The pipeline is triggered on every push to the `main` branch or `feat/*` branches.
+
+### Flow
+
+```
+push main → test → docker (build/push Docker Hub) → deploy (Elastic Beanstalk)
+```
+
+### Jobs
+
+| Job    | Trigger              | Description                                                       |
+|--------|----------------------|-------------------------------------------------------------------|
+| test   | push main / feat/*   | Runs all tests with Maven (./mvnw test)                           |
+| docker | after test (main)    | Builds Docker image and pushes to Docker Hub with SHA tag         |
+| deploy | after docker (main)  | Generates Dockerrun.aws.json, uploads to S3, updates EB env       |
+
+### Elastic Beanstalk Deploy
+
+EB uses `Dockerrun.aws.json` to know which Docker image to run. On each deploy:
+
+1. The job generates the file with image `{DOCKERHUB_USERNAME}/vidalongaflix:{SHA}`
+2. The file is zipped and uploaded to the EB S3 bucket
+3. A new "application version" is created in EB
+4. The environment is updated to use the new version
+
+**Required GitHub Secrets:**
+
+| Secret                | Description                                     |
+|-----------------------|-------------------------------------------------|
+| `DOCKERHUB_USERNAME`  | Docker Hub username                             |
+| `DOCKERHUB_TOKEN`     | Docker Hub access token                         |
+| `AWS_ACCESS_KEY_ID`   | IAM access key for user vidalongaflix-ci        |
+| `AWS_SECRET_ACCESS_KEY`| IAM secret key                                 |
+
+**Elastic Beanstalk Configuration:**
+
+| Parameter        | Value                               |
+|------------------|-------------------------------------|
+| Application name | vidalongaflix-backend               |
+| Environment name | Vidalongaflix-backend-env           |
+| Region           | us-east-2                           |
+| Container port   | 8090                                |
+
+### Rationale for Job Order
+
+The `test → docker → deploy` order may seem inverted compared to the industry standard, where the build typically happens before tests. In this project, the unit tests (Maven) do not depend on a running application or a Docker image — they simulate the application in memory (H2). Therefore, it makes sense to validate the code first and only then build and publish the image.
+
+In projects with end-to-end tests (that access a fully running application), the flow would be:
+
+```
+build image → start container → run e2e tests → push Docker Hub → deploy
+```
+
+### IAM Permissions (vidalongaflix-ci user)
+
+Create in AWS Console → IAM → Users → `vidalongaflix-ci` → Attach policies → JSON:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "elasticbeanstalk:CreateApplicationVersion",
+        "elasticbeanstalk:UpdateEnvironment",
+        "elasticbeanstalk:DescribeEnvironments",
+        "elasticbeanstalk:DescribeApplicationVersions",
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+### Operational Steps to Activate CD
+
+| # | Step | Status |
+|---|---|---|
+| 1 | Create IAM user `vidalongaflix-ci` in AWS Console with the policy above | ✅ Done |
+| 2 | Generate Access Key for the user (IAM → Security credentials → Create access key) | ✅ Done |
+| 3 | Register `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in GitHub Environment `production` | ✅ Done |
+| 4 | Confirm names in AWS Console: `application_name` and `environment_name` in `ci.yml` | ✅ Done |
+| 5 | Create GitHub Environment `production` with required reviewer | ✅ Done |
+
+### GitHub Environment: production
+
+The `deploy` job references the `production` environment in `ci.yml`. This adds a manual approval gate before any deploy reaches production.
+
+**How to configure (one time only):**
+
+```
+GitHub → Settings → Environments → New environment
+Name: production
+```
+
+Inside the `production` environment:
+
+- Check **"Required reviewers"** and add your user → requires manual approval before the deploy runs
+- Optionally move the AWS secrets to the environment scope (recommended):
+  - `AWS_ACCESS_KEY_ID`
+  - `AWS_SECRET_ACCESS_KEY`
+
+**Flow after configuration:**
+
+```
+push main → test ✅ → docker ✅ → deploy ⏸ waiting for approval
+                                          ↓ you receive an email notification
+                                          ↓ you click "Approve" on GitHub
+                                          ✅ deploy runs on Elastic Beanstalk
+```
+
+**Benefits:**
+
+| Benefit | Description |
+|---|---|
+| Deploy control | No code goes to production without conscious approval |
+| Auditable history | GitHub records who approved, when, and which commit was deployed |
+| Isolated secrets | AWS credentials are scoped to the environment, not mixed with other secrets |
+| Protection against accidental deploy | Prevents deploying code that passed tests but has a logical issue |
+
+---
+
+## 17. HTTP Response Codes
 
 | Code | Description                                      |
 |------|--------------------------------------------------|

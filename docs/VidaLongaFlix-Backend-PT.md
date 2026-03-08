@@ -2,9 +2,13 @@
 
 ## 1. Historico de Revisoes
 
-| Data       | Resumo da Revisao                              | Responsavel | Previsao de Desenvolvimento |
-|------------|------------------------------------------------|-------------|------------------------------|
-| 28/02/2026 | Criacao do documento inicial                   | Fabricio    | -                            |
+| Data       | Resumo da Revisao                                                            | Responsavel | Previsao de Desenvolvimento |
+|------------|------------------------------------------------------------------------------|-------------|------------------------------|
+| 28/02/2026 | Criacao do documento inicial                                                 | Fabricio    | -                            |
+| 03/03/2026 | Correcoes: shape CommentResponseDTO, CORS configuravel, CategoryController   | Fabricio    | -                            |
+| 07/03/2026 | CPF (taxId) passa a ser opcional no cadastro de usuario                      | Fabricio    | -                            |
+| 08/03/2026 | Adicao de CD automatico: job deploy GitHub Actions -> Elastic Beanstalk      | Fabricio    | -                            |
+| 08/03/2026 | GitHub Environment "production" com aprovacao manual antes do deploy         | Fabricio    | -                            |
 
 ---
 
@@ -158,7 +162,7 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 | name    | String  | Sim         | Nao vazio                              |
 | email   | String  | Sim         | Formato de e-mail valido               |
 | password| String  | Sim         | Minimo 8 caracteres, complexidade      |
-| taxId   | String  | Sim         | Formato XXX.XXX.XXX-XX (CPF)          |
+| taxId   | String  | Nao         | Formato XXX.XXX.XXX-XX (CPF)          |
 | phone   | String  | Sim         | Formato (XX) XXXXX-XXXX               |
 | address | Address | Sim         | Rua, bairro, cidade, estado, CEP       |
 
@@ -166,7 +170,7 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 **RG-USR-01** - E-mail unico por usuario. Duplicatas retornam HTTP 409.
 
-**RG-USR-02** - CPF (taxId) unico por usuario. Duplicatas retornam HTTP 409.
+**RG-USR-02** - CPF (taxId) e opcional. Quando informado, deve ser unico por usuario. Duplicatas retornam HTTP 409.
 
 **RG-USR-03** - Novo usuario recebe automaticamente o perfil ROLE_USER.
 
@@ -418,7 +422,7 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 **Acesso:** Publico.
 
-**Retorno:** Lista de CommentResponseDTO com id, text, userId, videoId.
+**Retorno:** Lista de CommentResponseDTO com id, text, date (ISO 8601), user: { id, name }.
 
 ---
 
@@ -667,7 +671,135 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 ---
 
-## 16. Codigos de Retorno HTTP
+## 16. Pipeline de CI/CD
+
+O projeto utiliza GitHub Actions para integracao e entrega continuas. O pipeline e ativado a cada push na branch `main` ou em branches `feat/*`.
+
+### Fluxo
+
+```
+push main → test → docker (build/push Docker Hub) → deploy (Elastic Beanstalk)
+```
+
+### Jobs
+
+| Job    | Trigger              | Descricao                                                      |
+|--------|----------------------|----------------------------------------------------------------|
+| test   | push main / feat/*   | Executa todos os testes com Maven (./mvnw test)                |
+| docker | apos test (main)     | Builda imagem Docker e faz push no Docker Hub com tag SHA      |
+| deploy | apos docker (main)   | Gera Dockerrun.aws.json, faz upload no S3 e atualiza o EB env  |
+
+### Deploy no Elastic Beanstalk
+
+O EB utiliza `Dockerrun.aws.json` para saber qual imagem Docker executar. A cada deploy:
+
+1. O job gera o arquivo com a imagem `{DOCKERHUB_USERNAME}/vidalongaflix:{SHA}`
+2. O arquivo e zipado e enviado ao bucket S3 do EB
+3. Uma nova "application version" e criada no EB
+4. O environment e atualizado para usar a nova versao
+
+**Configuracoes necessarias (GitHub Secrets):**
+
+| Secret                | Descricao                                   |
+|-----------------------|---------------------------------------------|
+| `DOCKERHUB_USERNAME`  | Usuario do Docker Hub                       |
+| `DOCKERHUB_TOKEN`     | Token de acesso ao Docker Hub               |
+| `AWS_ACCESS_KEY_ID`   | Chave de acesso IAM do usuario vidalongaflix-ci |
+| `AWS_SECRET_ACCESS_KEY`| Chave secreta IAM                           |
+
+**Configuracoes do Elastic Beanstalk:**
+
+| Parametro            | Valor                                      |
+|----------------------|--------------------------------------------|
+| Application name     | vidalongaflix-backend                      |
+| Environment name     | Vidalongaflix-backend-env                  |
+| Region               | us-east-2                                  |
+| Porta do container   | 8090                                       |
+
+### Racional da Ordem dos Jobs
+
+A ordem `test → docker → deploy` pode parecer invertida em relacao ao padrao da industria, onde o build ocorre antes dos testes. Neste projeto, os testes unitarios (Maven) nao dependem da aplicacao em execucao nem de imagem Docker — eles simulam a aplicacao em memoria (H2). Por isso, faz sentido validar o codigo primeiro e so entao construir e publicar a imagem.
+
+Em projetos com testes end-to-end (que acessam a aplicacao real rodando), o fluxo seria:
+
+```
+build imagem → subir container → rodar testes e2e → push Docker Hub → deploy
+```
+
+### Permissoes IAM (usuario vidalongaflix-ci)
+
+Criar no AWS Console → IAM → Users → `vidalongaflix-ci` → Attach policies → JSON:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "elasticbeanstalk:CreateApplicationVersion",
+        "elasticbeanstalk:UpdateEnvironment",
+        "elasticbeanstalk:DescribeEnvironments",
+        "elasticbeanstalk:DescribeApplicationVersions",
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+### Passos Operacionais para Ativar o CD
+
+| # | Passo | Status |
+|---|---|---|
+| 1 | Criar usuario IAM `vidalongaflix-ci` no AWS Console com a policy acima | ✅ Concluido |
+| 2 | Gerar Access Key para o usuario (IAM → Security credentials → Create access key) | ✅ Concluido |
+| 3 | Cadastrar `AWS_ACCESS_KEY_ID` e `AWS_SECRET_ACCESS_KEY` no GitHub Environment `production` | ✅ Concluido |
+| 4 | Confirmar nomes no console AWS: `application_name` e `environment_name` no `ci.yml` | ✅ Concluido |
+| 5 | Criar o GitHub Environment `production` com reviewer obrigatorio | ✅ Concluido |
+
+### GitHub Environment: production
+
+O job `deploy` referencia o environment `production` no `ci.yml`. Isso adiciona uma porta de aprovacao manual antes de qualquer deploy ir para producao.
+
+**Como configurar (uma unica vez):**
+
+```
+GitHub → Settings → Environments → New environment
+Nome: production
+```
+
+Em seguida, dentro do environment `production`:
+
+- Marcar **"Required reviewers"** e adicionar seu usuario → exige aprovacao manual antes do deploy executar
+- Mover os secrets AWS para o nivel do environment (opcional, mas recomendado):
+  - `AWS_ACCESS_KEY_ID`
+  - `AWS_SECRET_ACCESS_KEY`
+
+**Fluxo apos a configuracao:**
+
+```
+push main → test ✅ → docker ✅ → deploy ⏸ aguarda aprovacao
+                                         ↓ voce recebe notificacao por email
+                                         ↓ voce clica "Approve" no GitHub
+                                         ✅ deploy executa no Elastic Beanstalk
+```
+
+**Beneficios:**
+
+| Beneficio | Descricao |
+|---|---|
+| Controle de deploy | Nenhum codigo vai para producao sem aprovacao consciente |
+| Historico auditavel | GitHub registra quem aprovou, quando e qual commit foi deployado |
+| Secrets isolados | Credenciais AWS ficam no escopo do environment, nao misturadas com outros secrets |
+| Protecao contra deploy acidental | Evita deployar codigo quebrado que passou nos testes mas tem problema logico |
+
+---
+
+## 17. Codigos de Retorno HTTP
 
 | Codigo | Descricao                                     |
 |--------|-----------------------------------------------|
