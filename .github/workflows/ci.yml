@@ -52,6 +52,9 @@ jobs:
     environment: production      # aguarda aprovação manual antes de deployar
 
     steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
       - name: Gerar Dockerrun.aws.json
         run: |
           cat > Dockerrun.aws.json << EOF
@@ -66,7 +69,7 @@ jobs:
           EOF
 
       - name: Zipar pacote de deploy
-        run: zip deploy.zip Dockerrun.aws.json
+        run: zip -r deploy.zip Dockerrun.aws.json .platform
 
       - name: Deploy no Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v22

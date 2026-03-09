@@ -687,16 +687,18 @@ push main → test → docker (build/push Docker Hub) → deploy (Elastic Beanst
 |--------|----------------------|-------------------------------------------------------------------|
 | test   | push main / feat/*   | Runs all tests with Maven (./mvnw test)                           |
 | docker | after test (main)    | Builds Docker image and pushes to Docker Hub with SHA tag         |
-| deploy | after docker (main)  | Generates Dockerrun.aws.json, uploads to S3, updates EB env       |
+| deploy | after docker (main)  | Generates the EB bundle with Dockerrun.aws.json + .platform, uploads to S3, updates EB env |
 
 ### Elastic Beanstalk Deploy
 
 EB uses `Dockerrun.aws.json` to know which Docker image to run. On each deploy:
 
 1. The job generates the file with image `{DOCKERHUB_USERNAME}/vidalongaflix:{SHA}`
-2. The file is zipped and uploaded to the EB S3 bucket
-3. A new "application version" is created in EB
-4. The environment is updated to use the new version
+2. The `deploy.zip` bundle is created with `Dockerrun.aws.json` and `.platform/`
+3. The `.platform/hooks/predeploy/01_create_db.sh` hook reaches the EB instance and ensures the database from `DB_URL` exists before the container starts
+4. The bundle is uploaded to the EB S3 bucket
+5. A new "application version" is created in EB
+6. The environment is updated to use the new version
 
 **Required GitHub Secrets:**
 
