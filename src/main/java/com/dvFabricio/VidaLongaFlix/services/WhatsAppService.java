@@ -52,7 +52,7 @@ public class WhatsAppService {
         System.out.println("   URL: " + url);
         System.out.println("   To:  " + toNumber);
 
-        Map<String, Object> payload = buildTemplatePayload(toNumber);
+        Map<String, Object> payload = buildTemplatePayload(toNumber, message.getBody());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
@@ -77,12 +77,12 @@ public class WhatsAppService {
         }
     }
 
-    private Map<String, Object> buildTemplatePayload(String toNumber) {
+    private Map<String, Object> buildTemplatePayload(String toNumber, String messageTemplateName) {
         Map<String, Object> language = new LinkedHashMap<>();
         language.put("code", templateLanguage);
 
         Map<String, Object> template = new LinkedHashMap<>();
-        template.put("name", templateName);
+        template.put("name", messageTemplateName != null && !messageTemplateName.isBlank() ? messageTemplateName : templateName);
         template.put("language", language);
 
         Map<String, Object> payload = new LinkedHashMap<>();

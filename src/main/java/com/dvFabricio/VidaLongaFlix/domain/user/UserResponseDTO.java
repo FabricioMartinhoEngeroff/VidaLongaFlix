@@ -12,6 +12,8 @@ public record UserResponseDTO(
         Address address,
         String photo,
         boolean profileComplete,
+        UserStatus status,
+        Integer queuePosition,
         List<String> roles  // <- adicionar
 ) {
     public UserResponseDTO(User user) {
@@ -24,6 +26,8 @@ public record UserResponseDTO(
                 user.getAddress(),
                 user.getPhoto(),
                 user.isProfileComplete(),
+                user.getStatus(),
+                user.getQueuePosition(),
                 user.getRoles().stream()
                         .map(Role::getName)
                         .toList()

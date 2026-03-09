@@ -3,6 +3,7 @@ package com.dvFabricio.VidaLongaFlix.userTest.controller;
 import com.dvFabricio.VidaLongaFlix.controllers.UserController;
 import com.dvFabricio.VidaLongaFlix.domain.user.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
+import com.dvFabricio.VidaLongaFlix.domain.user.UserStatus;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
@@ -57,8 +58,17 @@ class UserControllerTest {
         user = new User("João Silva", "joao@example.com", "encodedPassword", "(11) 99999-9999");
         ReflectionTestUtils.setField(user, "id", userId);
 
-        userDTO = new UserDTO(userId, "João Silva", "joao@example.com",
-                List.of("ROLE_USER"), "123.456.789-00", "(11) 99999-9999", null);
+        userDTO = new UserDTO(
+                userId,
+                "João Silva",
+                "joao@example.com",
+                List.of("ROLE_USER"),
+                "123.456.789-00",
+                "(11) 99999-9999",
+                null,
+                UserStatus.ACTIVE,
+                null
+        );
     }
 
     @Test

@@ -55,7 +55,9 @@ class AuthIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("Unauthorized"))
+                .andExpect(jsonPath("$.message").value("Invalid credentials"));
     }
 
     @Test
@@ -107,7 +109,8 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token").isNotEmpty())
-                .andExpect(jsonPath("$.user.email").value(NEW_USER_EMAIL));
+                .andExpect(jsonPath("$.user.email").value(NEW_USER_EMAIL))
+                .andExpect(jsonPath("$.user.roles[0]").value("ROLE_USER"));
     }
 
     @Test
@@ -123,7 +126,9 @@ class AuthIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Duplicate resource"))
+                .andExpect(jsonPath("$.message").value("Email is already in use."));
     }
 
     @Test
@@ -164,7 +169,40 @@ class AuthIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation error"))
+                .andExpect(jsonPath("$.errors[?(@.fieldName == 'name')]").exists());
+    }
+
+    @Test
+    void shouldReturnDetailedValidationErrorsForInvalidRegisterPayload() throws Exception {
+        String body = """
+                {
+                  "name": "",
+                  "email": "email-invalido",
+                  "password": "fraca",
+                  "phone": "11999999999"
+                }
+                """;
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Validation error"))
+                .andExpect(jsonPath("$.errors[?(@.fieldName == 'name')]").exists())
+                .andExpect(jsonPath("$.errors[?(@.fieldName == 'email')]").exists())
+                .andExpect(jsonPath("$.errors[?(@.fieldName == 'password')]").exists())
+                .andExpect(jsonPath("$.errors[?(@.fieldName == 'phone')]").exists());
+    }
+
+    @Test
+    void shouldReturnBadRequestForMalformedJsonOnRegister() throws Exception {
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Integration User\""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Malformed request body"));
     }
 
     // ─────────────────────────── /auth/me ─────────────────────────────────
@@ -183,13 +221,15 @@ class AuthIntegrationTest extends BaseIntegrationTest {
     void shouldReturnNotFoundForMeWithoutToken() throws Exception {
         // /auth/me é permitAll mas o controller lança ResourceNotFoundExceptions se user == null
         mockMvc.perform(get("/auth/me"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("User not authenticated"));
     }
 
     @Test
-    void shouldReturnErrorForMeWithInvalidToken() throws Exception {
+    void shouldReturnNotFoundForMeWithInvalidToken() throws Exception {
         mockMvc.perform(get("/auth/me")
                         .header("Authorization", "Bearer token.invalido.aqui"))
-                .andExpect(status().is4xxClientError());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("User not authenticated"));
     }
 }

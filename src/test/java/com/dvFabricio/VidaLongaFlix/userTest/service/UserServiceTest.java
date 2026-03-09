@@ -8,11 +8,13 @@ import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFiel
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
+import com.dvFabricio.VidaLongaFlix.services.RegistrationLimitService;
 import com.dvFabricio.VidaLongaFlix.services.UserService;
 import com.dvFabricio.VidaLongaFlix.services.WelcomeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -33,6 +35,7 @@ class UserServiceTest {
     @Mock private UserRepository userRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private WelcomeService welcomeService;
+    @Mock private RegistrationLimitService registrationLimitService;
 
     private User user;
     private UUID userId;
@@ -72,6 +75,24 @@ class UserServiceTest {
     }
 
     @Test
+    void shouldFindAuthenticatedUser() {
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+
+        UserDTO result = userService.findAuthenticatedUser(userId);
+
+        assertEquals("João Silva", result.name());
+        assertEquals("joao@example.com", result.email());
+    }
+
+    @Test
+    void shouldThrowWhenAuthenticatedUserIsNotFound() {
+        given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundExceptions.class,
+                () -> userService.findAuthenticatedUser(userId));
+    }
+
+    @Test
     void shouldCreateUser() {
         given(userRepository.existsByEmail(validRequest.email())).willReturn(false);
         given(userRepository.existsByTaxId(validRequest.taxId())).willReturn(false);
@@ -85,6 +106,24 @@ class UserServiceTest {
         assertEquals("joao@example.com", result.email());
         then(userRepository).should().save(any(User.class));
         then(welcomeService).should().sendWelcomeMessage("João Silva", "(11) 99999-9999");
+    }
+
+    @Test
+    void shouldEncodePasswordAndAssignRoleUserWhenCreatingUser() {
+        given(userRepository.existsByEmail(validRequest.email())).willReturn(false);
+        given(userRepository.existsByTaxId(validRequest.taxId())).willReturn(false);
+        given(passwordEncoder.encode(validRequest.password())).willReturn("encodedPassword");
+        given(userRepository.save(any(User.class))).willReturn(user);
+
+        userService.createUser(validRequest);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        then(userRepository).should().save(userCaptor.capture());
+
+        User savedUser = userCaptor.getValue();
+        assertEquals("encodedPassword", savedUser.getPassword());
+        assertEquals(1, savedUser.getRoles().size());
+        assertEquals("ROLE_USER", savedUser.getRoles().get(0).getName());
     }
 
     @Test
@@ -143,6 +182,23 @@ class UserServiceTest {
     }
 
     @Test
+    void shouldNotReencodePasswordWhenUpdatingWithBlankPassword() {
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(userRepository.save(any(User.class))).willAnswer(inv -> inv.getArgument(0));
+
+        UserRequestDTO updateRequest = new UserRequestDTO(
+                "Nome Novo", "novo@example.com", "   ",
+                "123.456.789-00", "(11) 99999-9999", address);
+
+        UserDTO result = userService.updateUser(userId, updateRequest);
+
+        assertEquals("Nome Novo", result.name());
+        assertEquals("novo@example.com", result.email());
+        assertEquals("encodedPassword", user.getPassword());
+        then(passwordEncoder).should(never()).encode(any());
+    }
+
+    @Test
     void shouldThrowWhenUpdatingNonExistentUser() {
         given(userRepository.findById(userId)).willReturn(Optional.empty());
 
@@ -157,6 +213,7 @@ class UserServiceTest {
 
         assertDoesNotThrow(() -> userService.deleteUser(userId));
         then(userRepository).should().delete(user);
+        then(registrationLimitService).should().promoteQueuedUsersToAvailableSlots();
     }
 
     @Test

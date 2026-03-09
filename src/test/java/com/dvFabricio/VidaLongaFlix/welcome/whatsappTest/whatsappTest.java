@@ -52,6 +52,7 @@ class WhatsAppServiceTest {
 
         assertDoesNotThrow(() -> whatsAppService.send(message));
         assertEquals(DeliveryStatus.SENT, message.getDeliveryStatus());
+        assertTrue(outContent.toString().contains("[DEV] WhatsApp simulado para: 51999999999"));
     }
 
     @Test
@@ -73,6 +74,28 @@ class WhatsAppServiceTest {
         whatsAppService.send(message);
 
         assertTrue(outContent.toString().contains("To:  5511987654321"));
+        assertEquals(DeliveryStatus.SEND_ERROR, message.getDeliveryStatus());
+    }
+
+    @Test
+    void shouldKeepCountryCodeWhenPhoneAlreadyComesWithPlus55() {
+        ReflectionTestUtils.setField(whatsAppService, "enabled", true);
+        Message message = new Message("+55 (11) 98765-4321", "welcome_template");
+
+        whatsAppService.send(message);
+
+        assertTrue(outContent.toString().contains("To:  5511987654321"));
+        assertEquals(DeliveryStatus.SEND_ERROR, message.getDeliveryStatus());
+    }
+
+    @Test
+    void shouldNormalizeMaskedFixedPhoneBeforeCallingMetaApi() {
+        ReflectionTestUtils.setField(whatsAppService, "enabled", true);
+        Message message = new Message("(21) 3456-7890", "welcome_template");
+
+        whatsAppService.send(message);
+
+        assertTrue(outContent.toString().contains("To:  552134567890"));
         assertEquals(DeliveryStatus.SEND_ERROR, message.getDeliveryStatus());
     }
 

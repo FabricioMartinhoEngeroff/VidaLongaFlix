@@ -9,6 +9,7 @@
 | 07/03/2026 | CPF (taxId) passa a ser opcional no cadastro de usuario                      | Fabricio    | -                            |
 | 08/03/2026 | Adicao de CD automatico: job deploy GitHub Actions -> Elastic Beanstalk      | Fabricio    | -                            |
 | 08/03/2026 | GitHub Environment "production" com aprovacao manual antes do deploy         | Fabricio    | -                            |
+| 09/03/2026 | Limite de usuarios ativos, fila de espera (waitlist) e endpoints administrativos | Fabricio | Backend implementado; frontend deve tratar respostas `201/202` no cadastro |
 
 ---
 
@@ -52,6 +53,10 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 **RG08** - Requisicoes sem autenticacao a endpoints protegidos retornam HTTP 401. Requisicoes com perfil insuficiente retornam HTTP 403.
 
+**RG09** - O sistema possui um limite configuravel de usuarios com status `ACTIVE`, definido em `app_config.MAX_ACTIVE_USERS`. Quando o limite e atingido, novos cadastros entram na fila com status `QUEUED`.
+
+**RG10** - Usuarios com status `QUEUED` nao recebem token JWT no cadastro e nao podem fazer login ate serem promovidos para `ACTIVE`.
+
 ---
 
 ## 5. Modulo de Autenticacao
@@ -90,13 +95,17 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 **RG-AUTH-03** - O token gerado tem validade de 2 horas a partir do momento do login.
 
+**RG-AUTH-04** - Se o usuario estiver com status `QUEUED`, o sistema retorna HTTP 403 com `error = ACCOUNT_QUEUED`, mensagem explicativa e `queuePosition`.
+
+**RG-AUTH-05** - Se o usuario estiver com status `DISABLED`, o sistema retorna HTTP 403 com `error = ACCOUNT_DISABLED`.
+
 ---
 
 ### 5.2 Cadastro
 
 **Endpoint:** `POST /auth/register`
 
-**Descricao:** Cadastra novo usuario com perfil ROLE_USER. Apos o cadastro, envia mensagem de boas-vindas via WhatsApp.
+**Descricao:** Cadastra novo usuario com perfil ROLE_USER. Se houver vaga dentro do limite de usuarios ativos, o usuario entra como `ACTIVE` e recebe token. Se o limite estiver esgotado, o usuario entra na fila com status `QUEUED`, sem token JWT.
 
 **Campos de entrada (RegisterRequestDTO):**
 
@@ -107,7 +116,17 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 | password | String | Sim         | Minimo 8 caracteres, com maiuscula, minuscula, numero e especial |
 | phone    | String | Sim         | Formato (XX) XXXXX-XXXX                                         |
 
-**Retorno:** Mesmo que Login (AuthResponseDTO).
+**Retorno:** `RegistrationResponseDTO`.
+
+**Campos de retorno (RegistrationResponseDTO):**
+
+| Campo         | Tipo            | Descricao |
+|---------------|-----------------|-----------|
+| token         | String          | Token JWT quando o usuario entra como `ACTIVE`; `null` quando entra na fila |
+| user          | UserResponseDTO | Dados do usuario, incluindo `status` e `queuePosition` |
+| queued        | Boolean         | Indica se o cadastro entrou na fila |
+| queuePosition | Integer         | Posicao na fila quando `queued = true` |
+| message       | String          | Mensagem explicativa para a UI |
 
 **Regras:**
 
@@ -119,9 +138,86 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 **RG-REG-04** - O numero de telefone e normalizado para o padrao internacional com codigo do pais 55 (Brasil) antes do envio.
 
+**RG-REG-05** - Se `count(status = ACTIVE) < MAX_ACTIVE_USERS`, o sistema salva o usuario com status `ACTIVE`, gera o token JWT e retorna HTTP 201.
+
+**RG-REG-06** - Se `count(status = ACTIVE) >= MAX_ACTIVE_USERS`, o sistema salva o usuario com status `QUEUED`, define `queuePosition`, nao gera token e retorna HTTP 202.
+
+**RG-REG-07** - Se o e-mail ja estiver cadastrado com status `QUEUED`, o sistema retorna HTTP 409 informando que o usuario ja esta na fila de espera e inclui a posicao atual na mensagem.
+
+**RG-REG-08** - O backend atualmente registra em log as notificacoes por e-mail da fila, ativacao e remocao. O envio real de e-mail ainda nao esta implementado.
+
+**Exemplo de resposta - cadastro ativo (201 Created):**
+
+```json
+{
+  "token": "jwt-token",
+  "user": {
+    "id": "uuid",
+    "name": "Maria Silva",
+    "email": "maria@gmail.com",
+    "phone": "(11) 98765-4321",
+    "status": "ACTIVE",
+    "queuePosition": null,
+    "profileComplete": false,
+    "roles": ["ROLE_USER"]
+  },
+  "queued": false,
+  "queuePosition": null,
+  "message": null
+}
+```
+
+**Exemplo de resposta - cadastro na fila (202 Accepted):**
+
+```json
+{
+  "token": null,
+  "user": {
+    "id": "uuid",
+    "name": "Maria Silva",
+    "email": "maria@gmail.com",
+    "phone": "(11) 98765-4321",
+    "status": "QUEUED",
+    "queuePosition": 5,
+    "profileComplete": false,
+    "roles": ["ROLE_USER"]
+  },
+  "queued": true,
+  "queuePosition": 5,
+  "message": "Limite de usuarios atingido. Voce foi adicionado a fila de espera na posicao #5."
+}
+```
+
 ---
 
-### 5.3 Dados do Usuario Autenticado
+### 5.3 Status de Registro
+
+**Endpoint:** `GET /auth/registration-status`
+
+**Descricao:** Retorna o estado atual do cadastro publico, com quantidade de usuarios ativos, limite configurado e tamanho da fila.
+
+**Retorno (RegistrationStatusDTO):**
+
+| Campo       | Tipo    | Descricao |
+|-------------|---------|-----------|
+| open        | Boolean | `true` quando ainda existem vagas para `ACTIVE` |
+| activeUsers | Long    | Quantidade atual de usuarios `ACTIVE` |
+| limit       | Integer | Limite atual de usuarios ativos |
+| queueSize   | Long    | Quantidade atual de usuarios na fila |
+
+---
+
+### 5.4 Cancelamento da Fila
+
+**Endpoint:** `DELETE /auth/waitlist/me?email={email}`
+
+**Descricao:** Remove da fila um usuario com status `QUEUED` a partir do e-mail informado.
+
+**Retorno:** `WaitlistMessageDTO` com a mensagem `Voce foi removido da fila de espera.`
+
+---
+
+### 5.5 Dados do Usuario Autenticado
 
 **Endpoint:** `GET /auth/me`
 
@@ -129,7 +225,39 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 **Acesso:** Requer autenticacao (ROLE_USER ou ROLE_ADMIN).
 
-**Retorno:** UserResponseDTO com id, name, email, taxId, phone, address, photo, profileComplete, roles.
+**Retorno:** UserResponseDTO com id, name, email, taxId, phone, address, photo, profileComplete, status, queuePosition, roles.
+
+---
+
+## 5.6 Administracao da Fila de Espera
+
+**Endpoint base:** `/admin`
+
+**Acesso:** Requer `ROLE_ADMIN`
+
+### 5.6.1 Listar fila
+
+**Endpoint:** `GET /admin/waitlist`
+
+**Descricao:** Retorna o limite atual, quantidade de usuarios ativos e a fila ordenada por posicao.
+
+### 5.6.2 Ativar usuario da fila manualmente
+
+**Endpoint:** `POST /admin/waitlist/{userId}/activate`
+
+**Descricao:** Promove um usuario `QUEUED` para `ACTIVE` quando existir vaga disponivel.
+
+### 5.6.3 Remover usuario da fila
+
+**Endpoint:** `DELETE /admin/waitlist/{userId}`
+
+**Descricao:** Remove um usuario da fila e recalcula as posicoes restantes.
+
+### 5.6.4 Atualizar limite de usuarios ativos
+
+**Endpoint:** `PUT /admin/config/max-users`
+
+**Descricao:** Atualiza o limite de usuarios `ACTIVE`. Se o novo limite abrir vagas, o backend promove automaticamente usuarios da fila.
 
 ---
 

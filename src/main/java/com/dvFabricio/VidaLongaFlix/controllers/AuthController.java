@@ -1,26 +1,26 @@
 package com.dvFabricio.VidaLongaFlix.controllers;
 
 import com.dvFabricio.VidaLongaFlix.domain.auth.AuthResponseDTO;
+import com.dvFabricio.VidaLongaFlix.domain.auth.QueueLoginErrorDTO;
+import com.dvFabricio.VidaLongaFlix.domain.auth.RegistrationResponseDTO;
+import com.dvFabricio.VidaLongaFlix.domain.auth.RegistrationStatusDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.LoginRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.RegisterRequestDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.UserResponseDTO;
-import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
+import com.dvFabricio.VidaLongaFlix.domain.user.UserStatus;
+import com.dvFabricio.VidaLongaFlix.domain.waitlist.WaitlistMessageDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.authorization.InvalidCredentialsException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
-import com.dvFabricio.VidaLongaFlix.repositories.RoleRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
-import com.dvFabricio.VidaLongaFlix.services.WelcomeService;
+import com.dvFabricio.VidaLongaFlix.services.RegistrationLimitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -28,10 +28,9 @@ import java.util.List;
 public class AuthController {
 
     private final UserRepository repository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
-    private final WelcomeService welcomeService;
+    private final RegistrationLimitService registrationLimitService;
 
     // @AuthenticationPrincipal injeta o usuário já autenticado pelo SecurityFilter
     // Não precisa mais extrair token manualmente — o Spring já fez isso
@@ -47,11 +46,21 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(
+    public ResponseEntity<?> login(
             @RequestBody @Valid LoginRequestDTO body) {
 
         User user = repository.findByEmail(body.email())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid credentials"));
+
+        if (user.getStatus() == UserStatus.QUEUED) {
+            QueueLoginErrorDTO response = registrationLimitService.buildQueuedLoginError(user);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
+
+        if (user.getStatus() == UserStatus.DISABLED) {
+            QueueLoginErrorDTO response = registrationLimitService.buildDisabledLoginError();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
 
         if (!passwordEncoder.matches(body.password(), user.getPassword())) {
             throw new InvalidCredentialsException("Invalid credentials");
@@ -62,34 +71,21 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponseDTO> register(
+    public ResponseEntity<RegistrationResponseDTO> register(
             @RequestBody @Valid RegisterRequestDTO body) {
+        RegistrationResponseDTO response = registrationLimitService.register(body);
+        HttpStatus status = response.queued() ? HttpStatus.ACCEPTED : HttpStatus.CREATED;
+        return ResponseEntity.status(status).body(response);
+    }
 
-        if (repository.existsByEmail(body.email())) {
-            throw new DuplicateResourceException("email", "Email is already in use.");
-        }
+    @GetMapping("/registration-status")
+    public ResponseEntity<RegistrationStatusDTO> registrationStatus() {
+        return ResponseEntity.ok(registrationLimitService.getRegistrationStatus());
+    }
 
-        Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new ResourceNotFoundExceptions("Role 'ROLE_USER' not found"));
-
-        User newUser = new User(
-                body.name(),
-                body.email(),
-                passwordEncoder.encode(body.password()),
-                body.phone()
-        );
-        newUser.setRoles(List.of(userRole));
-        repository.save(newUser);
-
-        // WhatsApp é fire-and-forget — falha não impede o cadastro
-        try {
-            welcomeService.sendWelcomeMessage(newUser.getName(), newUser.getPhone());
-        } catch (Exception e) {
-            System.err.println("WhatsApp não enviado: " + e.getMessage());
-        }
-
-        String token = tokenService.generateToken(newUser);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new AuthResponseDTO(token, new UserResponseDTO(newUser)));
+    @DeleteMapping("/waitlist/me")
+    public ResponseEntity<WaitlistMessageDTO> cancelWaitlistEntry(
+            @RequestParam String email) {
+        return ResponseEntity.ok(registrationLimitService.removeQueuedUserByEmail(email));
     }
 }

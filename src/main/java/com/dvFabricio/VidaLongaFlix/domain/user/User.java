@@ -45,6 +45,13 @@ public class User implements UserDetails {
     @Column(name = "phone", nullable = false, length = 15)
     private String phone;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private UserStatus status = UserStatus.ACTIVE;
+
+    @Column(name = "queue_position")
+    private Integer queuePosition;
+
     @Embedded
     private Address address;
 
@@ -77,6 +84,8 @@ public class User implements UserDetails {
         this.password = password;
         this.phone = phone;
         this.profileComplete = false;
+        this.status = UserStatus.ACTIVE;
+        this.queuePosition = null;
         this.roles = new ArrayList<>();
     }
 
@@ -88,6 +97,8 @@ public class User implements UserDetails {
         this.phone = phone;
         this.address = address;
         this.profileComplete = true;
+        this.status = UserStatus.ACTIVE;
+        this.queuePosition = null;
         this.roles = new ArrayList<>();
     }
 

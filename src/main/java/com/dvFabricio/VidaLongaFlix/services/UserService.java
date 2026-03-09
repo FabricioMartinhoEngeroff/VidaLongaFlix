@@ -26,11 +26,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final WelcomeService welcomeService;
+    private final RegistrationLimitService registrationLimitService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, WelcomeService welcomeService) {
+    public UserService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            WelcomeService welcomeService,
+            RegistrationLimitService registrationLimitService
+    ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.welcomeService = welcomeService;
+        this.registrationLimitService = registrationLimitService;
     }
 
     public UserDTO findAuthenticatedUser(UUID userId) {
@@ -96,6 +103,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("User not found with id: " + userId));
         userRepository.delete(user);
+        registrationLimitService.promoteQueuedUsersToAvailableSlots();
     }
 
     private void updateUserFields(User user, UserRequestDTO dto) {

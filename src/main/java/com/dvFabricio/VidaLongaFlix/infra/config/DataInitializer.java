@@ -2,6 +2,7 @@ package com.dvFabricio.VidaLongaFlix.infra.config;
 
 import com.dvFabricio.VidaLongaFlix.domain.user.Role;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
+import com.dvFabricio.VidaLongaFlix.domain.user.UserStatus;
 import com.dvFabricio.VidaLongaFlix.repositories.RoleRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +46,8 @@ public class DataInitializer implements ApplicationRunner {
             );
             admin.setTaxId("987.654.321-00");
             admin.setProfileComplete(true);
+            admin.setStatus(UserStatus.ACTIVE);
+            admin.setQueuePosition(null);
             admin.setRoles(List.of(userRole, adminRole));
             userRepository.save(admin);
         }

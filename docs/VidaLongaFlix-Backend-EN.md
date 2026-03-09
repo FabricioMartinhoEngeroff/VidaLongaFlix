@@ -9,6 +9,7 @@
 | 03/07/2026 | CPF (taxId) becomes optional on user registration                            | Fabricio| -                 |
 | 03/08/2026 | Automated CD pipeline: GitHub Actions deploy job to Elastic Beanstalk        | Fabricio| -                 |
 | 03/08/2026 | GitHub Environment "production" with manual approval gate before deploy       | Fabricio| -                 |
+| 03/09/2026 | Active user limit, waitlist support, and waitlist admin endpoints            | Fabricio| Backend implemented; frontend must handle `201/202` registration responses |
 
 ---
 
@@ -52,6 +53,10 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 **GR08** - Unauthenticated requests to protected endpoints return HTTP 401. Requests with insufficient roles return HTTP 403.
 
+**GR09** - The system has a configurable limit of `ACTIVE` users, stored in `app_config.MAX_ACTIVE_USERS`. Once the limit is reached, new registrations are stored as `QUEUED`.
+
+**GR10** - Users with status `QUEUED` do not receive a JWT token during registration and cannot log in until they are promoted to `ACTIVE`.
+
 ---
 
 ## 5. Authentication Module
@@ -90,13 +95,17 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 **BR-AUTH-03** - The generated token is valid for 2 hours from the login moment.
 
+**BR-AUTH-04** - If the user status is `QUEUED`, the system returns HTTP 403 with `error = ACCOUNT_QUEUED`, a user-facing message, and `queuePosition`.
+
+**BR-AUTH-05** - If the user status is `DISABLED`, the system returns HTTP 403 with `error = ACCOUNT_DISABLED`.
+
 ---
 
 ### 5.2 Registration
 
 **Endpoint:** `POST /auth/register`
 
-**Description:** Registers a new user with the ROLE_USER profile. After registration, sends a welcome message via WhatsApp.
+**Description:** Registers a new user with the ROLE_USER profile. If there is available capacity, the user becomes `ACTIVE` and receives a JWT token. If the active user limit is already reached, the user is stored as `QUEUED` and no JWT is issued.
 
 **Input fields (RegisterRequestDTO):**
 
@@ -107,7 +116,17 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 | password | String | Yes      | Min 8 characters, with uppercase, lowercase, number and special  |
 | phone    | String | Yes      | Format (XX) XXXXX-XXXX                                           |
 
-**Response:** Same as Login (AuthResponseDTO).
+**Response:** `RegistrationResponseDTO`.
+
+**Response fields (RegistrationResponseDTO):**
+
+| Field         | Type            | Description |
+|---------------|-----------------|-------------|
+| token         | String          | JWT token when the user is created as `ACTIVE`; `null` when queued |
+| user          | UserResponseDTO | User data, including `status` and `queuePosition` |
+| queued        | Boolean         | Indicates whether the user entered the waitlist |
+| queuePosition | Integer         | Waitlist position when `queued = true` |
+| message       | String          | UI-friendly status message |
 
 **Rules:**
 
@@ -119,9 +138,86 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 **BR-REG-04** - The phone number is normalized to the international standard with country code 55 (Brazil) before sending.
 
+**BR-REG-05** - If `count(status = ACTIVE) < MAX_ACTIVE_USERS`, the system saves the user as `ACTIVE`, generates a JWT token, and returns HTTP 201.
+
+**BR-REG-06** - If `count(status = ACTIVE) >= MAX_ACTIVE_USERS`, the system saves the user as `QUEUED`, assigns `queuePosition`, does not generate a token, and returns HTTP 202.
+
+**BR-REG-07** - If the email already exists with status `QUEUED`, the system returns HTTP 409 and informs the current waitlist position in the error message.
+
+**BR-REG-08** - Queue, activation, and removal emails are currently log-only placeholders in the backend. Real email delivery is not implemented yet.
+
+**Example response - active registration (201 Created):**
+
+```json
+{
+  "token": "jwt-token",
+  "user": {
+    "id": "uuid",
+    "name": "Maria Silva",
+    "email": "maria@gmail.com",
+    "phone": "(11) 98765-4321",
+    "status": "ACTIVE",
+    "queuePosition": null,
+    "profileComplete": false,
+    "roles": ["ROLE_USER"]
+  },
+  "queued": false,
+  "queuePosition": null,
+  "message": null
+}
+```
+
+**Example response - queued registration (202 Accepted):**
+
+```json
+{
+  "token": null,
+  "user": {
+    "id": "uuid",
+    "name": "Maria Silva",
+    "email": "maria@gmail.com",
+    "phone": "(11) 98765-4321",
+    "status": "QUEUED",
+    "queuePosition": 5,
+    "profileComplete": false,
+    "roles": ["ROLE_USER"]
+  },
+  "queued": true,
+  "queuePosition": 5,
+  "message": "Limite de usuarios atingido. Voce foi adicionado a fila de espera na posicao #5."
+}
+```
+
 ---
 
-### 5.3 Authenticated User Data
+### 5.3 Registration Status
+
+**Endpoint:** `GET /auth/registration-status`
+
+**Description:** Returns the current public registration status, including active user count, configured limit, and waitlist size.
+
+**Response (RegistrationStatusDTO):**
+
+| Field       | Type    | Description |
+|-------------|---------|-------------|
+| open        | Boolean | `true` when there is still room for new `ACTIVE` users |
+| activeUsers | Long    | Current number of `ACTIVE` users |
+| limit       | Integer | Current active user limit |
+| queueSize   | Long    | Current number of queued users |
+
+---
+
+### 5.4 Waitlist Cancellation
+
+**Endpoint:** `DELETE /auth/waitlist/me?email={email}`
+
+**Description:** Removes a `QUEUED` user from the waitlist by email.
+
+**Response:** `WaitlistMessageDTO` with `Voce foi removido da fila de espera.`
+
+---
+
+### 5.5 Authenticated User Data
 
 **Endpoint:** `GET /auth/me`
 
@@ -129,7 +225,39 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 **Access:** Requires authentication (ROLE_USER or ROLE_ADMIN).
 
-**Response:** UserResponseDTO with id, name, email, taxId, phone, address, photo, profileComplete, roles.
+**Response:** UserResponseDTO with id, name, email, taxId, phone, address, photo, profileComplete, status, queuePosition, roles.
+
+---
+
+## 5.6 Waitlist Administration
+
+**Base endpoint:** `/admin`
+
+**Access:** Requires `ROLE_ADMIN`
+
+### 5.6.1 List waitlist
+
+**Endpoint:** `GET /admin/waitlist`
+
+**Description:** Returns the current limit, active user count, and the queue ordered by position.
+
+### 5.6.2 Manually activate queued user
+
+**Endpoint:** `POST /admin/waitlist/{userId}/activate`
+
+**Description:** Promotes a `QUEUED` user to `ACTIVE` when a slot is available.
+
+### 5.6.3 Remove queued user
+
+**Endpoint:** `DELETE /admin/waitlist/{userId}`
+
+**Description:** Removes a queued user and recalculates the remaining positions.
+
+### 5.6.4 Update active user limit
+
+**Endpoint:** `PUT /admin/config/max-users`
+
+**Description:** Updates the `ACTIVE` user limit. If the new limit opens capacity, queued users are promoted automatically.
 
 ---
 

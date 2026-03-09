@@ -13,7 +13,9 @@ public record UserDTO(
         List<String> roles,
         String taxId,
         String phone,
-        Address address
+        Address address,
+        UserStatus status,
+        Integer queuePosition
 ) {
 
     public UserDTO(User user) {
@@ -27,7 +29,9 @@ public record UserDTO(
 
                 user.getTaxId(),
                 user.getPhone(),
-                user.getAddress()
+                user.getAddress(),
+                user.getStatus(),
+                user.getQueuePosition()
         );
     }
 
