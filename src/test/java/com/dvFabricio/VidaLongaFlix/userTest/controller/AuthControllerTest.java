@@ -36,6 +36,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class AuthControllerTest {
@@ -139,6 +140,65 @@ class AuthControllerTest {
     }
 
     @Test
+    void shouldRegisterSuccessfullyWhenWelcomeServiceFails() throws Exception {
+        when(repository.existsByEmail("joao@example.com")).thenReturn(false);
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(role));
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+        when(repository.save(any(User.class))).thenAnswer(invocation -> {
+            User savedUser = invocation.getArgument(0);
+            ReflectionTestUtils.setField(savedUser, "id", UUID.randomUUID());
+            return savedUser;
+        });
+        when(tokenService.generateToken(any(User.class))).thenReturn("mockToken");
+        doThrow(new RuntimeException("WhatsApp indisponível"))
+                .when(welcomeService).sendWelcomeMessage(any(), any());
+
+        RegisterRequestDTO request = new RegisterRequestDTO(
+                "João Silva", "joao@example.com", "Password1@", "(11) 99999-9999");
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.token").value("mockToken"))
+                .andExpect(jsonPath("$.user.email").value("joao@example.com"));
+
+        verify(welcomeService).sendWelcomeMessage("João Silva", "(11) 99999-9999");
+    }
+
+    @Test
+    void shouldRegisterSuccessfullyEvenWhenWelcomeServiceIsSlow() throws Exception {
+        when(repository.existsByEmail("joao@example.com")).thenReturn(false);
+        when(roleRepository.findByName("ROLE_USER")).thenReturn(Optional.of(role));
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+        when(repository.save(any(User.class))).thenAnswer(invocation -> {
+            User savedUser = invocation.getArgument(0);
+            ReflectionTestUtils.setField(savedUser, "id", UUID.randomUUID());
+            return savedUser;
+        });
+        when(tokenService.generateToken(any(User.class))).thenReturn("mockToken");
+        doAnswer(invocation -> {
+            Thread.sleep(150);
+            return null;
+        }).when(welcomeService).sendWelcomeMessage(any(), any());
+
+        RegisterRequestDTO request = new RegisterRequestDTO(
+                "João Silva", "joao@example.com", "Password1@", "(11) 99999-9999");
+
+        long startedAt = System.currentTimeMillis();
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.token").value("mockToken"));
+
+        long elapsedMs = System.currentTimeMillis() - startedAt;
+        assertTrue(elapsedMs >= 150);
+        verify(welcomeService).sendWelcomeMessage("João Silva", "(11) 99999-9999");
+    }
+
+    @Test
     void shouldReturnConflictWhenEmailAlreadyExists() throws Exception {
         when(repository.existsByEmail("joao@example.com")).thenReturn(true);
 
@@ -149,12 +209,25 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
+
+        verifyNoInteractions(roleRepository, welcomeService, tokenService);
     }
 
     @Test
     void shouldReturnBadRequestWhenPasswordTooWeak() throws Exception {
         RegisterRequestDTO request = new RegisterRequestDTO(
                 "João Silva", "joao@example.com", "fraca", "(11) 99999-9999");
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturnBadRequestWhenPhoneIsInvalid() throws Exception {
+        RegisterRequestDTO request = new RegisterRequestDTO(
+                "João Silva", "joao@example.com", "Password1@", "11999999999");
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -182,6 +255,23 @@ class AuthControllerTest {
 
         mockMvc.perform(get("/auth/me"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldNotSendWelcomeMessageOnLogin() throws Exception {
+        when(repository.findByEmail("joao@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("Password1@", "encodedPassword")).thenReturn(true);
+        when(tokenService.generateToken(user)).thenReturn("mockToken");
+
+        LoginRequestDTO request = new LoginRequestDTO("joao@example.com", "Password1@");
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").value("mockToken"));
+
+        verifyNoInteractions(welcomeService);
     }
 
 }

@@ -46,4 +46,14 @@ class WelcomeServiceTest {
 
         assertEquals("(51) 98888-7777", captor.getValue().getDestination());
     }
+
+    @Test
+    void shouldUseApprovedWelcomeTemplate() {
+        ArgumentCaptor<Message> captor = ArgumentCaptor.forClass(Message.class);
+        doNothing().when(whatsAppService).send(captor.capture());
+
+        welcomeService.sendWelcomeMessage("Fabricio", "(51) 98888-7777");
+
+        assertEquals("welcome_template", captor.getValue().getBody());
+    }
 }
