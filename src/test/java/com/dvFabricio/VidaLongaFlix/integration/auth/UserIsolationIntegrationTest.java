@@ -238,4 +238,35 @@ class UserIsolationIntegrationTest extends BaseIntegrationTest {
         mockMvc.perform(get("/comments/video/{videoId}", videoId))
                 .andExpect(jsonPath("$.length()").value(0));
     }
+
+    @Test
+    void shouldPersistCommentAndExposeItToAnotherUser() throws Exception {
+        String commentText = "Comentario visivel para outro usuario";
+        String body = String.format("{\"text\":\"%s\",\"videoId\":\"%s\"}", commentText, videoId);
+
+        // User A (admin) cria o comentário
+        mockMvc.perform(bearer(post("/comments")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(body),
+                        adminToken))
+                .andExpect(status().isCreated());
+
+        // Confirma persistência no banco
+        var persistedComments = commentRepository.findByVideo_Id(videoId);
+        org.assertj.core.api.Assertions.assertThat(persistedComments).hasSize(1);
+        org.assertj.core.api.Assertions.assertThat(persistedComments.get(0).getText())
+                .isEqualTo(commentText);
+        UUID adminUserId = userRepository.findByEmail(ADMIN_EMAIL).orElseThrow().getId();
+        org.assertj.core.api.Assertions.assertThat(
+                commentRepository.existsByUser_IdAndVideo_Id(adminUserId, videoId))
+                .isTrue();
+
+        // User B busca os comentários e consegue visualizar o comentário do User A
+        mockMvc.perform(bearer(get("/comments/video/{videoId}", videoId), userBToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].text").value(commentText))
+                .andExpect(jsonPath("$[0].user.name").value("Admin User"))
+                .andExpect(jsonPath("$[0].id").isNotEmpty());
+    }
 }
