@@ -162,22 +162,28 @@ class CommentFlowIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isNotFound());
     }
 
-    // ─────────────────────────── DUPLICATA ───────────────────────────────
+    // ─────────────────────────── MÚLTIPLOS COMENTÁRIOS ──────────────────
 
     @Test
-    void shouldReturn409WhenCreatingDuplicateCommentByTheSameUserOnTheSameVideo()
+    void shouldAllowMultipleCommentsByTheSameUserOnTheSameVideo()
             throws Exception {
-        // Cria o comentário uma primeira vez
-        CreateCommentDTO request = new CreateCommentDTO("Comentário duplicado", videoId);
+        CreateCommentDTO firstRequest = new CreateCommentDTO("Primeiro comentário", videoId);
+        CreateCommentDTO secondRequest = new CreateCommentDTO("Segundo comentário", videoId);
+
         mockMvc.perform(bearer(post("/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)), adminToken))
+                        .content(objectMapper.writeValueAsString(firstRequest)), adminToken))
                 .andExpect(status().isCreated());
 
-        // Tenta criar o mesmo comentário novamente
         mockMvc.perform(bearer(post("/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)), adminToken))
-                .andExpect(status().isConflict());
+                        .content(objectMapper.writeValueAsString(secondRequest)), adminToken))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/comments/video/{videoId}", videoId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].text").value("Primeiro comentário"))
+                .andExpect(jsonPath("$[1].text").value("Segundo comentário"));
     }
 }

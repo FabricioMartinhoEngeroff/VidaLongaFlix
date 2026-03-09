@@ -65,6 +65,20 @@ class CommentServiceTest {
     }
 
     @Test
+    void shouldAllowMultipleCommentsFromSameUserOnSameVideo() {
+        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(videoRepository.findById(videoId)).willReturn(Optional.of(video));
+
+        CreateCommentDTO secondComment = new CreateCommentDTO("Segundo comentário", videoId);
+
+        assertDoesNotThrow(() -> commentService.create(dto, userId));
+        assertDoesNotThrow(() -> commentService.create(secondComment, userId));
+
+        then(commentRepository).should(times(2)).save(any(Comment.class));
+        then(commentRepository).should(never()).existsByUser_IdAndVideo_Id(any(UUID.class), any(UUID.class));
+    }
+
+    @Test
     void shouldReturnCommentsByVideo() {
         Comment comment = Comment.builder()
                 .text("Ótimo!").user(user).video(video).build();

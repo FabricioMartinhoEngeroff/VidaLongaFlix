@@ -8,7 +8,6 @@ import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.infra.exception.comment.CommentNotFoundException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.CommentRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
@@ -38,13 +37,6 @@ public class CommentService {
     public void create(CreateCommentDTO dto, UUID userId) {
         if (isBlank(dto.text())) {
             throw new MissingRequiredFieldException("text", "The comment text is required.");
-        }
-
-        if (commentRepository.existsByUser_IdAndVideo_Id(userId, dto.videoId())) {
-            throw new DuplicateResourceException(
-                    "videoId",
-                    "User has already created a comment for this video."
-            );
         }
 
         User user = findUserById(userId);
@@ -132,5 +124,4 @@ public class CommentService {
         return field == null || field.isBlank();
     }
 }
-
 

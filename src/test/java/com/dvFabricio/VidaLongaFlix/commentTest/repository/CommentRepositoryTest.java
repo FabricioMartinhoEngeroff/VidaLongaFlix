@@ -77,6 +77,20 @@ class CommentRepositoryTest {
     }
 
     @Test
+    void shouldAllowMultipleCommentsFromSameUserOnSameVideo() {
+        Comment secondComment = Comment.builder()
+                .text("Quero comentar de novo")
+                .user(user1)
+                .video(video)
+                .build();
+
+        assertDoesNotThrow(() -> commentRepository.saveAndFlush(secondComment));
+
+        List<Comment> comments = commentRepository.findByUser_Id(user1.getId());
+        assertEquals(2, comments.size());
+    }
+
+    @Test
     void shouldCheckDuplicate() {
         assertTrue(commentRepository.existsByTextAndUser_IdAndVideo_Id(
                 "Ótimo!", user1.getId(), video.getId()));
