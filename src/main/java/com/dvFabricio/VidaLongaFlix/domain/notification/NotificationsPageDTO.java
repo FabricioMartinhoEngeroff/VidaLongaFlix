@@ -1,4 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.controllers.notifications.dto;
+package com.dvFabricio.VidaLongaFlix.domain.notification;
 
 import java.util.List;
 

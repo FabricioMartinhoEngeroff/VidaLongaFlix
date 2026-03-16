@@ -1,8 +1,8 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
-import com.dvFabricio.VidaLongaFlix.controllers.notifications.dto.NotificationItemDTO;
-import com.dvFabricio.VidaLongaFlix.controllers.notifications.dto.NotificationsPageDTO;
-import com.dvFabricio.VidaLongaFlix.controllers.notifications.dto.UnreadCountDTO;
+import com.dvFabricio.VidaLongaFlix.domain.notification.NotificationItemDTO;
+import com.dvFabricio.VidaLongaFlix.domain.notification.NotificationsPageDTO;
+import com.dvFabricio.VidaLongaFlix.domain.notification.UnreadCountDTO;
 import com.dvFabricio.VidaLongaFlix.domain.menu.Menu;
 import com.dvFabricio.VidaLongaFlix.domain.notification.Notification;
 import com.dvFabricio.VidaLongaFlix.domain.notification.NotificationType;

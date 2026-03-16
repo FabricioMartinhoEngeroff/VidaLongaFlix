@@ -1,7 +1,4 @@
-package com.dvFabricio.VidaLongaFlix.controllers.notifications.dto;
-
-import com.dvFabricio.VidaLongaFlix.domain.notification.Notification;
-import com.dvFabricio.VidaLongaFlix.domain.notification.NotificationType;
+package com.dvFabricio.VidaLongaFlix.domain.notification;
 
 import java.time.Instant;
 import java.util.UUID;

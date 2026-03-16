@@ -24,16 +24,16 @@ public class WhatsAppService {
     private String accessToken;
 
     @Value("${whatsapp.api-version:v22.0}")
-    private String apiVersion;
+    private String apiVersion = "v22.0";
 
-    @Value("${whatsapp.template.name:hello_world}")
-    private String templateName;
+    @Value("${whatsapp.template.name:welcome_template}")
+    private String templateName = "welcome_template";
 
-    @Value("${whatsapp.template.language:en_US}")
-    private String templateLanguage;
+    @Value("${whatsapp.template.language:pt_BR}")
+    private String templateLanguage = "pt_BR";
 
     @Value("${whatsapp.enabled:false}")
-    private boolean enabled;
+    private boolean enabled = false;
 
     public void send(Message message) {
         if (!enabled) {

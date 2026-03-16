@@ -30,8 +30,8 @@ class WhatsAppServiceTest {
         ReflectionTestUtils.setField(whatsAppService, "phoneNumberId", "fake-phone-id");
         ReflectionTestUtils.setField(whatsAppService, "accessToken", "fake-token");
         ReflectionTestUtils.setField(whatsAppService, "apiVersion", "v22.0");
-        ReflectionTestUtils.setField(whatsAppService, "templateName", "hello_world");
-        ReflectionTestUtils.setField(whatsAppService, "templateLanguage", "en_US");
+        ReflectionTestUtils.setField(whatsAppService, "templateName", "welcome_template");
+        ReflectionTestUtils.setField(whatsAppService, "templateLanguage", "pt_BR");
         ReflectionTestUtils.setField(whatsAppService, "enabled", false); // <- modo dev
 
         originalOut = System.out;

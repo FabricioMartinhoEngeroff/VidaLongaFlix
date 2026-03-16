@@ -1,7 +1,7 @@
-package com.dvFabricio.VidaLongaFlix.controllers.notifications;
+package com.dvFabricio.VidaLongaFlix.controllers;
 
-import com.dvFabricio.VidaLongaFlix.controllers.notifications.dto.NotificationsPageDTO;
-import com.dvFabricio.VidaLongaFlix.controllers.notifications.dto.UnreadCountDTO;
+import com.dvFabricio.VidaLongaFlix.domain.notification.NotificationsPageDTO;
+import com.dvFabricio.VidaLongaFlix.domain.notification.UnreadCountDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.services.NotificationService;
 import org.springframework.http.ResponseEntity;
