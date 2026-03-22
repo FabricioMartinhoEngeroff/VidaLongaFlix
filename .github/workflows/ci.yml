@@ -50,10 +50,22 @@ jobs:
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     environment: production      # aguarda aprovação manual antes de deployar
+    permissions:
+      id-token: write  # necessário para solicitar o token OIDC à AWS
+      contents: read
 
     steps:
       - name: Checkout do código
         uses: actions/checkout@v4
+
+      # OIDC: o GitHub pede uma credencial temporária à AWS (válida por 15 min)
+      # A AWS verifica se o pedido vem do repo correto antes de conceder
+      # Substitui AWS_ACCESS_KEY_ID e AWS_SECRET_ACCESS_KEY permanentes
+      - name: Configurar credenciais AWS via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::359598898309:role/github-actions-vidalongaflix
+          aws-region: us-east-2
 
       - name: Gerar Dockerrun.aws.json
         run: |
@@ -74,8 +86,6 @@ jobs:
       - name: Deploy no Elastic Beanstalk
         uses: einaregilsson/beanstalk-deploy@v22
         with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: vidalongaflix-backend
           environment_name: Vidalongaflix-backend-env
           version_label: ${{ github.sha }}
