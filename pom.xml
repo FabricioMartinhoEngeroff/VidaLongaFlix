@@ -105,6 +105,13 @@
             <artifactId>java-jwt</artifactId>
         </dependency>
 
+        <!-- Bucket4j — rate limiting por IP (ACL da aplicação) -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-core</artifactId>
+            <version>8.10.1</version>
+        </dependency>
+
         <!-- OpenCSV — leitura de arquivos CSV para importação -->
         <dependency>
             <groupId>com.opencsv</groupId>
