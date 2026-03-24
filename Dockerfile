@@ -15,11 +15,16 @@ RUN mvn -B -DskipTests package && \
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-RUN mkdir -p /app/logs
+# Rule 2: create a non-root user — limits blast radius if container is compromised
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser && \
+    mkdir -p /app/logs && \
+    chown -R appuser:appgroup /app
 
 EXPOSE 8090
 
 COPY --from=build /workspace/app.jar ./app.jar
 
+# exec replaces the shell with java as PID 1, so SIGTERM reaches the JVM for graceful shutdown
 ENV JAVA_OPTS=""
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
+USER appuser
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]

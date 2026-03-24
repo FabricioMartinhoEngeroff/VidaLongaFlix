@@ -145,3 +145,6 @@ Identify and stop the process that's listening on port 8090 or configure this ap
 2026-03-22 07:59:18 [http-nio-8090-exec-9] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring DispatcherServlet 'dispatcherServlet'
 2026-03-22 07:59:18 [http-nio-8090-exec-9] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
 2026-03-22 07:59:18 [http-nio-8090-exec-9] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2026-03-22 08:23:42 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-03-22 08:23:42 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-03-22 08:23:42 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
