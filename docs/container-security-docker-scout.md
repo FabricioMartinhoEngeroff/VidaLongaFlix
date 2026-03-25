@@ -1,123 +1,123 @@
-# Container Security with Docker Scout and Trivy
+# Segurança de Containers com Docker Scout e Trivy
 
-## Course Objectives
-- Discover security vulnerabilities in containers
-- Generate security vulnerability reports
-- Manage base image versions
-- Apply techniques to prevent security issues
-- Automate vulnerability scanning in CI/CD pipelines
+## Objetivos do Curso
+- Descobrir vulnerabilidades de segurança em containers
+- Gerar relatórios de vulnerabilidades
+- Gerenciar versões de imagens base
+- Aplicar técnicas para prevenir problemas de segurança
+- Automatizar o escaneamento de vulnerabilidades em pipelines CI/CD
 
 ---
 
-## Module 1 — Finding Vulnerabilities with Docker Scout
+## Módulo 1 — Encontrando Vulnerabilidades com Docker Scout
 
-### Key Concepts
+### Conceitos Principais
 
 **Docker Scout**
-Tool that analyzes Docker images against a database of known CVEs (Common Vulnerabilities and Exposures). Works as a security scanner for container images — checks both the OS layer and application dependencies.
+Ferramenta que analisa imagens Docker contra um banco de dados de CVEs conhecidos (Common Vulnerabilities and Exposures). Funciona como um scanner de segurança para imagens de container — verifica tanto a camada do sistema operacional quanto as dependências da aplicação.
 
 **CVE (Common Vulnerabilities and Exposures)**
-Unique identifier for a known security vulnerability. Each CVE has:
-- **CVSS Score**: 0–10 scale (0 = no risk, 10 = maximum risk)
-- **Attack Vector**: how the attacker reaches the vulnerability (Network, Local, Physical)
+Identificador único para uma vulnerabilidade de segurança conhecida. Cada CVE possui:
+- **CVSS Score**: escala de 0 a 10 (0 = sem risco, 10 = risco máximo)
+- **Attack Vector**: como o atacante chega à vulnerabilidade (Network, Local, Physical)
 - **Severity**: Critical, High, Medium, Low
 
-**CVSS Score reading example:**
-- Attack Vector = Network → exploitable remotely (worse)
-- Attack Vector = Local → attacker needs console access (harder to exploit)
-- Confidentiality/Integrity/Availability = High → attacker can steal data, alter data, or crash the service
+**Exemplo de leitura do CVSS Score:**
+- Attack Vector = Network → explorável remotamente (pior cenário)
+- Attack Vector = Local → atacante precisa de acesso ao console (mais difícil de explorar)
+- Confidentiality/Integrity/Availability = High → atacante pode roubar dados, alterar dados ou derrubar o serviço
 
-**Multi-stage Dockerfile**
-Best practice that separates the build environment (JDK, Maven, build tools) from the runtime environment (JRE only). Reduces the image attack surface significantly — fewer packages = fewer potential CVEs.
+**Dockerfile Multi-stage**
+Boa prática que separa o ambiente de build (JDK, Maven, ferramentas de build) do ambiente de runtime (apenas JRE). Reduz significativamente a superfície de ataque da imagem — menos pacotes = menos CVEs potenciais.
 
-### Commands
+### Comandos
 
 ```bash
-# Install Docker Scout (Linux)
+# Instalar Docker Scout (Linux)
 curl -fsSL https://raw.githubusercontent.com/docker/scout-cli/main/install.sh -o install-scout.sh
 sh install-scout.sh
 
-# Manual install (if script fails)
+# Instalação manual (se o script falhar)
 mkdir -p ~/.docker/cli-plugins
 curl -sSfL https://github.com/docker/scout-cli/releases/download/v1.20.3/docker-scout_1.20.3_linux_amd64.tar.gz | tar -xz -C ~/.docker/cli-plugins
 chmod +x ~/.docker/cli-plugins/docker-scout
 
-# Quick overview of an image
+# Visão geral rápida de uma imagem
 docker scout quickview <image>
 
-# List all CVEs
+# Listar todos os CVEs
 docker scout cves <image>
 
-# Filter by severity
+# Filtrar por severidade
 docker scout cves <image> --only-severity critical,high
 
-# View base image update recommendations
+# Ver recomendações de atualização da imagem base
 docker scout recommendations <image>
 ```
 
-### Applied to VidaLongaFlix
+### Aplicado ao VidaLongaFlix
 
-**Scan result** — `fabricioengeroff/vidalongaflix:latest` (Spring Boot 3.3.3):
+**Resultado do scan** — `fabricioengeroff/vidalongaflix:latest` (Spring Boot 3.3.3):
 
-| Severity | Count |
-|----------|-------|
-| Critical | 3     |
-| High     | 15    |
-| Medium   | 0     |
-| Low      | 0     |
+| Severidade | Quantidade |
+|------------|-----------|
+| Critical   | 3         |
+| High       | 15        |
+| Medium     | 0         |
+| Low        | 0         |
 
-**Base image** `eclipse-temurin:17-jre` had 0 critical and 0 high — all 18 vulnerabilities came from Java dependencies inside the JAR.
+**Imagem base** `eclipse-temurin:17-jre` tinha 0 críticos e 0 altos — todas as 18 vulnerabilidades vieram das dependências Java dentro do JAR.
 
-**Vulnerable packages found:**
+**Pacotes vulneráveis encontrados:**
 
-| Package | Version | Severity | CVE | Fix |
-|---------|---------|----------|-----|-----|
-| `spring-security-web` | 6.3.3 | CRITICAL | CVE-2024-38821 — Improper Authorization | 6.3.4 |
-| `spring-security-web` | 6.3.3 | CRITICAL | CVE-2026-22732 — Forced Browsing | no fix yet |
+| Pacote | Versão | Severidade | CVE | Correção |
+|--------|--------|------------|-----|----------|
+| `spring-security-web` | 6.3.3 | CRITICAL | CVE-2024-38821 — Autorização Inadequada | 6.3.4 |
+| `spring-security-web` | 6.3.3 | CRITICAL | CVE-2026-22732 — Forced Browsing | sem correção ainda |
 | `tomcat-embed-core` | 10.1.28 | CRITICAL 🚨 CISA KEV | CVE-2025-24813 — Path Equivalence → RCE | 10.1.35 |
 | `tomcat-embed-core` | 10.1.28 | HIGH (x8) | DoS, race condition, path traversal | 10.1.52 |
 | `spring-webmvc` | 6.1.12 | HIGH (x2) | CVE-2024-38816/38819 — Path Traversal | 6.1.14 |
-| `commons-beanutils` | 1.9.4 | HIGH | CVE-2025-48734 — Improper Access Control | 1.11.0 |
-| `spring-core` | 6.1.12 | HIGH | CVE-2025-41249 — Improper Authorization | no fix yet |
-| `spring-boot` | 3.3.3 | HIGH | CVE-2025-22235 — Input Validation | 3.3.11 |
-| `jackson-core` | 2.17.2 | HIGH | GHSA-72hv — Resource Allocation DoS | 2.18.6 |
-| `spring-security-crypto` | 6.3.3 | HIGH | CVE-2025-22228 — Improper Authentication | 6.3.8 |
+| `commons-beanutils` | 1.9.4 | HIGH | CVE-2025-48734 — Controle de Acesso Inadequado | 1.11.0 |
+| `spring-core` | 6.1.12 | HIGH | CVE-2025-41249 — Autorização Inadequada | sem correção ainda |
+| `spring-boot` | 3.3.3 | HIGH | CVE-2025-22235 — Validação de Input | 3.3.11 |
+| `jackson-core` | 2.17.2 | HIGH | GHSA-72hv — DoS por Alocação de Recursos | 2.18.6 |
+| `spring-security-crypto` | 6.3.3 | HIGH | CVE-2025-22228 — Autenticação Inadequada | 6.3.8 |
 
-> **CISA KEV** = vulnerability actively exploited in the real world. Highest priority to fix.
+> **CISA KEV** = vulnerabilidade ativamente explorada no mundo real. Prioridade máxima para correção.
 
-**Fix applied** in branch `feat/docker-scout-security-fixes` — `pom.xml` changes:
+**Correção aplicada** na branch `feat/docker-scout-security-fixes` — mudanças no `pom.xml`:
 
-| Change | Before | After | Reason |
-|--------|--------|-------|--------|
-| Spring Boot parent | 3.3.3 | 3.5.12 | Fixes Tomcat, Spring Security, Spring Framework, Jackson transitively |
-| Flyway version override | 9.22.0 (forced) | removed (managed by Spring Boot BOM) | Spring Boot 3.5.x uses Flyway 10.x |
-| `commons-beanutils` override | none | 1.11.0 in dependencyManagement | Fixes CVE-2025-48734 from opencsv transitive dep |
-| springdoc-openapi | 2.2.0 | 2.8.9 | Compatibility with Spring Boot 3.5.x |
-| `spring-boot.version` property | 3.1.0 (wrong/unused) | removed | Cleanup |
-| `junit.platform.version` override | 1.10.0 | removed (managed by BOM) | Cleanup |
+| Mudança | Antes | Depois | Motivo |
+|---------|-------|--------|--------|
+| Spring Boot parent | 3.3.3 | 3.5.12 | Corrige Tomcat, Spring Security, Spring Framework, Jackson transitivamente |
+| Override versão Flyway | 9.22.0 (forçado) | removido (gerenciado pelo BOM do Spring Boot) | Spring Boot 3.5.x usa Flyway 10.x |
+| Override `commons-beanutils` | nenhum | 1.11.0 em dependencyManagement | Corrige CVE-2025-48734 da dep transitiva opencsv |
+| springdoc-openapi | 2.2.0 | 2.8.9 | Compatibilidade com Spring Boot 3.5.x |
+| Propriedade `spring-boot.version` | 3.1.0 (errada/não usada) | removida | Limpeza |
+| Override `junit.platform.version` | 1.10.0 | removido (gerenciado pelo BOM) | Limpeza |
 
-**Key insight:** Updating the Spring Boot parent version transitively fixes Tomcat, Spring Security, Spring Web, and Jackson because Spring Boot uses a BOM (Bill of Materials) that pins all dependency versions together.
+**Conceito chave:** Atualizar a versão do parent do Spring Boot corrige transitivamente o Tomcat, Spring Security, Spring Web e Jackson, porque o Spring Boot usa um BOM (Bill of Materials) que fixa todas as versões de dependências juntas.
 
 ---
 
-## Module 2 — Securing the Container
+## Módulo 2 — Protegendo o Container
 
-### How Docker Scout works internally
+### Como o Docker Scout funciona internamente
 
-Docker Scout scans every package installed in the image — both the OS layer (e.g. Ubuntu packages) and the application layer (e.g. JAR dependencies). For each package + version, it checks against a known CVE database. Different versions of the same package can have different CVEs.
+O Docker Scout escaneia todos os pacotes instalados na imagem — tanto a camada do SO (ex: pacotes Ubuntu) quanto a camada da aplicação (ex: dependências JAR). Para cada pacote + versão, ele verifica contra um banco de dados de CVEs conhecidos. Versões diferentes do mesmo pacote podem ter CVEs diferentes.
 
-### The 3 main vulnerability types
+### Os 3 principais tipos de vulnerabilidade
 
 **1. Remote Code Execution (RCE)**
-The attacker can run arbitrary code on the server as if they were physically at the terminal. Highest severity. Full access to the system, files, databases, network.
+O atacante consegue executar código arbitrário no servidor como se estivesse fisicamente no terminal. Maior severidade. Acesso total ao sistema, arquivos, bancos de dados, rede.
 
-**2. Data Leak**
-Sensitive data is exposed. Scope varies — a vulnerability in one module may only expose that module's data (e.g. only transfers, not account balances). Not always a full breach, but still serious.
+**2. Vazamento de Dados**
+Dados sensíveis são expostos. O escopo varia — uma vulnerabilidade em um módulo pode expor apenas os dados daquele módulo (ex: apenas transferências, não saldos de contas). Nem sempre é uma violação total, mas ainda é grave.
 
 **3. Denial of Service (DoS)**
-A service is made unavailable. Can be scoped: a DoS on the auth service means nobody can log in (all services down); a DoS on a specific endpoint only affects that feature. Performance degradation without full outage is also possible.
+Um serviço fica indisponível. Pode ser localizado: um DoS no serviço de autenticação significa que ninguém consegue logar (todos os serviços caem); um DoS em um endpoint específico afeta apenas aquela funcionalidade. Degradação de performance sem indisponibilidade total também é possível.
 
-> **Rule of thumb:** Low CVSS + Local attack vector + no data exposure = low urgency. High CVSS + Network attack vector + Confidentiality/Integrity/Availability = High = fix immediately.
+> **Regra geral:** CVSS baixo + vetor de ataque Local + sem exposição de dados = baixa urgência. CVSS alto + vetor de ataque Network + Confidentiality/Integrity/Availability = High = corrigir imediatamente.
 
 ### Docker Scout recommendations
 
@@ -125,49 +125,49 @@ A service is made unavailable. Can be scoped: a DoS on the auth service means no
 docker scout recommendations <image>
 ```
 
-Shows base image update options in a table with: new tag, size delta, and remaining CVE count after the update. Useful to eliminate OS-layer vulnerabilities with a one-line Dockerfile change.
+Mostra opções de atualização da imagem base em uma tabela com: nova tag, delta de tamanho e contagem de CVEs restantes após a atualização. Útil para eliminar vulnerabilidades da camada do SO com uma mudança de uma linha no Dockerfile.
 
-**Important limitation:** Docker Scout recommendations only cover the base image (OS packages). It cannot suggest fixes for application-level CVEs (your JAR dependencies). Those must be handled by the development team, who needs to update versions, run tests, and validate no regressions before releasing a new image tag.
+**Limitação importante:** As recomendações do Docker Scout cobrem apenas a imagem base (pacotes do SO). Ele não consegue sugerir correções para CVEs no nível da aplicação (suas dependências JAR). Essas devem ser tratadas pelo time de desenvolvimento, que precisa atualizar versões, rodar a suite de testes e validar que não há regressões antes de publicar uma nova tag de imagem.
 
-**Workflow for fixing CVEs in production:**
-1. Run `docker scout cves` → generate report
-2. Pass report to dev team (application CVEs)
-3. Dev team updates dependencies, runs full test suite
-4. Rebuild image with updated base + updated app
-5. Run `docker scout cves` again on the new image to confirm reduction
+**Fluxo para corrigir CVEs em produção:**
+1. Rodar `docker scout cves` → gerar relatório
+2. Passar relatório para o time de dev (CVEs da aplicação)
+3. Time de dev atualiza dependências, roda suite completa de testes
+4. Rebuildar imagem com base atualizada + app atualizado
+5. Rodar `docker scout cves` novamente na nova imagem para confirmar redução
 
-### Applied to VidaLongaFlix
+### Aplicado ao VidaLongaFlix
 
-Our base image `eclipse-temurin:17-jre` showed 0 critical/high CVEs — all 18 came from JAR dependencies. The fix was updating `pom.xml` (Spring Boot 3.3.3 → 3.5.12), not the Dockerfile base image. After the update, the rebuilt image should show a significantly reduced CVE count.
+Nossa imagem base `eclipse-temurin:17-jre` mostrou 0 CVEs críticos/altos — todos os 18 vieram das dependências JAR. A correção foi atualizar o `pom.xml` (Spring Boot 3.3.3 → 3.5.12), não a imagem base do Dockerfile. Após a atualização, a imagem reconstruída deve mostrar uma redução significativa na contagem de CVEs.
 
-### Docker Security Best Practices (cheat sheet rules 0–13)
+### Boas Práticas de Segurança Docker (regras 0–13 do cheat sheet)
 
-**Rule 0 — Keep host and Docker updated**
-Updates are primarily security patches, not just new features. An unpatched host or Docker daemon can expose all containers regardless of how secure the images are.
+**Regra 0 — Manter o host e o Docker atualizados**
+Atualizações são principalmente patches de segurança, não apenas novas funcionalidades. Um host ou daemon Docker sem patches pode expor todos os containers independentemente de quão seguras sejam as imagens.
 
-**Rule 2 — Define a non-root user**
-By default, processes inside containers run as `root`. If an attacker achieves RCE inside the container, they have full root access. Adding a dedicated user limits the blast radius.
+**Regra 2 — Definir um usuário não-root**
+Por padrão, processos dentro de containers rodam como `root`. Se um atacante conseguir RCE dentro do container, ele terá acesso root total. Adicionar um usuário dedicado limita o raio de impacto.
 
 ```dockerfile
-# Example — non-root user in Dockerfile
+# Exemplo — usuário não-root no Dockerfile
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 USER appuser
 ```
 
-**Rule 3 — Drop unnecessary capabilities**
-`docker run` grants many Linux capabilities by default. Most apps only need CPU, memory, and basic networking. Drop everything else:
+**Regra 3 — Remover capabilities desnecessárias**
+`docker run` concede muitas capabilities Linux por padrão. A maioria das aplicações precisa apenas de CPU, memória e rede básica. Remove todo o resto:
 
 ```bash
 docker run --cap-drop ALL --cap-add NET_BIND_SERVICE <image>
 ```
 
-**Rule — Network isolation between containers**
-By default, all containers share the Docker Bridge network and can reach each other freely (no firewall between them). If one container is compromised, the attacker can pivot laterally to others on the same network.
+**Regra — Isolamento de rede entre containers**
+Por padrão, todos os containers compartilham a rede Bridge do Docker e podem se alcançar livremente (sem firewall entre eles). Se um container for comprometido, o atacante pode se mover lateralmente para outros na mesma rede.
 
-Solution: create separate networks per application/service. Docker Compose does this automatically per project. With plain `docker run`, you must create and assign networks manually.
+Solução: criar redes separadas por aplicação/serviço. Docker Compose faz isso automaticamente por projeto. Com `docker run` simples, você deve criar e atribuir redes manualmente.
 
 ```yaml
-# docker-compose.yml example
+# Exemplo docker-compose.yml
 networks:
   backend-net:
   db-net:
@@ -179,11 +179,11 @@ services:
     networks: [db-net, backend-net]
 ```
 
-> VidaLongaFlix deployment on Elastic Beanstalk runs a single container, so network isolation between services is handled at the AWS VPC/security group level, not at the Docker network level.
+> O deploy do VidaLongaFlix no Elastic Beanstalk roda um único container, portanto o isolamento de rede entre serviços é feito no nível do VPC/security group da AWS, não no nível da rede Docker.
 
-### Applied to VidaLongaFlix — Dockerfile hardening
+### Aplicado ao VidaLongaFlix — Hardening do Dockerfile
 
-**Before (running as root):**
+**Antes (rodando como root):**
 ```dockerfile
 FROM eclipse-temurin:17-jre
 WORKDIR /app
@@ -193,69 +193,271 @@ ENV JAVA_OPTS=""
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
 ```
 
-**After (non-root + proper signal handling):**
+**Depois (non-root + tratamento correto de sinais):**
 ```dockerfile
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-# Rule 2: non-root user limits blast radius if container is compromised
+# Regra 2: usuário não-root limita o raio de impacto se o container for comprometido
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser && \
     mkdir -p /app/logs && \
     chown -R appuser:appgroup /app
 
 COPY --from=build /workspace/app.jar ./app.jar
 
-# exec replaces the shell with java as PID 1, so SIGTERM reaches the JVM for graceful shutdown
+# exec substitui o shell pelo java como PID 1, para que SIGTERM chegue ao JVM no shutdown gracioso
 ENV JAVA_OPTS=""
 USER appuser
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]
 ```
 
-**Why `exec` matters:** Without `exec`, the process tree is `sh (PID 1) → java (child)`. Docker sends `SIGTERM` to PID 1 (the shell). The shell may ignore it or not forward it to Java, causing the container to be force-killed after the timeout instead of shutting down gracefully. With `exec`, Java becomes PID 1 and handles `SIGTERM` directly — Spring Boot completes in-flight requests before shutting down.
+**Por que o `exec` importa:** Sem `exec`, a árvore de processos é `sh (PID 1) → java (filho)`. O Docker envia `SIGTERM` para o PID 1 (o shell). O shell pode ignorá-lo ou não repassá-lo para o Java, fazendo o container ser forçosamente encerrado após o timeout em vez de fazer um shutdown gracioso. Com `exec`, o Java se torna o PID 1 e trata o `SIGTERM` diretamente — o Spring Boot completa as requisições em andamento antes de encerrar.
 
 ---
 
-## Module 3 — Finding Vulnerabilities with Trivy
+## Módulo 3 — Encontrando Vulnerabilidades com Trivy
 
-> _Content to be added as the course progresses._
+### Por que usar Trivy via Docker (sem instalação local)
 
-Topics: Trivy installation and configuration, first scan, CVE classification, different scanner targets, optimizing scans.
+O Trivy possui uma imagem Docker oficial. Em vez de instalar o binário na máquina, você o executa como container. Regra: onde o curso escrever `trivy image`, substitua por `docker run <imagem-trivy> image`. O resultado é idêntico.
+
+**Importante:** A tag `:latest` não está publicada no Docker Hub (`aquasec/trivy`). O repositório oficial mantido pelo projeto está no GitHub Container Registry. Sempre use `ghcr.io/aquasecurity/trivy:latest` ou uma versão pinada como `ghcr.io/aquasecurity/trivy:0.62.0`.
+
+### Montando o socket Docker (obrigatório para escanear imagens locais)
+
+Quando o Trivy roda dentro de um container, ele está isolado do Docker do host e não enxerga as imagens locais. Para dar acesso, é preciso montar o socket Unix do Docker com `-v /var/run/docker.sock:/var/run/docker.sock`:
+
+```
+[Container Trivy] ──→ /var/run/docker.sock ──→ [Docker daemon do host] ──→ imagem local
+```
+
+Sem isso, o Trivy tentaria buscar a imagem no Docker Hub e falharia se ela não estiver publicada lá.
+
+### Comandos de scan
+
+```bash
+# Scan básico — mostra no terminal
+docker run -v /var/run/docker.sock:/var/run/docker.sock ghcr.io/aquasecurity/trivy:latest image <image>
+
+# Exportar para arquivo (recomendado — permite comparar versões no git)
+docker run -v /var/run/docker.sock:/var/run/docker.sock ghcr.io/aquasecurity/trivy:latest image <image> > cve.txt
+```
+
+O `cve.txt` no controle de versão permite fazer diff da contagem de vulnerabilidades entre releases — ex: "saímos de 25 médios para 8 médios após a atualização."
+
+### Estrutura do relatório CVE (colunas explicadas)
+
+| Coluna    | O que significa |
+|-----------|----------------|
+| Library   | Pacote afetado (ex: `tomcat-embed-core`) |
+| CVE       | Identificador da vulnerabilidade (ex: CVE-2025-24813) |
+| Severity  | Low / Medium / High / Critical |
+| Status    | `affected` = sem correção ainda · `fixed` = versão corrigida existe |
+| Installed | Versão atualmente no seu container |
+| Fixed     | Versão onde o problema foi corrigido |
+| Title     | Descrição curta + link para detalhes completos do CVE |
+
+O CVSS Score mostrado no link do CVE pode variar dependendo de quem o pontuou (NVD, Red Hat, etc.) — scorers diferentes usam critérios e escalas diferentes (v2 vs v3). Isso explica por que o mesmo CVE pode aparecer como "Low" em um banco de dados e "High" em outro.
+
+### Scanners — o que o Trivy verifica por padrão
+
+| Scanner     | Padrão        | O que faz |
+|-------------|--------------|-----------|
+| `vuln`      | ✅ habilitado | CVEs de pacotes do SO + dependências da aplicação |
+| `secret`    | ✅ habilitado | Procura segredos (senhas, tokens) no filesystem |
+| `misconfig` | ❌ desabilitado | Erros de configuração em IaC (YAML Kubernetes, Terraform, etc.) |
+| `license`   | ❌ desabilitado | Conformidade de licenças dos pacotes instalados |
+
+O scanner de segredos é lento em imagens grandes mas não encontra nada em uma imagem bem construída (sem segredos embutidos na camada). Para pular e escanear apenas vulnerabilidades:
+
+```bash
+docker run -v /var/run/docker.sock:/var/run/docker.sock ghcr.io/aquasecurity/trivy:latest image --scanners vuln <image> > cve.txt
+```
+
+Se a coluna Secrets mostrar `-` no relatório, significa que o scan de segredos foi pulado.
+
+### Trivy vs Docker Scout — por que rodar os dois
+
+São ferramentas independentes com bancos de dados de CVEs diferentes. Na mesma imagem, o Docker Scout pode encontrar 5 Críticos enquanto o Trivy encontra 4 — ou o Trivy encontra 1000 onde o Scout encontrou 350. **Boa prática: rodar os dois e corrigir tudo que cada um reportar.**
+
+| Ferramenta    | Ponto forte |
+|---------------|------------|
+| Docker Scout  | Integração profunda com Docker Hub, recomendações de imagem base |
+| Trivy         | Banco de dados de CVEs mais amplo, suporta mais tipos de alvo (filesystem, repositórios git, K8s, etc.) |
+
+### Aplicado ao VidaLongaFlix
+
+Imagem: `fabricioengeroff/vidalongaflix:latest` (Spring Boot 3.5.12, base `eclipse-temurin:17-jre`)
+
+```bash
+# Passo 1 — build da imagem
+docker build -t fabricioengeroff/vidalongaflix:latest .
+
+# Passo 2 — escanear apenas vulnerabilidades (pular scan lento de segredos)
+docker run -v /var/run/docker.sock:/var/run/docker.sock ghcr.io/aquasecurity/trivy:latest image --scanners vuln fabricioengeroff/vidalongaflix:latest > cve.txt
+
+# Passo 3 — commitar o cve.txt para rastrear versões
+git add cve.txt && git commit -m "security: add Trivy CVE report for vidalongaflix:latest"
+```
+
+### Resultado real do scan (Spring Boot 3.5.12)
+
+```
+Report Summary
+┌──────────────────────────────────────────────────────┬────────┬─────────────────┐
+│                        Target                        │  Type  │ Vulnerabilities │
+├──────────────────────────────────────────────────────┼────────┼─────────────────┤
+│ fabricioengeroff/vidalongaflix:latest (ubuntu 24.04) │ ubuntu │       29        │
+├──────────────────────────────────────────────────────┼────────┼─────────────────┤
+│ app/app.jar                                          │  jar   │        3        │
+└──────────────────────────────────────────────────────┴────────┴─────────────────┘
+```
+
+**Ubuntu 24.04 — 29 CVEs (13 LOW, 16 MEDIUM, 0 HIGH, 0 CRITICAL)**
+
+Todas têm `Status: affected` sem `Fixed Version` — o Ubuntu ainda não lançou patches. São pacotes do SO como GnuPG, libpam, tar, wget. Não há ação possível no Dockerfile agora. Aguardar atualizações do Ubuntu.
+
+**app.jar — 3 CVEs (0 LOW, 2 MEDIUM, 1 HIGH, 0 CRITICAL)**
+
+| Pacote | Versão | Severidade | CVE | Problema | Fix |
+|--------|--------|------------|-----|----------|-----|
+| `jackson-core` | 2.19.4 | HIGH | GHSA-72hv | DoS via parser assíncrono — bypass de limite de tamanho | 2.21.1 |
+| `nimbus-jose-jwt` | 9.47 | MEDIUM | CVE-2025-53864 | Recursão descontrolada no parser JWT | 10.0.2 |
+| `commons-lang3` | 3.17.0 | MEDIUM | CVE-2025-48924 | Recursão descontrolada | 3.18.0 |
+
+**Comparação com Docker Scout (Módulo 1, mesma imagem com Spring Boot 3.3.3):**
+
+| | Docker Scout (antes) | Trivy (depois) |
+|-|---------------------|----------------|
+| CRITICAL (JAR) | 3 | 0 |
+| HIGH (JAR) | 15 | 1 |
+| MEDIUM (JAR) | 0 | 2 |
+
+O upgrade do Spring Boot 3.3.3 → 3.5.12 eliminou 17 dos 18 CVEs do JAR. Restaram 3 CVEs que requerem pins adicionais no `pom.xml` (ver pendências abaixo).
+
+> **Nota:** Docker Scout encontrou 18 CVEs no JAR na versão 3.3.3 e Trivy encontrou 3 na 3.5.12. Contagens diferentes entre as ferramentas são normais — bancos de dados e critérios de classificação distintos. Rodar os dois e corrigir o que cada um reportar é a boa prática.
 
 ---
 
-## Module 4 — Reports and Analysis
+## Módulo 4 — Relatórios e Análise
 
-> _Content to be added as the course progresses._
+> _Conteúdo a ser adicionado conforme o curso avança._
 
-Topics: generating vulnerability reports (JSON), analyzing different targets, creating non-root users in images.
-
----
-
-## Module 5 — Integrating Docker Scout and Trivy in CI/CD
-
-> _Content to be added as the course progresses._
-
-Topics: configuring Docker Scout in GitHub Actions, automated analysis with Trivy in pipeline, combining both scanners.
+Tópicos: geração de relatórios de vulnerabilidades (JSON), análise de diferentes alvos, criação de usuários não-root em imagens.
 
 ---
 
-## Pre-existing Security in VidaLongaFlix (before the course)
+## Módulo 5 — Integrando Docker Scout e Trivy no CI/CD
 
-| Feature | Implementation | File |
-|---------|---------------|------|
-| Multi-stage Dockerfile | JDK for build, JRE-only for runtime | `Dockerfile` |
-| `.dockerignore` | Excludes target, git, logs, secrets | `.dockerignore` |
-| OIDC AWS auth | Temporary credentials (15min), no long-lived keys | `.github/workflows/ci.yml` |
-| JWT authentication | HMAC256, stateless, 2h expiry | `TokenService.java` |
-| Login rate limiting | 5 attempts/min per IP (Bucket4j) | `LoginRateLimitFilter.java` |
-| CORS | Dynamic origins from env var | `CorsConfig.java` |
-| BCrypt passwords | Applied to all user passwords | `DataInitializer.java` |
-| Secrets via env vars | No hardcoded credentials in code | `application-prod.properties` |
-| Actuator restricted | Only health/info exposed in production | `application-prod.properties` |
-| Dependabot | Weekly Maven + GitHub Actions dependency scans | `.github/dependabot.yml` |
+### Por que automatizar os scanners?
 
-## Pending (Phase 2)
-- [ ] Docker Scout integrated in CI/CD pipeline
-- [ ] Trivy integrated in CI/CD pipeline
-- [ ] Gitleaks — secret scanning in git history
-- [ ] SonarCloud — SAST static code analysis
+Sem CI/CD, para cada nova versão você precisa: baixar o código, instalar as ferramentas, lembrar todos os parâmetros na ordem certa, rodar manualmente. Com GitHub Actions isso acontece automaticamente em todo push — sem intervenção humana.
+
+### GitHub Secrets — como armazenar credenciais com segurança
+
+Senhas e tokens **não podem ficar no código** (ficam visíveis no GitHub para qualquer pessoa com acesso). A solução são os GitHub Secrets:
+
+1. `Settings → Secrets and variables → Actions → New repository secret`
+2. Dê um nome (ex: `DOCKERHUB_TOKEN`) e cole o valor
+3. No workflow, referencie com `${{ secrets.DOCKERHUB_TOKEN }}`
+4. O valor nunca aparece nos logs — fica mascarado como `***`
+
+### Docker Scout Action
+
+```yaml
+- name: Docker Scout
+  uses: docker/scout-action@v1.17.0
+  with:
+    command: quickview          # resumo: Critical/High/Medium/Low por camada
+    image: usuario/app:tag
+    ignore-base: false          # false = reportar CVEs da imagem base também
+    dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
+    dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+```
+
+O `quickview` é suficiente para o CI — mostra o resumo de contagens sem listar cada CVE individualmente (menos ruído nos logs).
+
+### Trivy Action
+
+```yaml
+- name: Trivy
+  uses: aquasecurity/trivy-action@0.30.0
+  with:
+    image-ref: usuario/app:tag
+    scan-type: image
+    scanners: vuln              # só vulnerabilidades (pular scan de segredos)
+    severity: CRITICAL,HIGH     # filtrar apenas o que importa
+    format: table
+    exit-code: '0'              # 0 = reportar mas não falhar o build
+```
+
+### `exit_code: 1` — trava de segurança no pipeline
+
+Quando `exit-code: '1'`, o step retorna erro se encontrar CVEs com a severidade configurada. Isso impede merges enquanto houver vulnerabilidade conhecida.
+
+```
+push → build → Scout → Trivy ✗ → pipeline vermelho → merge bloqueado
+```
+
+> **Quando ligar:** Só após ter zerado todos os críticos/altos. Se ligar com CVEs ativos, o pipeline fica permanentemente vermelho e ninguém consegue fazer deploy.
+
+### Por que rodar os dois no CI?
+
+A aula demonstrou: o Scout **não encontrou** uma vulnerabilidade no Ubuntu 24.10, mas o Trivy **encontrou**. Dois bancos de dados independentes = cobertura maior. Custo zero — ambos os GitHub Actions são gratuitos para repositórios públicos.
+
+### Aplicado ao VidaLongaFlix
+
+O projeto já tem `docker.yml` que constrói e faz push da imagem. Os scanners entram **depois do build**, usando a imagem recém-construída.
+
+```yaml
+# Adicionado no final de .github/workflows/docker.yml
+# após o step "Build (e Push)"
+
+- name: Docker Scout — quickview
+  if: ${{ secrets.DOCKERHUB_TOKEN != '' }}
+  uses: docker/scout-action@v1.17.0
+  with:
+    command: quickview
+    image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+    ignore-base: false
+    dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
+    dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+- name: Trivy — scan de vulnerabilidades
+  uses: aquasecurity/trivy-action@0.30.0
+  with:
+    image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+    scan-type: image
+    scanners: vuln
+    severity: CRITICAL,HIGH
+    format: table
+    exit-code: '0'    # manter 0 enquanto houver CVEs conhecidos sem correção
+```
+
+**Por que `exit-code: 0` agora?** Após o upgrade do Spring Boot (Módulo 1), restaram 3 CVEs no JAR (1 HIGH, 2 MEDIUM) e 29 CVEs no Ubuntu sem fix disponível. Com `exit-code: 1`, o pipeline ficaria permanentemente bloqueado. Quando esses CVEs tiverem correção e forem aplicados, alterar para `exit-code: 1`.
+
+**Pendência:** adicionar esses steps ao `docker.yml` (ver seção de pendências abaixo).
+
+---
+
+## Segurança Pré-existente no VidaLongaFlix (antes do curso)
+
+| Funcionalidade | Implementação | Arquivo |
+|----------------|--------------|---------|
+| Dockerfile Multi-stage | JDK para build, apenas JRE para runtime | `Dockerfile` |
+| `.dockerignore` | Exclui target, git, logs, segredos | `.dockerignore` |
+| Autenticação AWS com OIDC | Credenciais temporárias (15min), sem chaves de longa duração | `.github/workflows/ci.yml` |
+| Autenticação JWT | HMAC256, stateless, expiração em 2h | `TokenService.java` |
+| Rate limiting no login | 5 tentativas/min por IP (Bucket4j) | `LoginRateLimitFilter.java` |
+| CORS | Origins dinâmicas via variável de ambiente | `CorsConfig.java` |
+| Senhas com BCrypt | Aplicado a todas as senhas de usuários | `DataInitializer.java` |
+| Segredos via variáveis de ambiente | Sem credenciais hardcoded no código | `application-prod.properties` |
+| Actuator restrito | Apenas health/info expostos em produção | `application-prod.properties` |
+| Dependabot | Scans semanais de dependências Maven + GitHub Actions | `.github/dependabot.yml` |
+
+## Pendências (Fase 2)
+- [x] Docker Scout integrado no pipeline CI/CD (`docker.yml`)
+- [x] Trivy integrado no pipeline CI/CD (`docker.yml`)
+- [ ] Ativar `exit-code: 1` no Trivy quando os 3 CVEs restantes do JAR tiverem correção
+- [ ] Gitleaks — scan de segredos no histórico git
+- [ ] SonarCloud — análise estática de código (SAST)

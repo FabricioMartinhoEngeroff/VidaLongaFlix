@@ -18,6 +18,8 @@
         <java.version>17</java.version>
         <mockito.version>5.5.0</mockito.version>
         <jwt.version>4.4.0</jwt.version>
+        <!-- Override para corrigir GHSA-72hv (jackson-core DoS via async parser) — Trivy scan 2026-03-25 -->
+        <jackson-bom.version>2.21.1</jackson-bom.version>
     </properties>
 
     <dependencyManagement>
@@ -37,6 +39,19 @@
                 <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
                 <version>1.11.0</version>
+            </dependency>
+            <!-- Override para corrigir CVE-2025-48924 (commons-lang3 recursão descontrolada) — Trivy scan 2026-03-25 -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.18.0</version>
+            </dependency>
+            <!-- Override para corrigir CVE-2025-53864 (nimbus-jose-jwt recursão no parser JWT) — Trivy scan 2026-03-25
+                 ATENÇÃO: major version 9.x → 10.x. Spring Security depende deste pacote. Rodar testes completos. -->
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>nimbus-jose-jwt</artifactId>
+                <version>10.0.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

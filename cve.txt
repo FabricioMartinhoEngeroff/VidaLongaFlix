@@ -1,0 +1,151 @@
+
+Report Summary
+
+┌──────────────────────────────────────────────────────┬────────┬─────────────────┐
+│                        Target                        │  Type  │ Vulnerabilities │
+├──────────────────────────────────────────────────────┼────────┼─────────────────┤
+│ fabricioengeroff/vidalongaflix:latest (ubuntu 24.04) │ ubuntu │       29        │
+├──────────────────────────────────────────────────────┼────────┼─────────────────┤
+│ app/app.jar                                          │  jar   │        3        │
+└──────────────────────────────────────────────────────┴────────┴─────────────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+fabricioengeroff/vidalongaflix:latest (ubuntu 24.04)
+====================================================
+Total: 29 (UNKNOWN: 0, LOW: 13, MEDIUM: 16, HIGH: 0, CRITICAL: 0)
+
+┌────────────────────┬────────────────┬──────────┬──────────┬─────────────────────────┬───────────────┬─────────────────────────────────────────────────────────────┐
+│      Library       │ Vulnerability  │ Severity │  Status  │    Installed Version    │ Fixed Version │                            Title                            │
+├────────────────────┼────────────────┼──────────┼──────────┼─────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+│ coreutils          │ CVE-2016-2781  │ LOW      │ affected │ 9.4-3ubuntu6.1          │               │ coreutils: Non-privileged session can escape to the parent  │
+│                    │                │          │          │                         │               │ session in chroot                                           │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2016-2781                   │
+├────────────────────┼────────────────┼──────────┤          ├─────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+│ dirmngr            │ CVE-2025-68972 │ MEDIUM   │          │ 2.4.4-2ubuntu17.4       │               │ gnupg: GnuPG: Signature bypass via form feed character in   │
+│                    │                │          │          │                         │               │ signed messages                                             │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-68972                  │
+│                    ├────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│                    │ CVE-2022-3219  │ LOW      │          │                         │               │ gnupg: denial of service issue (resource consumption) using │
+│                    │                │          │          │                         │               │ compressed packets                                          │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2022-3219                   │
+├────────────────────┼────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│ gnupg              │ CVE-2025-68972 │ MEDIUM   │          │                         │               │ gnupg: GnuPG: Signature bypass via form feed character in   │
+│                    │                │          │          │                         │               │ signed messages                                             │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-68972                  │
+│                    ├────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│                    │ CVE-2022-3219  │ LOW      │          │                         │               │ gnupg: denial of service issue (resource consumption) using │
+│                    │                │          │          │                         │               │ compressed packets                                          │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2022-3219                   │
+├────────────────────┼────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│ gnupg-utils        │ CVE-2025-68972 │ MEDIUM   │          │                         │               │ gnupg: GnuPG: Signature bypass via form feed character in   │
+│                    │                │          │          │                         │               │ signed messages                                             │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-68972                  │
+│                    ├────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│                    │ CVE-2022-3219  │ LOW      │          │                         │               │ gnupg: denial of service issue (resource consumption) using │
+│                    │                │          │          │                         │               │ compressed packets                                          │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2022-3219                   │
+├────────────────────┼────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│ gpg                │ CVE-2025-68972 │ MEDIUM   │          │                         │               │ gnupg: GnuPG: Signature bypass via form feed character in   │
+│                    │                │          │          │                         │               │ signed messages                                             │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-68972                  │
+│                    ├────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│                    │ CVE-2022-3219  │ LOW      │          │                         │               │ gnupg: denial of service issue (resource consumption) using │
+│                    │                │          │          │                         │               │ compressed packets                                          │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2022-3219                   │
+├────────────────────┼────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│ gpg-agent          │ CVE-2025-68972 │ MEDIUM   │          │                         │               │ gnupg: GnuPG: Signature bypass via form feed character in   │
+│                    │                │          │          │                         │               │ signed messages                                             │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-68972                  │
+│                    ├────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│                    │ CVE-2022-3219  │ LOW      │          │                         │               │ gnupg: denial of service issue (resource consumption) using │
+│                    │                │          │          │                         │               │ compressed packets                                          │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2022-3219                   │
+├────────────────────┼────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│ gpgconf            │ CVE-2025-68972 │ MEDIUM   │          │                         │               │ gnupg: GnuPG: Signature bypass via form feed character in   │
+│                    │                │          │          │                         │               │ signed messages                                             │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-68972                  │
+│                    ├────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│                    │ CVE-2022-3219  │ LOW      │          │                         │               │ gnupg: denial of service issue (resource consumption) using │
+│                    │                │          │          │                         │               │ compressed packets                                          │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2022-3219                   │
+├────────────────────┼────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│ gpgsm              │ CVE-2025-68972 │ MEDIUM   │          │                         │               │ gnupg: GnuPG: Signature bypass via form feed character in   │
+│                    │                │          │          │                         │               │ signed messages                                             │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-68972                  │
+│                    ├────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│                    │ CVE-2022-3219  │ LOW      │          │                         │               │ gnupg: denial of service issue (resource consumption) using │
+│                    │                │          │          │                         │               │ compressed packets                                          │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2022-3219                   │
+├────────────────────┼────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│ gpgv               │ CVE-2025-68972 │ MEDIUM   │          │                         │               │ gnupg: GnuPG: Signature bypass via form feed character in   │
+│                    │                │          │          │                         │               │ signed messages                                             │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-68972                  │
+│                    ├────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│                    │ CVE-2022-3219  │ LOW      │          │                         │               │ gnupg: denial of service issue (resource consumption) using │
+│                    │                │          │          │                         │               │ compressed packets                                          │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2022-3219                   │
+├────────────────────┼────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│ keyboxd            │ CVE-2025-68972 │ MEDIUM   │          │                         │               │ gnupg: GnuPG: Signature bypass via form feed character in   │
+│                    │                │          │          │                         │               │ signed messages                                             │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-68972                  │
+│                    ├────────────────┼──────────┤          │                         ├───────────────┼─────────────────────────────────────────────────────────────┤
+│                    │ CVE-2022-3219  │ LOW      │          │                         │               │ gnupg: denial of service issue (resource consumption) using │
+│                    │                │          │          │                         │               │ compressed packets                                          │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2022-3219                   │
+├────────────────────┼────────────────┼──────────┤          ├─────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+│ libexpat1          │ CVE-2025-66382 │ MEDIUM   │          │ 2.6.1-2ubuntu0.4        │               │ libexpat: libexpat: Denial of service via crafted file      │
+│                    │                │          │          │                         │               │ processing                                                  │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-66382                  │
+├────────────────────┼────────────────┼──────────┤          ├─────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+│ libgcrypt20        │ CVE-2024-2236  │ LOW      │          │ 1.10.3-2build1          │               │ libgcrypt: vulnerable to Marvin Attack                      │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2024-2236                   │
+├────────────────────┼────────────────┼──────────┤          ├─────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+│ libpam-modules     │ CVE-2025-8941  │ MEDIUM   │          │ 1.5.3-5ubuntu5.5        │               │ linux-pam: Incomplete fix for CVE-2025-6020                 │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-8941                   │
+├────────────────────┤                │          │          │                         ├───────────────┤                                                             │
+│ libpam-modules-bin │                │          │          │                         │               │                                                             │
+│                    │                │          │          │                         │               │                                                             │
+├────────────────────┤                │          │          │                         ├───────────────┤                                                             │
+│ libpam-runtime     │                │          │          │                         │               │                                                             │
+│                    │                │          │          │                         │               │                                                             │
+├────────────────────┤                │          │          │                         ├───────────────┤                                                             │
+│ libpam0g           │                │          │          │                         │               │                                                             │
+│                    │                │          │          │                         │               │                                                             │
+├────────────────────┼────────────────┼──────────┤          ├─────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+│ login              │ CVE-2024-56433 │ LOW      │          │ 1:4.13+dfsg1-4ubuntu3.2 │               │ shadow-utils: Default subordinate ID configuration in       │
+│                    │                │          │          │                         │               │ /etc/login.defs could lead to compromise                    │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2024-56433                  │
+├────────────────────┤                │          │          │                         ├───────────────┤                                                             │
+│ passwd             │                │          │          │                         │               │                                                             │
+│                    │                │          │          │                         │               │                                                             │
+│                    │                │          │          │                         │               │                                                             │
+├────────────────────┼────────────────┼──────────┤          ├─────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+│ tar                │ CVE-2025-45582 │ MEDIUM   │          │ 1.35+dfsg-3build1       │               │ tar: Tar path traversal                                     │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2025-45582                  │
+├────────────────────┼────────────────┤          │          ├─────────────────────────┼───────────────┼─────────────────────────────────────────────────────────────┤
+│ wget               │ CVE-2021-31879 │          │          │ 1.21.4-1ubuntu4.1       │               │ wget: authorization header disclosure on redirect           │
+│                    │                │          │          │                         │               │ https://avd.aquasec.com/nvd/cve-2021-31879                  │
+└────────────────────┴────────────────┴──────────┴──────────┴─────────────────────────┴───────────────┴─────────────────────────────────────────────────────────────┘
+
+Java (jar)
+==========
+Total: 3 (UNKNOWN: 0, LOW: 0, MEDIUM: 2, HIGH: 1, CRITICAL: 0)
+
+┌───────────────────────────────────────────────────┬─────────────────────┬──────────┬────────┬───────────────────┬───────────────────────┬──────────────────────────────────────────────────────────────┐
+│                      Library                      │    Vulnerability    │ Severity │ Status │ Installed Version │     Fixed Version     │                            Title                             │
+├───────────────────────────────────────────────────┼─────────────────────┼──────────┼────────┼───────────────────┼───────────────────────┼──────────────────────────────────────────────────────────────┤
+│ com.fasterxml.jackson.core:jackson-core (app.jar) │ GHSA-72hv-8253-57qq │ HIGH     │ fixed  │ 2.19.4            │ 2.18.6, 2.21.1, 3.1.0 │ jackson-core: Number Length Constraint Bypass in Async       │
+│                                                   │                     │          │        │                   │                       │ Parser Leads to Potential DoS...                             │
+│                                                   │                     │          │        │                   │                       │ https://github.com/advisories/GHSA-72hv-8253-57qq            │
+├───────────────────────────────────────────────────┼─────────────────────┼──────────┤        ├───────────────────┼───────────────────────┼──────────────────────────────────────────────────────────────┤
+│ com.nimbusds:nimbus-jose-jwt (app.jar)            │ CVE-2025-53864      │ MEDIUM   │        │ 9.47              │ 10.0.2, 9.37.4        │ com.nimbusds/nimbus-jose-jwt: Uncontrolled recursion in      │
+│                                                   │                     │          │        │                   │                       │ Connect2id Nimbus JOSE + JWT                                 │
+│                                                   │                     │          │        │                   │                       │ https://avd.aquasec.com/nvd/cve-2025-53864                   │
+├───────────────────────────────────────────────────┼─────────────────────┤          │        ├───────────────────┼───────────────────────┼──────────────────────────────────────────────────────────────┤
+│ org.apache.commons:commons-lang3 (app.jar)        │ CVE-2025-48924      │          │        │ 3.17.0            │ 3.18.0                │ commons-lang/commons-lang: org.apache.commons/commons-lang3: │
+│                                                   │                     │          │        │                   │                       │ Uncontrolled Recursion vulnerability in Apache Commons Lang  │
+│                                                   │                     │          │        │                   │                       │ https://avd.aquasec.com/nvd/cve-2025-48924                   │
+└───────────────────────────────────────────────────┴─────────────────────┴──────────┴────────┴───────────────────┴───────────────────────┴──────────────────────────────────────────────────────────────┘

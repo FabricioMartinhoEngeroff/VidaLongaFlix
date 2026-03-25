@@ -59,9 +59,35 @@ jobs:
           context: .
           file: ./Dockerfile
           push: ${{ inputs.push }}
+          load: ${{ !inputs.push }}   # carrega localmente quando não faz push (PRs/feature branches)
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
             ${{ env.IMAGE_NAME }}:${{ env.REF_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      # ── Segurança ────────────────────────────────────────────────────────────
+      # Docker Scout: quickview — resumo de Critical/High/Medium/Low por camada
+      # Requer login no Docker Hub (secrets opcionais — não falha se ausentes)
+      - name: Docker Scout — quickview
+        if: ${{ secrets.DOCKERHUB_TOKEN != '' }}
+        uses: docker/scout-action@v1.17.0
+        with:
+          command: quickview
+          image: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          ignore-base: false
+          dockerhub-user: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Trivy: scan de vulnerabilidades — banco de dados independente do Scout
+      # exit-code 0 = reporta mas não bloqueia (alterar para 1 quando todos os CRITICAL/HIGH estiverem corrigidos)
+      - name: Trivy — scan de vulnerabilidades
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          scan-type: image
+          scanners: vuln
+          severity: CRITICAL,HIGH
+          format: table
+          exit-code: '0'
