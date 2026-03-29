@@ -972,10 +972,417 @@ Esta é a distinção mais importante e mais ignorada em operações:
 
 ---
 
+---
+
+## Fase de Produção — Grafana Cloud + AWS Elastic Beanstalk
+
+### Estado atual após push na `main` (2026-03-29)
+
+| Passo | Status | O que foi feito |
+|---|---|---|
+| 1 — Stack local | ✅ | `docker-compose.observability.yml` com Mimir, Loki, Tempo, Grafana |
+| 2 — OTel Collector (local) | ✅ | `observability/otel-collector-config.yaml` |
+| 3 — Backend instrumentado | ✅ | Micrometer OTLP + `opentelemetry-exporter-otlp` no `pom.xml` |
+| 4 — Frontend documentado | ✅ | `src/tracing.ts` planejado — a implementar no repo Angular |
+| 5 — Datasources Grafana | ✅ | `observability/grafana/provisioning/datasources/datasources.yaml` |
+| 6 — Dashboards provisionados | ✅ | `golden-signals.json`, `jvm-backend.json`, `sli-disponibilidade.json` |
+| 7 — Alertas provisionados | ✅ | `observability/grafana/provisioning/alerting/rules.yaml` |
+| 8 — Config prod (EB sidecar) | ✅ | `docker-compose.eb.yml` + `otel-collector-prod.yaml` |
+| 9 — application-prod.properties | ✅ | OTLP configurado via `${OTLP_HTTP_ENDPOINT}` e `${OTLP_AUTH_HEADER}` |
+| **10 — Grafana Cloud** | ⏳ | **Próximo: criar conta e obter credenciais** |
+| **11 — Env vars no EB** | ⏳ | **Próximo: configurar no console AWS** |
+| **12 — Validar dados** | ⏳ | Confirmar que traces/métricas/logs chegam |
+| **13 — SLIs e SLOs formais** | ⏳ | Definir no Grafana Cloud |
+
+---
+
+### Passo 10 — Criar conta no Grafana Cloud e obter credenciais
+
+**10.1 — Criar a conta (free tier)**
+
+1. Acesse **grafana.com → "Get Grafana Cloud"**
+2. Crie uma conta gratuita (free tier cobre: 10.000 series ativas, 50GB de logs, 50GB de traces)
+3. Escolha a **região** mais próxima → **South America (São Paulo)** se disponível, senão **US East**
+4. Anote o nome da sua stack, ex: `vidalongaflix`
+
+**10.2 — Obter o endpoint OTLP**
+
+1. No painel do Grafana Cloud → **"My Account"** (canto superior esquerdo)
+2. Na seção **"Stack"** → clique no nome da stack
+3. Clique em **"Configure"** ao lado de **"OpenTelemetry"**
+4. Você verá:
+   ```
+   OTLP Endpoint: https://otlp-gateway-prod-sa-east-1.grafana.net/otlp
+   Instance ID:   123456
+   ```
+   Anote o **endpoint** e o **Instance ID**.
+
+**10.3 — Gerar o API Token**
+
+1. No mesmo painel → **"Generate now"** ao lado de "Password / API Token"
+2. Escolha o escopo: **MetricsPublisher + LogsPublisher + TracesPublisher**
+3. Copie o token gerado — ele começa com `glc_...`
+   > **Atenção:** o token é exibido apenas uma vez. Copie agora.
+
+**10.4 — Gerar o auth header Base64**
+
+```bash
+# Substitua com seus dados reais
+INSTANCE_ID="123456"
+API_TOKEN="glc_eyJrIjoiOWZj..."
+
+echo -n "${INSTANCE_ID}:${API_TOKEN}" | base64
+# Saída: MTIzNDU2OmdsY19leUp...
+```
+
+Guarde a string base64 — ela vai como `OTLP_AUTH_HEADER` no EB.
+
+---
+
+### Passo 11 — Configurar variáveis de ambiente no Elastic Beanstalk
+
+**Acesso ao console:**
+
+1. AWS Console → **Elastic Beanstalk** → selecione o ambiente `vidalongaflix-env`
+2. Menu lateral → **"Configuration"** → seção **"Software"** → **"Edit"**
+3. Role até **"Environment properties"** e adicione as variáveis abaixo
+
+**Variáveis obrigatórias para observabilidade (adicionar às já existentes):**
+
+| Variável | Valor | Descrição |
+|---|---|---|
+| `OTLP_HTTP_ENDPOINT` | `https://otlp-gateway-prod-sa-east-1.grafana.net/otlp` | URL do Grafana Cloud OTLP (sem `/v1/*`) |
+| `OTLP_AUTH_HEADER` | `MTIzNDU2OmdsY19leUp...` | Base64 de `instanceId:apiToken` |
+
+**Variável opcional:**
+
+| Variável | Valor padrão | Quando mudar |
+|---|---|---|
+| `OTEL_SAMPLING_PROBABILITY` | `0.1` (10%) | Mudar para `1.0` durante investigação de incidente |
+
+**Variáveis já existentes (verificar se estão presentes):**
+
+```
+SPRING_PROFILES_ACTIVE=prod
+DB_URL=jdbc:postgresql://<RDS_ENDPOINT>:5432/vidalongaflix
+DB_USERNAME=<usuario>
+DB_PASSWORD=<senha>
+JWT_SECRET=<segredo-forte-64-chars>
+ADMIN_EMAIL=admin@vidalongaflix.com.br
+ADMIN_PASSWORD=<senha-forte>
+CORS_ALLOWED_ORIGINS=https://vidalongaflix.com.br,https://xxxx.cloudfront.net
+```
+
+4. Clique **"Apply"** — o EB vai reiniciar o ambiente com as novas variáveis.
+
+> **Como os dados chegam ao Grafana Cloud:** o Spring Boot envia métricas, traces e logs diretamente para o endpoint OTLP do Grafana Cloud via Micrometer (`management.otlp.*` no `application-prod.properties`). Não é necessário o Collector sidecar para o backend — ele só é necessário quando quiser capturar traces do Angular (frontend).
+
+---
+
+### Passo 12 — Validar que os dados chegam ao Grafana Cloud
+
+**12.1 — Verificar métricas**
+
+1. Acesse seu Grafana Cloud: `https://vidalongaflix.grafana.net`
+2. Menu → **Explore** → Data Source: **Grafana Mimir / Prometheus**
+3. Query:
+   ```promql
+   http_server_requests_seconds_count{job="vidalongaflix-backend"}
+   ```
+   Se retornar dados → métricas chegando.
+
+**12.2 — Verificar traces**
+
+1. Menu → **Explore** → Data Source: **Grafana Tempo**
+2. TraceQL:
+   ```
+   { .service.name = "vidalongaflix-backend" }
+   ```
+   Se aparecer spans → traces chegando.
+
+**12.3 — Verificar logs**
+
+1. Menu → **Explore** → Data Source: **Grafana Loki**
+2. LogQL:
+   ```logql
+   {service_name="vidalongaflix-backend"} |= "ERROR"
+   ```
+   Faça uma chamada que gere um erro no backend e confirme que o log aparece.
+
+**12.4 — Verificar o dashboard Golden Signals**
+
+Os dashboards do repositório (`golden-signals.json`, `jvm-backend.json`, `sli-disponibilidade.json`) foram feitos para o Grafana local (Mimir local). Para o Grafana Cloud:
+
+1. No Grafana Cloud → **Dashboards** → **Import**
+2. Importe os JSONs de `observability/grafana/provisioning/dashboards/`
+3. Ajuste o datasource para apontar para o Grafana Cloud Mimir (ao invés do local)
+
+> Os dashboards do free tier do Grafana Cloud já têm um **Kubernetes Monitoring** e **Spring Boot** pré-instalados — verifique antes de reimportar.
+
+---
+
+### Passo 13 — Definir SLIs e SLOs no Grafana Cloud
+
+#### SLIs do VidaLongaFlix (o que medimos)
+
+Os SLIs medem a **experiência real do usuário**, não apenas uptime de infraestrutura.
+
+| SLI | Pergunta | Métrica OTLP | PromQL |
+|---|---|---|---|
+| **Disponibilidade** | A API está respondendo? | `http_server_requests_seconds_count` | `sum(rate(...{status=~"2.."}[5m])) / sum(rate(...[5m]))` |
+| **Latência P95** | 95% das requisições respondem em < 300ms? | `http_server_requests_seconds_bucket` | `histogram_quantile(0.95, sum(rate(...[5m])) by (le))` |
+| **Taxa de Erro** | Menos de 0.5% das requisições retornam 5xx? | `http_server_requests_seconds_count` | `sum(rate(...{status=~"5.."}[5m])) / sum(rate(...[5m]))` |
+| **Throughput** | Volume de requisições (contexto) | `http_server_requests_seconds_count` | `sum(rate(...[5m]))` |
+
+#### SLOs do VidaLongaFlix (nossas metas internas)
+
+| SLO | Meta | Error Budget (mês) | Alerta WARN | Alerta CRITICAL |
+|---|---|---|---|---|
+| **Disponibilidade** | ≥ 99.5% | ~3.6h de downtime | < 99.7% | < 99.5% |
+| **Latência P95** | < 300ms | — | > 250ms | > 500ms |
+| **Taxa de Erro** | < 0.5% | ~3.6h equivalente | > 0.3% | > 1% |
+
+#### SLA implícito (referência para usuários)
+
+```
+Disponibilidade garantida: 99% (colchão de 0.5% entre SLO e SLA)
+Latência máxima P95:       500ms
+Janela de medição:         mensal
+```
+
+#### Configurar SLOs no Grafana Cloud (via SLO plugin)
+
+O Grafana Cloud free tier inclui o **SLO plugin**:
+
+1. Grafana Cloud → **Alerting** → **SLOs** → **Create SLO**
+2. Configure o SLO de Disponibilidade:
+   ```
+   Name: vidalongaflix-disponibilidade
+
+   Query (Good events):
+   sum(rate(http_server_requests_seconds_count{status=~"2..",job="vidalongaflix-backend"}[5m]))
+
+   Query (Total events):
+   sum(rate(http_server_requests_seconds_count{job="vidalongaflix-backend"}[5m]))
+
+   Objective: 99.5%
+   Rolling window: 30 days
+   ```
+3. O plugin gera automaticamente:
+   - Error Budget gauge (quanto sobrou no mês)
+   - Alertas de esgotamento do budget (Burn Rate)
+   - Dashboard com histórico de SLO
+
+4. Repita para **Latência P95**:
+   ```
+   Name: vidalongaflix-latencia-p95
+
+   Query (Good events — requisições abaixo de 300ms):
+   sum(rate(http_server_requests_seconds_bucket{le="0.3",job="vidalongaflix-backend"}[5m]))
+
+   Query (Total events):
+   sum(rate(http_server_requests_seconds_count{job="vidalongaflix-backend"}[5m]))
+
+   Objective: 99.5%
+   ```
+
+#### Alertas de Burn Rate (esgotamento acelerado do Error Budget)
+
+O Grafana SLO plugin configura alertas de **Burn Rate** automaticamente. A ideia é:
+
+| Burn Rate | Significa | Ação |
+|---|---|---|
+| 1x | Consumindo budget na taxa normal | Monitorar |
+| 6x | Budget vai esgotar em ~5 dias | Alerta WARN → investigar |
+| 14x | Budget vai esgotar em ~2 dias | Alerta CRITICAL → acionar time |
+| 36x+ | Budget vai esgotar em horas | Alerta de EMERGÊNCIA |
+
+> Burn Rate 14x significa que o sistema está 14 vezes pior que o tolerado. Se o SLO é 99.5%, um Burn Rate de 14x implica ~93% de disponibilidade.
+
+---
+
+### Passo 14 — Conectar o Frontend Angular (quando implementado)
+
+Quando o `src/tracing.ts` for implementado no repo Angular, configurar a URL do Collector:
+
+**`environment.prod.ts`** no repo frontend:
+```typescript
+export const environment = {
+  production: true,
+  apiUrl: 'https://api.vidalongaflix.com.br/api',
+  // URL pública do OTel Collector sidecar (porta 4318 exposta no EB)
+  otlpEndpoint: 'https://api.vidalongaflix.com.br:4318'
+};
+```
+
+Para isso funcionar, ativar o `docker-compose.eb.yml` em vez do deploy single-container:
+1. Renomear `docker-compose.eb.yml` → `docker-compose.yml` na raiz
+2. O EB vai detectar e subir dois containers: `app` + `otel-collector`
+3. O Collector fica exposto na porta 4318 para receber traces do browser
+
+Variáveis adicionais necessárias no EB para o sidecar:
+```
+GRAFANA_OTLP_ENDPOINT=https://otlp-gateway-prod-sa-east-1.grafana.net/otlp
+GRAFANA_AUTH_HEADER=<mesmo base64 do OTLP_AUTH_HEADER>
+```
+
+---
+
+## Módulo 7 — Automação como Pilar de Confiabilidade (CRE)
+
+### Por que automação é um pilar de contabilidade
+
+Quanto menor o erro humano, maior o tempo disponível para inovação. Quando a confiabilidade depende totalmente do humano, os problemas são previsíveis:
+
+| Problema | Consequência |
+|---|---|
+| Deploys manuais | Risco de quebra por diferenças de ambiente e dependências |
+| Resolução manual de incidentes | MTTR alto — mais tempo parado |
+| Sem padronização | Cada pessoa faz de um jeito — resultado imprevisível |
+| Retrabalho sem processo | Falhas se repetem porque o processo não evolui |
+| Mudanças lentas | Correções em produção demoram e geram inconsistências |
+
+> Automatizar não é reiniciar um servidor. É levar um serviço para produção, executar testes e garantir previsibilidade — liberando tempo de tarefas repetitivas para inovação.
+
+### Custo do trabalho manual (medir para justificar)
+
+Antes de automatizar, medir:
+
+```
+Tarefa manual: reiniciar serviço X quando fica lento
+  Frequência:  3x por semana
+  Tempo gasto: 20 min por ocorrência
+  Total/mês:   ~5 horas
+  Risco:       humano pode esquecer, fazer no horário errado, não notificar
+
+Após automação:
+  Tempo humano: 0 (script roda sozinho + notifica)
+  Ganho/mês:    5 horas de engenharia liberadas para inovação
+  Bônus:        audit trail automático (quem/quando/por quê foi reiniciado)
+```
+
+Essa métrica concreta transforma a conversa: deixa de ser "seria bom automatizar" e passa a ser "custa X por mês não automatizar".
+
+### O processo de automação — ciclo completo
+
+```
+1. IDENTIFICAR   → processo manual e repetitivo com padrão definível
+2. DOCUMENTAR    → passos, pré-requisitos, exceções possíveis
+3. CODIFICAR     → Python, Shell, Bash — qualquer linguagem
+4. TESTAR        → homologação técnica + regras de negócio
+5. FAZER DEPLOY  → disponibilizar na ferramenta de automação
+6. MONITORAR     → dashboard para acompanhar execução em produção
+```
+
+Exemplo prático: instalar agente OTel em 100 máquinas
+
+| Abordagem manual | Abordagem automatizada |
+|---|---|
+| Acessar servidor por servidor | Script com Ansible/shell parametrizado |
+| Verificar permissões manualmente | Pré-requisitos validados no script |
+| Configurar proxy/coletor individualmente | Variável de ambiente padronizada |
+| ~2h por servidor | ~2min por servidor (ou paralelo) |
+| Inconsistências entre servidores | Resultado idêntico em todos |
+| Sem audit trail | Log de execução por servidor |
+
+### Automação no dia a dia do SRE/CRE
+
+**Deploys com CI/CD** (já implementado no VidaLongaFlix):
+- Esteira: código → testes → build Docker → push Docker Hub → deploy EB
+- Elimina "funciona na minha máquina" — ambiente reproduzível via Dockerfile
+- Cada PR passa pelos mesmos gates de qualidade (GitHub Actions)
+
+**Autorremediação (auto-remediation)**:
+- Scripts que corrigem incidentes leves automaticamente
+- Exemplo: se latência P95 > 1s por 5 min → reiniciar pool de conexões HikariCP + alertar
+- Exemplo: se disco > 85% → limpar logs antigos + alertar
+- Regra: autorremediação trata **sintoma**, não causa raiz — a causa ainda precisa ser investigada
+
+**Infraestrutura como Código (IaC)**:
+- Ambiente inteiro provisionado via código parametrizado
+- Todos trabalham com o mesmo padrão — elimina "servidor especial" não documentado
+- No VidaLongaFlix: `docker-compose.observability.yml` é IaC para a stack local
+- Próximo nível: Terraform para EB, RDS, S3, CloudFront
+
+**Alertas inteligentes integrados com APIs**:
+- Alerta no Grafana → webhook → Slack/Teams/PagerDuty
+- Alerta com contexto: qual serviço, qual SLO foi violado, link direto para o trace
+- Alerta com runbook: link para o passo a passo de investigação
+
+### Identificando alvos de automação — exercício prático
+
+Para cada tarefa repetitiva do time, responder:
+
+| Pergunta | Exemplo |
+|---|---|
+| Qual a tarefa? | Reiniciar serviço quando fica lento |
+| Frequência | 3x por semana |
+| Tempo gasto | 20 min cada |
+| Risco de erro humano | Alto — pode ser feito tarde |
+| Impacto se automatizar | 5h/mês liberadas + consistência |
+| Complexidade de automatizar | Baixa — script de 20 linhas |
+
+> Quanto maior o ganho e menor a complexidade, maior a prioridade. Comece pelos mais fáceis — o hábito de automatizar se constrói.
+
+### Dois caminhos ao identificar uma repetição
+
+Exemplo: serviço X precisa ser reiniciado toda sexta-feira.
+
+**Caminho 1 — É uma regra de negócio?**
+- Sim: criar script agendado (cron) + monitorar execução + documentar o porquê
+- O script não substitui entender por que o reinício é necessário
+
+**Caminho 2 — Não deveria ser necessário?**
+- Investigar: por que o serviço degrada? Memory leak? Query lenta? Conexão não fechada?
+- O reinício automático é um **Band-Aid** — a causa raiz ainda está lá
+- Criar um SLI específico para rastrear até o problema ser resolvido na origem
+
+> Automação sem investigação mascara problemas. Automação com investigação resolve problemas.
+
+### Automação aplicada ao VidaLongaFlix
+
+| Automação | Status | Como funciona |
+|---|---|---|
+| CI/CD completo | ✅ | GitHub Actions: test → build → push → deploy EB |
+| Scan de vulnerabilidades | ✅ | Docker Scout + Trivy no pipeline (CVEs bloqueiam o build) |
+| Stack de observabilidade | ✅ | `docker compose up -d` sobe todo o ambiente local |
+| Deploy do Collector sidecar | ✅ | `docker-compose.eb.yml` — EB sobe dois containers automaticamente |
+| Alertas automáticos | ✅ | Grafana dispara alertas quando Golden Signals violam thresholds |
+| Autorremediação | ⏳ | Próximo: webhook Grafana → Lambda AWS → ação corretiva |
+| IaC completo (Terraform) | ⏳ | Próximo: EB + RDS + S3 como código |
+| Runbooks automatizados | ⏳ | Próximo: links nos alertas → documentação de investigação |
+
+### Métricas de automação para o dashboard
+
+Além dos Golden Signals, acompanhar a saúde da automação em si:
+
+```promql
+# Tempo médio desde o alerta até resolução (MTTR)
+# Deve diminuir ao longo do tempo com mais automação
+
+# Número de deploys por mês (quanto mais, melhor — sinal de CI/CD saudável)
+# Taxa de sucesso dos deploys (meta: > 99%)
+# Número de incidentes com autorremediação bem-sucedida
+```
+
+---
+
 ## Pendências
+
+### Implementados ✅
 - [x] Health checks no Spring Boot Actuator (liveness/readiness)
-- [x] Métricas com Micrometer + Prometheus
-- [x] Tracing distribuído com OpenTelemetry
-- [x] Dashboard Grafana para o VidaLongaFlix
-- [x] Alertas para Golden Signals (latência, erros, saturação, tráfego)
-- [x] Conectar produção (Elastic Beanstalk) ao Grafana Cloud (documentado — requer conta Grafana Cloud)
+- [x] Métricas com Micrometer + OTLP exporter
+- [x] Tracing distribuído via Micrometer Tracing + OTel
+- [x] Logs via OTLP (Micrometer)
+- [x] Stack local completa (`docker-compose.observability.yml`)
+- [x] Dashboards Grafana provisionados (Golden Signals, JVM Backend, SLI/SLO)
+- [x] Alertas Grafana provisionados (latência, erros, JVM heap, HikariCP)
+- [x] Config de produção documentada (`application-prod.properties`)
+- [x] OTel Collector sidecar para EB (`docker-compose.eb.yml`)
+
+### Próximos passos ⏳
+- [ ] **Passo 10**: Criar conta Grafana Cloud e obter `OTLP_HTTP_ENDPOINT` + `OTLP_AUTH_HEADER`
+- [ ] **Passo 11**: Adicionar `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER` no Elastic Beanstalk
+- [ ] **Passo 12**: Validar dados chegando (Explore → Mimir, Loki, Tempo)
+- [ ] **Passo 13**: Criar SLOs no Grafana Cloud SLO plugin (disponibilidade + latência P95)
+- [ ] **Passo 14**: Implementar `src/tracing.ts` no repo Angular + ativar sidecar no EB
