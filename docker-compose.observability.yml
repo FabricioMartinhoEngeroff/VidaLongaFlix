@@ -1,0 +1,106 @@
+# Stack de Observabilidade — VidaLongaFlix
+# Uso: docker compose -f docker-compose.observability.yml up -d
+#
+# Fluxo de dados:
+#   App (Spring Boot / Angular)
+#     → OTel Collector (4317 gRPC | 4318 HTTP)
+#       → Mimir  (métricas)
+#       → Loki   (logs)
+#       → Tempo  (traces)
+#         → Grafana (visualização em localhost:3000)
+
+services:
+
+  # ─── COLETOR CENTRAL ────────────────────────────────────────────────────────
+  # Recebe tudo da app, processa e distribui para cada storage
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.101.0
+    container_name: otel-collector
+    volumes:
+      - ./observability/otel-collector-config.yaml:/etc/otel/config.yaml
+    command: ["--config=/etc/otel/config.yaml"]
+    ports:
+      - "4317:4317"   # gRPC  — Spring Boot Java Agent
+      - "4318:4318"   # HTTP  — Angular (browser não suporta gRPC)
+    depends_on:
+      - mimir
+      - loki
+      - tempo
+    networks:
+      - observability
+
+  # ─── MÉTRICAS (Prometheus-compatible) ───────────────────────────────────────
+  # Mimir: versão escalável do Prometheus — armazena séries temporais
+  mimir:
+    image: grafana/mimir:2.13.0
+    container_name: mimir
+    volumes:
+      - ./observability/mimir-demo.yaml:/etc/mimir/demo.yaml
+      - mimir-data:/tmp/mimir
+    command: ["--config.file=/etc/mimir/demo.yaml"]
+    ports:
+      - "9009:9009"
+    networks:
+      - observability
+
+  # ─── LOGS ───────────────────────────────────────────────────────────────────
+  # Loki: armazena e indexa logs — não indexa o conteúdo, só os labels
+  # Isso o torna muito mais barato que Elasticsearch
+  loki:
+    image: grafana/loki:3.1.0
+    container_name: loki
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    ports:
+      - "3100:3100"
+    networks:
+      - observability
+
+  # ─── TRACES ─────────────────────────────────────────────────────────────────
+  # Tempo: armazena traces distribuídos — correlaciona com logs via trace_id
+  tempo:
+    image: grafana/tempo:2.5.0
+    container_name: tempo
+    volumes:
+      - ./observability/tempo.yaml:/etc/tempo/tempo.yaml
+      - tempo-data:/var/tempo
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    ports:
+      - "3200:3200"   # HTTP API (Grafana lê daqui)
+    networks:
+      - observability
+
+  # ─── VISUALIZAÇÃO ───────────────────────────────────────────────────────────
+  # Grafana: dashboard, alertas, Explorer — acesse em http://localhost:3000
+  # Datasources já pré-configurados via provisioning (pasta grafana/)
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - mimir
+      - loki
+      - tempo
+    networks:
+      - observability
+
+# ─── REDE INTERNA ─────────────────────────────────────────────────────────────
+# Todos os serviços conversam pelo nome do container (ex: http://loki:3100)
+# Nenhum tráfego interno passa pela internet
+networks:
+  observability:
+    driver: bridge
+
+# ─── VOLUMES PERSISTENTES ─────────────────────────────────────────────────────
+# Dados sobrevivem ao docker compose down (não ao down -v)
+volumes:
+  mimir-data:
+  tempo-data:
+  grafana-data:

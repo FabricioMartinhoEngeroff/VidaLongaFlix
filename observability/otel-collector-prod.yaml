@@ -1,0 +1,61 @@
+# OTel Collector — configuração de PRODUÇÃO
+# Diferença do local: exporta para Grafana Cloud (não para Mimir/Loki/Tempo locais)
+#
+# Variáveis de ambiente necessárias no container:
+#   GRAFANA_OTLP_ENDPOINT  → ex: https://otlp-gateway-prod-sa-east-1.grafana.net/otlp
+#   GRAFANA_AUTH_HEADER    → base64(instanceId:apiToken)
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317   # Spring Boot (rede interna do compose)
+      http:
+        endpoint: 0.0.0.0:4318   # Angular (browser via internet)
+        cors:
+          allowed_origins:
+            - "https://vidalongaflix.com.br"
+            - "https://*.cloudfront.net"
+          allowed_headers: ["*"]
+
+processors:
+  batch:
+    timeout: 5s
+    send_batch_size: 1000
+
+  memory_limiter:
+    limit_mib: 128          # limite menor em produção — EB tem menos RAM disponível
+    check_interval: 1s
+
+  # Filtra apenas WARN e ERROR nos logs — reduz custo de ingestão no Grafana Cloud
+  filter/logs_prod:
+    logs:
+      exclude:
+        match_type: strict
+        severity_texts: ["TRACE", "DEBUG", "INFO"]
+
+exporters:
+  # Único exporter — tudo vai para Grafana Cloud via OTLP
+  otlphttp/grafana:
+    endpoint: ${env:GRAFANA_OTLP_ENDPOINT}
+    headers:
+      authorization: "Basic ${env:GRAFANA_AUTH_HEADER}"
+    tls:
+      insecure: false        # produção usa TLS obrigatoriamente
+
+service:
+  pipelines:
+    traces:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch]
+      exporters:  [otlphttp/grafana]
+
+    metrics:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch]
+      exporters:  [otlphttp/grafana]
+
+    logs:
+      receivers:  [otlp]
+      processors: [memory_limiter, filter/logs_prod, batch]
+      exporters:  [otlphttp/grafana]

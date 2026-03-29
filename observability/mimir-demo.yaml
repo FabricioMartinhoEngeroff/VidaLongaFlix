@@ -1,0 +1,52 @@
+# Grafana Mimir — configuração de laboratório (NÃO usar em produção)
+#
+# Mimir é o Prometheus escalável do Grafana.
+# Diferença do Prometheus puro:
+#   - Suporta multitenancy (múltiplos times com dados isolados)
+#   - Modo distribuído para alta carga
+#   - Compactação e retenção de longo prazo nativa
+#
+# Aqui usamos modo monolítico (tudo em um processo) — ideal para dev/lab
+
+multitenancy_enabled: false   # em produção pode separar por time/serviço
+
+blocks_storage:
+  backend: filesystem           # em produção: S3, GCS ou MinIO
+  bucket_store:
+    sync_dir: /tmp/mimir/tsdb-sync
+  filesystem:
+    dir: /tmp/mimir/data/tsdb
+  tsdb:
+    dir: /tmp/mimir/tsdb
+
+compactor:
+  data_dir: /tmp/mimir/compactor
+  sharding_ring:
+    kvstore:
+      store: memberlist
+
+distributor:
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: memberlist
+
+ingester:
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: memberlist
+    replication_factor: 1       # em produção: 3 (tolerância a falhas)
+
+ruler_storage:
+  backend: filesystem
+  filesystem:
+    dir: /tmp/mimir/rules
+
+server:
+  http_listen_port: 9009
+  log_level: warn               # warn em lab — em produção: error
+
+store_gateway:
+  sharding_ring:
+    replication_factor: 1

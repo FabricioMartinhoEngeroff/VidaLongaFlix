@@ -1,0 +1,38 @@
+# Grafana Tempo — armazenamento de traces distribuídos
+#
+# O Tempo recebe spans do OTel Collector e os armazena.
+# Diferente do Jaeger/Zipkin, o Tempo é baseado em object storage —
+# não indexa os dados por conteúdo, por isso é muito barato de escalar.
+# A busca é feita pelo trace_id (que o Grafana passa via link do Loki ou alerta).
+
+server:
+  http_listen_port: 3200        # Grafana lê traces daqui
+
+# Recebe traces do OTel Collector via OTLP gRPC (rede Docker interna)
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+
+# Quanto tempo um trace fica em memória antes de ser salvo no disco
+ingester:
+  trace_idle_period: 10s
+  max_block_bytes: 1_000_000
+  max_block_duration: 5m
+
+# Compacta blocos antigos para economizar espaço
+compactor:
+  compaction:
+    compaction_window: 1h
+    block_retention: 336h       # mantém traces por 14 dias
+
+# Armazenamento local para laboratório (em produção: S3 ou GCS)
+storage:
+  trace:
+    backend: local
+    local:
+      path: /var/tempo/blocks
+    wal:
+      path: /var/tempo/wal

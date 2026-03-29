@@ -1,0 +1,82 @@
+# OpenTelemetry Collector — VidaLongaFlix
+#
+# Estrutura de um pipeline OTel:
+#   receivers  → quem envia dados para o Collector
+#   processors → o que fazer com os dados antes de exportar
+#   exporters  → para onde enviar os dados processados
+#   service    → monta os pipelines conectando os três acima
+
+# ─── RECEIVERS ────────────────────────────────────────────────────────────────
+# O Collector aceita dados em dois protocolos OTLP:
+#   gRPC (4317) — Spring Boot Java Agent (mais eficiente, binário)
+#   HTTP (4318) — Angular no browser (o browser não suporta gRPC nativo)
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "http://localhost:4200"   # Angular dev server
+            - "https://vidalongaflix.com.br"
+
+# ─── PROCESSORS ───────────────────────────────────────────────────────────────
+# batch: agrupa dados antes de exportar — reduz número de chamadas de rede
+# memory_limiter: evita que o Collector consuma RAM demais e derrube o host
+processors:
+  batch:
+    timeout: 5s
+    send_batch_size: 1000
+
+  memory_limiter:
+    limit_mib: 256
+    check_interval: 1s
+
+# ─── EXPORTERS ────────────────────────────────────────────────────────────────
+exporters:
+
+  # Métricas → Mimir (via Prometheus Remote Write)
+  prometheusremotewrite:
+    endpoint: http://mimir:9009/api/v1/push
+    tls:
+      insecure: true
+
+  # Traces → Tempo (via OTLP gRPC interno)
+  otlp/tempo:
+    endpoint: http://tempo:4317
+    tls:
+      insecure: true
+
+  # Logs → Loki
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    tls:
+      insecure: true
+    default_labels_enabled:
+      exporter: false
+      job: true        # agrupa logs por serviço no Grafana
+      instance: true
+      level: true      # permite filtrar por ERROR/WARN no Grafana
+
+# ─── SERVICE (PIPELINES) ──────────────────────────────────────────────────────
+# Cada pilar (traces, metrics, logs) tem seu próprio pipeline independente
+# Se o Loki cair, traces e métricas continuam funcionando normalmente
+service:
+  pipelines:
+
+    traces:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch]
+      exporters:  [otlp/tempo]
+
+    metrics:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch]
+      exporters:  [prometheusremotewrite]
+
+    logs:
+      receivers:  [otlp]
+      processors: [memory_limiter, batch]
+      exporters:  [loki]

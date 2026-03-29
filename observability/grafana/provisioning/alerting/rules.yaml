@@ -1,0 +1,317 @@
+apiVersion: 1
+
+groups:
+
+  # ─── LATÊNCIA ──────────────────────────────────────────────────────────────
+  # "Quanto tempo a API demora?" — impacto direto no usuário
+  - orgId: 1
+    name: Latencia
+    folder: VidaLongaFlix
+    interval: 1m
+    rules:
+
+      - uid: vlf-latency-p95-warn
+        title: "Latência P95 > 500ms"
+        condition: C
+        for: 2m    # precisa estar ruim por 2 minutos — evita falsos positivos
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: "histogram_quantile(0.95, sum by(le) (rate(http_server_request_duration_seconds_bucket[5m])))"
+              instant: true
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: gt, params: [0.5] }
+                  operator: { type: and }
+                  query: { params: [B] }
+                  reducer: { type: last, params: [] }
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Error
+        annotations:
+          summary: "P95 acima de 500ms — usuários sentindo lentidão"
+          description: "P95 atual: {{ $values.B.Value }}s. Abrir Grafana Tempo e buscar traces lentos: { .service.name = \"vidalongaflix-backend\" && duration > 500ms }"
+          runbook_url: "http://localhost:3000/d/golden-signals-vlf"
+        labels:
+          severity: warning
+          team: backend
+
+      - uid: vlf-latency-p95-critical
+        title: "Latência P95 > 1s (CRÍTICO)"
+        condition: C
+        for: 2m
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: "histogram_quantile(0.95, sum by(le) (rate(http_server_request_duration_seconds_bucket[5m])))"
+              instant: true
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: gt, params: [1.0] }
+                  operator: { type: and }
+                  query: { params: [B] }
+                  reducer: { type: last, params: [] }
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Error
+        annotations:
+          summary: "P95 acima de 1 segundo — abandono iminente"
+          description: "P95 atual: {{ $values.B.Value }}s. Convocar war room. Verificar HikariCP e traces no Tempo."
+          runbook_url: "http://localhost:3000/d/golden-signals-vlf"
+        labels:
+          severity: critical
+          team: backend
+
+  # ─── ERROS ─────────────────────────────────────────────────────────────────
+  # "O sistema está falhando?" — prioridade 1 se afetar login
+  - orgId: 1
+    name: Erros
+    folder: VidaLongaFlix
+    interval: 1m
+    rules:
+
+      - uid: vlf-error-rate-critical
+        title: "Taxa de Erros 5xx > 1%"
+        condition: C
+        for: 1m    # erros são urgentes — apenas 1 minuto de tolerância
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: "sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[5m])) / sum(rate(http_server_request_duration_seconds_count[5m]))"
+              instant: true
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: gt, params: [0.01] }
+                  operator: { type: and }
+                  query: { params: [B] }
+                  reducer: { type: last, params: [] }
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Error
+        annotations:
+          summary: "Mais de 1% das requisições retornando erro 5xx"
+          description: "Taxa atual: {{ $values.B.Value | humanizePercentage }}. Verificar logs no Loki: {job=\"vidalongaflix-backend\"} |= \"ERROR\""
+          runbook_url: "http://localhost:3000/d/golden-signals-vlf"
+        labels:
+          severity: critical
+          team: backend
+
+      - uid: vlf-login-error-critical
+        title: "Erro no Login (CRÍTICO — Prioridade 1)"
+        condition: C
+        for: 1m
+        data:
+          - refId: A
+            relativeTimeRange: { from: 60, to: 0 }
+            datasourceUid: prometheus
+            model:
+              # login com erro 5xx — impede acesso ao sistema = zero receita
+              expr: "sum(rate(http_server_request_duration_seconds_count{http_route=~\".*auth.*\", http_response_status_code=~\"5..\"}[1m]))"
+              instant: true
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: gt, params: [0] }
+                  operator: { type: and }
+                  query: { params: [B] }
+                  reducer: { type: last, params: [] }
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Error
+        annotations:
+          summary: "Erro no endpoint de autenticação — usuários não conseguem fazer login"
+          description: "Qualquer erro 5xx em /auth/* é prioridade máxima. Verificar logs e traces imediatamente."
+          runbook_url: "http://localhost:3000/d/golden-signals-vlf"
+        labels:
+          severity: critical
+          team: backend
+          priority: "P1"
+
+  # ─── SATURAÇÃO ─────────────────────────────────────────────────────────────
+  # "Os recursos estão acabando?" — detectar antes do colapso
+  - orgId: 1
+    name: Saturacao
+    folder: VidaLongaFlix
+    interval: 1m
+    rules:
+
+      - uid: vlf-jvm-heap-warn
+        title: "JVM Heap > 80%"
+        condition: C
+        for: 5m    # heap flutuante é normal — só alerta se persistir 5 minutos
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: "sum(jvm_memory_used_bytes{area=\"heap\"}) / sum(jvm_memory_max_bytes{area=\"heap\"})"
+              instant: true
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: gt, params: [0.8] }
+                  operator: { type: and }
+                  query: { params: [B] }
+                  reducer: { type: last, params: [] }
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Error
+        annotations:
+          summary: "Heap JVM acima de 80% — risco de OutOfMemoryError"
+          description: "Heap atual: {{ $values.B.Value | humanizePercentage }}. Verificar GC no dashboard JVM & Backend."
+          runbook_url: "http://localhost:3000/d/jvm-backend-vlf"
+        labels:
+          severity: warning
+          team: backend
+
+      - uid: vlf-jvm-heap-critical
+        title: "JVM Heap > 90% (CRÍTICO)"
+        condition: C
+        for: 2m
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: "sum(jvm_memory_used_bytes{area=\"heap\"}) / sum(jvm_memory_max_bytes{area=\"heap\"})"
+              instant: true
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: gt, params: [0.9] }
+                  operator: { type: and }
+                  query: { params: [B] }
+                  reducer: { type: last, params: [] }
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Error
+        annotations:
+          summary: "Heap JVM acima de 90% — OutOfMemoryError iminente"
+          description: "Heap atual: {{ $values.B.Value | humanizePercentage }}. Ação imediata: reiniciar com -Xmx maior ou investigar memory leak."
+          runbook_url: "http://localhost:3000/d/jvm-backend-vlf"
+        labels:
+          severity: critical
+          team: backend
+
+      - uid: vlf-hikari-pool-saturated
+        title: "Connection Pool Saturado (HikariCP)"
+        condition: C
+        for: 2m
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              # se conexões pendentes > 0, o pool está cheio e requisições estão esperando
+              expr: "hikaricp_connections_pending"
+              instant: true
+              refId: A
+          - refId: B
+            datasourceUid: __expr__
+            model:
+              type: reduce
+              expression: A
+              reducer: last
+              refId: B
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              type: threshold
+              expression: B
+              conditions:
+                - evaluator: { type: gt, params: [0] }
+                  operator: { type: and }
+                  query: { params: [B] }
+                  reducer: { type: last, params: [] }
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Error
+        annotations:
+          summary: "Pool de conexões ao banco saturado — requisições aguardando"
+          description: "{{ $values.B.Value }} requisições aguardando conexão. Causa provável: query lenta ou pool subdimensionado. Ver HikariCP no dashboard JVM & Backend."
+          runbook_url: "http://localhost:3000/d/jvm-backend-vlf"
+        labels:
+          severity: critical
+          team: backend
