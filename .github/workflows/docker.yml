@@ -83,7 +83,7 @@ jobs:
       # Trivy: scan de vulnerabilidades — banco de dados independente do Scout
       # exit-code 0 = reporta mas não bloqueia (alterar para 1 quando todos os CRITICAL/HIGH estiverem corrigidos)
       - name: Trivy — scan de vulnerabilidades
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
           scan-type: image
