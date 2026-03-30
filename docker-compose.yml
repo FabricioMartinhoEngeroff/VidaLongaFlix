@@ -1,0 +1,52 @@
+# docker-compose para Elastic Beanstalk — Fase 2
+#
+# Substitui o Dockerrun.aws.json quando quiser adicionar o OTel Collector
+# como sidecar para capturar telemetria do frontend Angular.
+#
+# Para ativar no EB:
+#   1. Renomear para docker-compose.yml
+#   2. Fazer deploy normalmente (eb deploy ou GitHub Actions)
+#
+# Todas as variáveis de ambiente abaixo devem existir no EB:
+#   OTLP_HTTP_ENDPOINT, OTLP_AUTH_HEADER, GRAFANA_OTLP_ENDPOINT,
+#   GRAFANA_AUTH_HEADER, DB_URL, DB_USERNAME, DB_PASSWORD, JWT_SECRET,
+#   ADMIN_EMAIL, ADMIN_PASSWORD, CORS_ALLOWED_ORIGINS
+
+services:
+
+  # ─── BACKEND ────────────────────────────────────────────────────────────────
+  app:
+    image: fabricioengeroff/vidalongaflix:latest
+    ports:
+      - "80:8090"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      # OTel: aponta para o Collector sidecar (rede interna do compose)
+      OTLP_HTTP_ENDPOINT: http://otel-collector:4318
+      # Banco, JWT, CORS, Admin — injetados pelo EB
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+    depends_on:
+      - otel-collector
+    restart: unless-stopped
+
+  # ─── COLETOR (sidecar) ──────────────────────────────────────────────────────
+  # Recebe do backend (interno) e do frontend (internet)
+  # Encaminha tudo para o Grafana Cloud
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.101.0
+    volumes:
+      - ./observability/otel-collector-prod.yaml:/etc/otel/config.yaml
+    command: ["--config=/etc/otel/config.yaml"]
+    ports:
+      - "4318:4318"        # exposto para o frontend Angular (internet)
+      # 4317 só interno — backend acessa via rede compose
+    environment:
+      GRAFANA_OTLP_ENDPOINT: ${GRAFANA_OTLP_ENDPOINT}
+      GRAFANA_AUTH_HEADER: ${GRAFANA_AUTH_HEADER}
+    restart: unless-stopped
