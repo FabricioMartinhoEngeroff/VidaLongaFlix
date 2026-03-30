@@ -27,7 +27,7 @@ jobs:
       contents: read
 
     env:
-      IMAGE_NAME: ${{ inputs.image != '' && inputs.image || (secrets.DOCKERHUB_USERNAME != '' && format('{0}/vidalongaflix', secrets.DOCKERHUB_USERNAME) || 'vidalongaflix') }}
+      IMAGE_NAME: ${{ inputs.image != '' && inputs.image || format('{0}/vidalongaflix', secrets.DOCKERHUB_USERNAME) }}
 
     steps:
       - name: Checkout do código
@@ -71,7 +71,7 @@ jobs:
       # Docker Scout: quickview — resumo de Critical/High/Medium/Low por camada
       # Requer login no Docker Hub (secrets opcionais — não falha se ausentes)
       - name: Docker Scout — quickview
-        if: ${{ secrets.DOCKERHUB_TOKEN != '' }}
+        if: ${{ inputs.push }}
         uses: docker/scout-action@v1.17.0
         with:
           command: quickview
