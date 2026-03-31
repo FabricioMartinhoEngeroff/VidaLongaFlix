@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Logback — VidaLongaFlix
+  Dois appenders:
+    1. Console  → saída padrão (visível no terminal e nos logs do container)
+    2. OpenTelemetry → envia logs ao OTel Collector via SDK, que os exporta
+       ao Grafana Loki (ou Grafana Cloud) para busca e correlação com traces
+-->
+<configuration>
+
+    <!-- ─── CONSOLE ──────────────────────────────────────────────────────────── -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ─── OPENTELEMETRY → OTLP → LOKI ─────────────────────────────────────── -->
+    <!--
+      OpenTelemetryAppender bridges Logback → OTel SdkLoggerProvider.
+      O SdkLoggerProvider (criado pelo OpenTelemetryLoggingAutoConfiguration)
+      usa o BatchLogRecordProcessor → OtlpHttpLogRecordExporter para enviar
+      ao endpoint configurado em management.otlp.logging.endpoint.
+    -->
+    <appender name="OpenTelemetry"
+              class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+        <!-- Captura os atributos de código (arquivo, linha, método) nos spans -->
+        <captureCodeAttributes>true</captureCodeAttributes>
+        <!-- Inclui argumentos do log (para mensagens parametrizadas: "user {}" → "user admin") -->
+        <captureArguments>true</captureArguments>
+    </appender>
+
+    <!-- ─── ROOT LOGGER ──────────────────────────────────────────────────────── -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="OpenTelemetry"/>
+    </root>
+
+    <!-- ─── PACOTES INTERNOS ─────────────────────────────────────────────────── -->
+    <logger name="com.dvFabricio" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="OpenTelemetry"/>
+    </logger>
+
+</configuration>

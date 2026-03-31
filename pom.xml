@@ -142,16 +142,32 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
 
+        <!-- Push de métricas via OTLP → habilita management.otlp.metrics.export.* -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-otlp</artifactId>
+        </dependency>
+
         <!-- Ponte Micrometer Tracing → OpenTelemetry (traduz spans do Spring para OTel) -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-otel</artifactId>
         </dependency>
 
-        <!-- Exportador OTLP: envia métricas, traces e logs ao OTel Collector via HTTP -->
+        <!-- Exportador OTLP: envia traces e logs ao OTel Collector via HTTP -->
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-exporter-otlp</artifactId>
+        </dependency>
+
+        <!-- Appender Logback → OTel SDK: liga logs do Logback ao SdkLoggerProvider -->
+        <!-- Versão alinhada com opentelemetry-api 1.49.0 (Spring Boot 3.5.12 BOM) -->
+        <!-- Sem isso, OtlpHttpLogRecordExporter existe mas não recebe nenhum log -->
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+            <version>2.15.0-alpha</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- SpringDoc OpenAPI -->

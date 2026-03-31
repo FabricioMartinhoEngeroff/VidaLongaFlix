@@ -976,23 +976,165 @@ Esta é a distinção mais importante e mais ignorada em operações:
 
 ## Fase de Produção — Grafana Cloud + AWS Elastic Beanstalk
 
-### Estado atual após push na `main` (2026-03-29)
+### Estado atual — sessão 2026-03-29 (executado localmente)
 
-| Passo | Status | O que foi feito |
+| Passo | Status | O que foi feito / O que falta |
 |---|---|---|
-| 1 — Stack local | ✅ | `docker-compose.observability.yml` com Mimir, Loki, Tempo, Grafana |
-| 2 — OTel Collector (local) | ✅ | `observability/otel-collector-config.yaml` |
-| 3 — Backend instrumentado | ✅ | Micrometer OTLP + `opentelemetry-exporter-otlp` no `pom.xml` |
-| 4 — Frontend documentado | ✅ | `src/tracing.ts` planejado — a implementar no repo Angular |
-| 5 — Datasources Grafana | ✅ | `observability/grafana/provisioning/datasources/datasources.yaml` |
-| 6 — Dashboards provisionados | ✅ | `golden-signals.json`, `jvm-backend.json`, `sli-disponibilidade.json` |
-| 7 — Alertas provisionados | ✅ | `observability/grafana/provisioning/alerting/rules.yaml` |
-| 8 — Config prod (EB sidecar) | ✅ | `docker-compose.eb.yml` + `otel-collector-prod.yaml` |
-| 9 — application-prod.properties | ✅ | OTLP configurado via `${OTLP_HTTP_ENDPOINT}` e `${OTLP_AUTH_HEADER}` |
-| **10 — Grafana Cloud** | ⏳ | **Próximo: criar conta e obter credenciais** |
-| **11 — Env vars no EB** | ⏳ | **Próximo: configurar no console AWS** |
-| **12 — Validar dados** | ⏳ | Confirmar que traces/métricas/logs chegam |
-| **13 — SLIs e SLOs formais** | ⏳ | Definir no Grafana Cloud |
+| 1 — Stack local subindo | ✅ | `docker compose -f docker-compose.observability.yml up -d` — todos os 5 containers `Up` |
+| 2 — OTel Collector ouvindo | ✅ | gRPC:4317 e HTTP:4318 ativos, sem erros |
+| 3 — Métricas → Mimir | ✅ | **Corrigido nesta sessão**: adicionado `micrometer-registry-otlp` ao `pom.xml` — 75 séries chegando (JVM, HikariCP, HTTP) |
+| 4 — Traces → Tempo | ✅ | Funcionando antes desta sessão — spans de todos os endpoints visíveis no Tempo |
+| 5 — Logs → Loki | ⚠️ | **Parcialmente corrigido**: adicionado `opentelemetry-logback-appender-1.0:2.15.0-alpha` + criado `logback-spring.xml` — **falta validar** se logs chegam ao Loki (restart interrompido) |
+| 6 — Grafana local | ✅ | Datasources provisionados automaticamente (Mimir, Loki, Tempo) |
+| 7 — Dashboards | ✅ | `golden-signals.json`, `jvm-backend.json`, `sli-disponibilidade.json` carregados |
+| 8 — Alertas | ⚠️ | Provisionados mas com **nome errado de métrica**: OTLP usa `_milliseconds`, regras usam `_seconds` — ver fix abaixo |
+| 9 — Config prod | ✅ | `application-prod.properties` + `docker-compose.eb.yml` prontos |
+| **10 — Grafana Cloud** | ⏳ | Criar conta + obter endpoint OTLP + gerar token |
+| **11 — Env vars no EB** | ⏳ | Adicionar `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER` |
+| **12 — Validar prod** | ⏳ | Confirmar dados chegando no Grafana Cloud |
+| **13 — SLIs/SLOs formais** | ⏳ | Criar no Grafana Cloud SLO plugin |
+| **14 — Frontend Angular** | ⏳ | Implementar `tracing.ts` + ativar sidecar no EB |
+
+---
+
+### Correções aplicadas nesta sessão — detalhe técnico
+
+#### Correção 1 — Métricas via OTLP (pom.xml)
+
+**Problema:** `management.otlp.metrics.export.url` exige `micrometer-registry-otlp` — sem ele, métricas nunca chegam ao Mimir via push OTLP.
+
+**Fix:** adicionado ao `pom.xml`:
+```xml
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-otlp</artifactId>
+</dependency>
+```
+
+> O `micrometer-registry-prometheus` (já existente) serve apenas para o endpoint `/actuator/prometheus` (scrape). O push OTLP requer o `micrometer-registry-otlp`.
+
+#### Correção 2 — Logs via OTLP (pom.xml + logback-spring.xml)
+
+**Problema raiz:** dois fatores combinados:
+1. `opentelemetry-logback-appender-1.0` não estava no `pom.xml`
+2. Spring Boot 3.5 cria o `SdkLoggerProvider` + `OtlpHttpLogRecordExporter` automaticamente (via `OpenTelemetryLoggingAutoConfiguration` + `OtlpLoggingAutoConfiguration`) mas **NÃO instala o Logback appender automaticamente** — requer `logback-spring.xml` explícito
+
+**Fix — pom.xml:**
+```xml
+<!-- Versão alinhada com opentelemetry-api 1.49.0 (Spring Boot 3.5.12 BOM) -->
+<dependency>
+    <groupId>io.opentelemetry.instrumentation</groupId>
+    <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+    <version>2.15.0-alpha</version>
+    <scope>runtime</scope>
+</dependency>
+```
+
+**Fix — `src/main/resources/logback-spring.xml`** (arquivo criado):
+```xml
+<appender name="OpenTelemetry"
+          class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+    <captureCodeAttributes>true</captureCodeAttributes>
+    <captureArguments>true</captureArguments>
+</appender>
+<root level="INFO">
+    <appender-ref ref="CONSOLE"/>
+    <appender-ref ref="OpenTelemetry"/>
+</root>
+```
+
+**Status:** adicionado e compilando — falta validar que logs chegam ao Loki (restart foi interrompido).
+
+#### Correção 3 — application.properties (pendente reverter)
+
+Para diagnóstico foi adicionado `conditions` aos endpoints expostos:
+```properties
+management.endpoints.web.exposure.include=health,info,metrics,prometheus,conditions
+```
+**Reverter para:** `health,info,metrics,prometheus` antes do próximo deploy.
+
+#### Bug identificado nos alertas — nomes de métricas errados
+
+As regras em `observability/grafana/provisioning/alerting/rules.yaml` usam nomes no formato Prometheus (`_seconds`), mas o exporter OTLP (`micrometer-registry-otlp`) usa `_milliseconds`.
+
+**Exemplo — rules.yaml atual (errado):**
+```yaml
+expr: "histogram_quantile(0.95, sum by(le) (rate(http_server_request_duration_seconds_bucket[5m])))"
+```
+
+**Correto para OTLP:**
+```yaml
+expr: "histogram_quantile(0.95, sum by(le) (rate(http_server_requests_milliseconds_bucket[5m]))) "
+```
+
+**Mapeamento completo de nomes:**
+| Regra | Nome errado (Prometheus scrape) | Nome correto (OTLP push) |
+|---|---|---|
+| Latência P95 | `http_server_request_duration_seconds_bucket` | `http_server_requests_milliseconds_bucket` |
+| Taxa de erros | `http_server_request_duration_seconds_count{status=~"5.."}` | `http_server_requests_milliseconds_count{http_response_status_code=~"5.."}` |
+| Total req. | `http_server_request_duration_seconds_count` | `http_server_requests_milliseconds_count` |
+| Rota de login | `http_route=~".*auth.*"` | `uri=~".*auth.*"` (label diferente no OTLP) |
+
+**Ação necessária:** corrigir `rules.yaml` + `golden-signals.json` + `jvm-backend.json` nas queries HTTP.
+
+---
+
+### Próxima sessão — o que fazer em ordem
+
+**1. Validar logs no Loki (5 min)**
+```bash
+# Subir a stack (se não estiver rodando)
+docker compose -f docker-compose.observability.yml up -d
+
+# Subir o backend
+./mvnw spring-boot:run -DskipTests &
+
+# Aguardar UP e gerar tráfego
+curl http://localhost:8090/api/videos
+curl -X POST http://localhost:8090/api/auth/login -H "Content-Type: application/json" \
+  -d '{"email":"admin@vidalongaflix.com","password":"Admin@123456"}'
+
+# Aguardar 15s e verificar Loki
+sleep 15
+curl -s 'http://localhost:3100/loki/api/v1/labels?since=1h'
+# Esperado: {"status":"success","data":["service_name","severity","...etc"]}
+```
+
+**2. Corrigir nomes de métricas nos alertas (15 min)**
+
+Editar `observability/grafana/provisioning/alerting/rules.yaml` trocando os nomes conforme tabela acima.
+
+**3. Corrigir nomes de métricas nos dashboards (15 min)**
+
+Nos JSONs `golden-signals.json` e `jvm-backend.json`, substituir `http_server_request_duration_seconds` por `http_server_requests_milliseconds`.
+
+**4. Reverter `conditions` endpoint (1 min)**
+
+Em `application.properties`:
+```properties
+management.endpoints.web.exposure.include=health,info,metrics,prometheus
+```
+
+**5. Abrir Grafana local e validar visualmente (10 min)**
+
+Acessar `http://localhost:3000` e confirmar:
+- Dashboard Golden Signals mostrando latência e throughput
+- Dashboard JVM Backend mostrando heap e HikariCP
+- Dashboard SLI/SLO mostrando disponibilidade
+- Explore → Loki → logs chegando
+- Explore → Tempo → traces com correlação de logs
+
+**6. Fazer commit com as correções (2 min)**
+```bash
+git add pom.xml src/main/resources/logback-spring.xml src/main/resources/application.properties \
+        observability/grafana/provisioning/alerting/rules.yaml \
+        observability/grafana/provisioning/dashboards/
+git commit -m "fix(observability): add missing OTLP deps and fix metric names for OTLP push format"
+```
+
+**7. Passos 10–14 (produção — requer conta Grafana Cloud)**
+
+Ver seção "Passo 10" abaixo para o roteiro completo.
 
 ---
 
@@ -1379,10 +1521,106 @@ Além dos Golden Signals, acompanhar a saúde da automação em si:
 - [x] Alertas Grafana provisionados (latência, erros, JVM heap, HikariCP)
 - [x] Config de produção documentada (`application-prod.properties`)
 - [x] OTel Collector sidecar para EB (`docker-compose.eb.yml`)
+- [x] **Passo 10**: Conta Grafana Cloud criada (stack `vidalongaflix.grafana.net`)
+  - Endpoint: `https://otlp-gateway-prod-sa-east-1.grafana.net/otlp`
+  - Instance ID: `1577558`
+  - Token criado: `vidalongaflix-otel-prod` (scopes: metrics/logs/traces write, no expiry)
+- [x] **Passo 11 parcial**: Vars adicionadas no Elastic Beanstalk + upgrade de instância
+  - `GRAFANA_OTLP_ENDPOINT` e `GRAFANA_AUTH_HEADER` adicionados ao EB
+  - Instância upgradeada de `t3.micro` (1 GB) → `t3.small` (2 GB) para suportar sidecar
+  - `docker-compose.yml` criado (cópia de `docker-compose.eb.yml`) e commitado
+  - `docker.yml` corrigido: expressão `secrets.*` removida de `if` conditions (incompatível com `workflow_call`)
+- [x] **Passo 14**: `src/tracing.ts` no repo Angular
+  - `src/tracing.ts` criado com WebTracerProvider + OTLPTraceExporter + BatchSpanProcessor + auto-instrumentation fetch/XHR
+  - `src/telemetry.ts` mantido como re-export (`import './tracing'`) para não quebrar referências antigas
+  - `src/main.ts` atualizado para `import './tracing'`
+  - Build Angular: `npm run build` — compilou sem erros
+
+### Correções aplicadas nesta sessão (2026-03-31)
+
+- [x] `application.properties` — removido `conditions` de `management.endpoints.web.exposure.include`
+- [x] `rules.yaml` — corrigidos nomes de métricas OTLP (`micrometer-registry-otlp` exporta em `_milliseconds`, não `_seconds`):
+  - `http_server_request_duration_seconds_bucket` → `http_server_requests_milliseconds_bucket`
+  - `http_server_request_duration_seconds_count` → `http_server_requests_milliseconds_count`
+  - Thresholds de latência: `0.5` → `500` ms e `1.0` → `1000` ms
+  - Label de rota: `http_route` → `uri` (label correto no OTLP push do Micrometer)
 
 ### Próximos passos ⏳
-- [ ] **Passo 10**: Criar conta Grafana Cloud e obter `OTLP_HTTP_ENDPOINT` + `OTLP_AUTH_HEADER`
-- [ ] **Passo 11**: Adicionar `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER` no Elastic Beanstalk
-- [ ] **Passo 12**: Validar dados chegando (Explore → Mimir, Loki, Tempo)
-- [ ] **Passo 13**: Criar SLOs no Grafana Cloud SLO plugin (disponibilidade + latência P95)
-- [ ] **Passo 14**: Implementar `src/tracing.ts` no repo Angular + ativar sidecar no EB
+
+#### Passo 11 — Completar configuração do Elastic Beanstalk 🔴
+
+O app em produção crasha no startup com `PlaceholderResolutionException: Could not resolve placeholder 'OTLP_HTTP_ENDPOINT'` porque o EB foi configurado com nomes errados.
+
+**Ação**: No EB → Configuration → Software → Environment properties, adicionar:
+
+| Variável | Valor |
+|---|---|
+| `OTLP_HTTP_ENDPOINT` | `https://otlp-gateway-prod-sa-east-1.grafana.net/otlp` |
+| `OTLP_AUTH_HEADER` | `<base64(1577558:glc_TOKEN)>` (mesmo valor de `GRAFANA_AUTH_HEADER`) |
+
+> `GRAFANA_OTLP_ENDPOINT` e `GRAFANA_AUTH_HEADER` são usadas apenas pelo container `otel-collector`. O Spring Boot usa `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER`.
+
+---
+
+#### Passo 12 — Validar dados no Grafana Cloud ⏳
+
+Após adicionar as variáveis do Passo 11 e o EB reiniciar:
+
+**12.1 — Métricas (Mimir)**
+```promql
+# Explore → Data Source: Grafana Mimir
+http_server_requests_milliseconds_count{job="NutriLongaVidaFlix"}
+```
+
+**12.2 — Traces (Tempo)**
+```
+# Explore → Data Source: Grafana Tempo → TraceQL
+{ .service.name = "NutriLongaVidaFlix" }
+```
+
+**12.3 — Logs (Loki)**
+```logql
+# Explore → Data Source: Grafana Loki
+{service_name="NutriLongaVidaFlix"} |= "ERROR"
+```
+
+**12.4 — Importar dashboards**
+1. Grafana Cloud → Dashboards → Import
+2. Importar os JSONs de `observability/grafana/provisioning/dashboards/`
+3. Ajustar datasource para apontar ao Mimir/Loki/Tempo do Grafana Cloud
+
+---
+
+#### Passo 13 — Criar SLOs no Grafana Cloud ⏳
+
+O Grafana Cloud free tier inclui o **SLO plugin**. Criar dois SLOs:
+
+**SLO 1 — Disponibilidade (99.5%)**
+
+No Grafana Cloud → Alerting → SLOs → Create SLO:
+```
+Name: vidalongaflix-disponibilidade
+
+Good events:
+  sum(rate(http_server_requests_milliseconds_count{http_response_status_code=~"2..",job="NutriLongaVidaFlix"}[5m]))
+
+Total events:
+  sum(rate(http_server_requests_milliseconds_count{job="NutriLongaVidaFlix"}[5m]))
+
+Objective: 99.5% — Rolling window: 30 days
+```
+
+**SLO 2 — Latência P95 < 500ms (99.5%)**
+```
+Name: vidalongaflix-latencia-p95
+
+Good events (requests abaixo de 500ms):
+  sum(rate(http_server_requests_milliseconds_bucket{le="500",job="NutriLongaVidaFlix"}[5m]))
+
+Total events:
+  sum(rate(http_server_requests_milliseconds_count{job="NutriLongaVidaFlix"}[5m]))
+
+Objective: 99.5% — Rolling window: 30 days
+```
+
+O plugin gera automaticamente alertas de **Burn Rate** (6x, 14x, 36x) e o gauge de Error Budget.
