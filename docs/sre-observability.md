@@ -1624,3 +1624,153 @@ Objective: 99.5% — Rolling window: 30 days
 ```
 
 O plugin gera automaticamente alertas de **Burn Rate** (6x, 14x, 36x) e o gauge de Error Budget.
+
+---
+
+## Ciclo de Observabilidade na Prática — O que foi feito em 2026-03-31
+
+### O conceito: observabilidade é um ciclo, não uma instalação
+
+Um erro comum é tratar observabilidade como um projeto com início e fim: "subimos o Grafana, configuramos os alertas, pronto." Na prática, observabilidade é um **ciclo contínuo de refinamento**:
+
+```
+1. INSTRUMENTAR  → coletar métricas, traces e logs
+2. ALERTAR       → definir thresholds com base nos dados reais
+3. INVESTIGAR    → quando algo dispara, seguir o rastro: alerta → trace → log
+4. CORRIGIR      → resolver o problema com evidência, não com intuição
+5. VALIDAR       → confirmar que o problema foi resolvido pela métrica
+6. INSTITUCIONALIZAR → transformar em SLI/SLO para nunca regredir
+       └──────────────────────────────────────────┘
+                    (reinicia no próximo ciclo)
+```
+
+O que diferencia um time SRE maduro de um time iniciante não é ter a stack instalada — é **ter passado pelo ciclo o suficiente para calibrar os alertas, entender os falsos positivos e saber o que cada métrica realmente significa** no contexto do seu sistema.
+
+---
+
+### Como o conceito foi praticado hoje
+
+#### 1. O alerta quebrado que nunca dispararia
+
+**Conceito:** um alerta com a expressão PromQL errada é **pior que não ter alerta** — dá falsa sensação de segurança. O sistema pode estar degradado por horas enquanto o Grafana mostra tudo verde porque a query não retorna dados.
+
+**O que encontramos:** as regras em `rules.yaml` usavam `http_server_request_duration_seconds_bucket` — o nome da métrica quando o Prometheus **raspa** o endpoint `/actuator/prometheus`. Mas o projeto usa `micrometer-registry-otlp`, que **empurra** métricas via OTLP para o Mimir. O exporter OTLP do Micrometer segue sua própria convenção de nomenclatura: `http_server_requests_milliseconds_bucket`.
+
+**Consequência prática:** os alertas de latência P95 foram provisionados, apareciam no Grafana, mas a expressão retornava `No data` — porque a métrica `http_server_request_duration_seconds_bucket` simplesmente não existia no Mimir. Mesmo que a latência chegasse a 5 segundos, nenhum alerta dispararia.
+
+**O que corrigimos:**
+```yaml
+# Antes — métrica do Prometheus scrape (não existe no OTLP push)
+expr: "histogram_quantile(0.95, sum by(le) (rate(http_server_request_duration_seconds_bucket[5m])))"
+
+# Depois — métrica real do micrometer-registry-otlp
+expr: "histogram_quantile(0.95, sum by(le) (rate(http_server_requests_milliseconds_bucket[5m])))"
+```
+
+E junto com o nome, o threshold também precisou mudar: o valor `0.5` fazia sentido em **segundos**, mas a métrica agora é em **milissegundos** — o threshold correto é `500`.
+
+> **Lição:** sempre validar uma nova regra de alerta no Grafana Explore **antes** de confiar nela. Se a query retorna `No data` com o sistema em pé, a expressão está errada.
+
+---
+
+#### 2. Duas variáveis para a mesma credencial — fonte de bugs
+
+**Conceito:** configuração redundante é dívida técnica. Quando a mesma informação existe em dois lugares com nomes diferentes, qualquer mudança precisa ser feita nos dois lugares. Quando não é, surgem bugs como o que vimos.
+
+**O que encontramos:** o EB foi configurado com `GRAFANA_OTLP_ENDPOINT` e `GRAFANA_AUTH_HEADER` (nomes descritivos do destino), mas o `application-prod.properties` esperava `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER` (nomes genéricos). Resultado: crash no startup com `PlaceholderResolutionException`.
+
+**O que corrigimos:** o `docker-compose.eb.yml` foi atualizado para o container `otel-collector` reutilizar as mesmas variáveis `OTLP_*` que o Spring Boot já usa — eliminando a necessidade de manter dois conjuntos de credenciais idênticas com nomes diferentes.
+
+```yaml
+# Antes — duas variáveis, mesmo valor, nomes diferentes no EB
+otel-collector:
+  environment:
+    GRAFANA_OTLP_ENDPOINT: ${GRAFANA_OTLP_ENDPOINT}
+    GRAFANA_AUTH_HEADER: ${GRAFANA_AUTH_HEADER}
+
+# Depois — uma variável, reutilizada pelos dois containers
+otel-collector:
+  environment:
+    GRAFANA_OTLP_ENDPOINT: ${OTLP_HTTP_ENDPOINT}
+    GRAFANA_AUTH_HEADER: ${OTLP_AUTH_HEADER}
+```
+
+> **Lição:** toda variável de ambiente duplicada é uma oportunidade de erro. Centralizar em um único nome e referenciar a partir daí.
+
+---
+
+#### 3. Endpoint de diagnóstico esquecido em produção
+
+**Conceito:** endpoints de diagnóstico como `/actuator/conditions` são úteis durante o desenvolvimento mas expõem detalhes internos da aplicação (quais beans foram carregados, quais condições foram avaliadas, quais autoconfigurações estão ativas). Em produção, isso é superfície de ataque desnecessária.
+
+**O que encontramos:** durante uma sessão anterior de debug foi adicionado `conditions` à lista de endpoints expostos e esquecido lá.
+
+**O que corrigimos:**
+```properties
+# Antes
+management.endpoints.web.exposure.include=health,info,metrics,prometheus,conditions
+
+# Depois
+management.endpoints.web.exposure.include=health,info,metrics,prometheus
+```
+
+> **Lição:** o ciclo de observabilidade inclui **rever o que foi adicionado temporariamente** e remover antes de ir para produção. Configuração de debug em produção é tão perigosa quanto código de debug.
+
+---
+
+### O que ainda falta para fechar o ciclo
+
+O ciclo de observabilidade do VidaLongaFlix está **instrumentado e configurado**, mas ainda não foi **validado ponta a ponta em produção**. Fechar o ciclo significa confirmar que cada camada está funcionando e que os alertas disparariam em uma falha real.
+
+```
+INSTRUMENTAR    ✅  Spring Boot envia métricas + traces + logs via OTLP
+ALERTAR         ✅  Regras configuradas com expressões corretas (corrigido hoje)
+INVESTIGAR      ⏳  Depende de dados chegando no Grafana Cloud (Passos 11–12)
+CORRIGIR        ⏳  Primeiro incidente real em produção vai calibrar os alertas
+VALIDAR         ⏳  SLOs criados no Grafana Cloud (Passo 13)
+INSTITUCIONALIZAR ⏳ Error Budget monitorado ativamente, deploys bloqueados se esgotado
+```
+
+#### O que falta concretamente
+
+**1. App subindo em produção (desbloqueante)**
+
+Adicionar no EB as variáveis `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER` (ver Passo 11). Sem isso, o Spring Boot crasha antes de enviar qualquer dado.
+
+**2. Confirmar que os três pilares chegam ao Grafana Cloud**
+
+Após o app subir, abrir o Grafana Cloud e confirmar:
+- Mimir: `http_server_requests_milliseconds_count{job="NutriLongaVidaFlix"}` retorna dados
+- Tempo: `{ .service.name = "NutriLongaVidaFlix" }` mostra spans
+- Loki: `{service_name="NutriLongaVidaFlix"}` mostra logs
+
+Se qualquer um dos três estiver vazio, a pipeline está incompleta e não há observabilidade real — apenas infraestrutura instalada.
+
+**3. Criar os SLOs formais (Passo 13)**
+
+Sem SLOs, não há Error Budget. Sem Error Budget, a decisão de fazer deploy é baseada em intuição. Com SLOs:
+- O time sabe objetivamente se o sistema está dentro ou fora da meta
+- Deploys arriscados são bloqueados quando o budget está esgotado
+- A conversa entre Dev, SRE e Produto passa a ser baseada em dados
+
+**4. Simular uma falha e seguir o rastro**
+
+O teste final do ciclo é simular um problema real e verificar se:
+1. O alerta dispara no tempo esperado
+2. O trace mostra o span lento ou com erro
+3. O log correlacionado aparece no Loki com o mesmo `trace_id`
+4. O SLO mostra consumo do Error Budget
+
+```bash
+# Exemplo: forçar latência alta chamando um endpoint lento
+for i in {1..50}; do curl -s http://api.vidalongaflix.com.br/api/videos; done
+
+# Verificar no Grafana Cloud — Explore → Tempo:
+{ .service.name = "NutriLongaVidaFlix" && duration > 500ms }
+```
+
+Se o alerta disparar, o trace aparecer e o log correlacionar — **o ciclo está fechado**.
+O que falta para fechar o ciclo:
+- Status visual de cada etapa (✅ / ⏳)
+- 4 ações concretas em ordem: app subindo → validar 3 pilares → criar SLOs → simular falha real
+- O teste final com curl + query no Grafana para confirmar que o ciclo está realmente fechado

@@ -23,6 +23,8 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       # OTel: aponta para o Collector sidecar (rede interna do compose)
       OTLP_HTTP_ENDPOINT: http://otel-collector:4318
+      # Auth repassado do EB — o Collector ignora o header mas Spring Boot exige a variável
+      OTLP_AUTH_HEADER: ${OTLP_AUTH_HEADER:-}
       # Banco, JWT, CORS, Admin — injetados pelo EB
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
@@ -47,6 +49,6 @@ services:
       - "4318:4318"        # exposto para o frontend Angular (internet)
       # 4317 só interno — backend acessa via rede compose
     environment:
-      GRAFANA_OTLP_ENDPOINT: ${GRAFANA_OTLP_ENDPOINT}
-      GRAFANA_AUTH_HEADER: ${GRAFANA_AUTH_HEADER}
+      GRAFANA_OTLP_ENDPOINT: ${OTLP_ENDPOINT}
+      GRAFANA_AUTH_HEADER: ${OTLP_AUTH_HEADER}
     restart: unless-stopped
