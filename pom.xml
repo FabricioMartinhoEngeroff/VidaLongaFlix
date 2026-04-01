@@ -111,6 +111,11 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <!-- Flyway 10.x: suporte ao PostgreSQL foi extraído para módulo separado -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
 
         <!-- JSON Web Token -->
         <dependency>
