@@ -22,7 +22,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       # OTel: aponta para o Collector sidecar (rede interna do compose)
-      OTLP_HTTP_ENDPOINT: http://otel-collector:4318
+      OTLP_ENDPOINT: http://otel-collector:4318
       # Auth repassado do EB — o Collector ignora o header mas Spring Boot exige a variável
       OTLP_AUTH_HEADER: ${OTLP_AUTH_HEADER:-}
       # Banco, JWT, CORS, Admin — injetados pelo EB
