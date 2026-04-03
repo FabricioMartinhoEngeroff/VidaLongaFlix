@@ -224,6 +224,32 @@ class VideoFlowIntegrationTest extends BaseIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void shouldRejectBlobVideoUrlFromAdminCreate() throws Exception {
+        String invalidJson = String.format(
+                "{\"title\":\"Video inválido\",\"description\":\"Desc\",\"url\":\"blob:https://vidalongaflix.com/123\","
+                        + "\"cover\":\"https://cdn.example.com/capa.jpg\",\"categoryId\":\"%s\"}", categoryId);
+
+        mockMvc.perform(bearer(post("/admin/videos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson), adminToken))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errors[0].fieldName").value("url"));
+    }
+
+    @Test
+    void shouldRejectLocalCoverPathFromAdminCreate() throws Exception {
+        String invalidJson = String.format(
+                "{\"title\":\"Video inválido\",\"description\":\"Desc\",\"url\":\"https://cdn.example.com/video.mp4\","
+                        + "\"cover\":\"C:/Users/Fabricio/Downloads/capa.jpg\",\"categoryId\":\"%s\"}", categoryId);
+
+        mockMvc.perform(bearer(post("/admin/videos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidJson), adminToken))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errors[0].fieldName").value("cover"));
+    }
+
     // ─────────────────────────── HELPERS ──────────────────────────────────
 
     private VideoRequestDTO buildVideoRequest(String title, UUID catId) {

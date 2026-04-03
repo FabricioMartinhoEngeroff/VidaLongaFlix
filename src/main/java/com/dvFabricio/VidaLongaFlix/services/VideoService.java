@@ -6,13 +6,18 @@ import com.dvFabricio.VidaLongaFlix.domain.category.Category;
 import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.DatabaseException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFieldException;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.FieldMessage;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
+import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ValidationException;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,6 +39,8 @@ public class VideoService {
 
     @Transactional
     public void create(VideoRequestDTO request) {
+        validateMediaUrls(request);
+
         // Sem null checks manuais — @NotBlank no DTO + @Valid no controller já garantem
         Video video = Video.builder()
                 .title(request.title())
@@ -55,6 +62,8 @@ public class VideoService {
 
     @Transactional
     public void update(UUID id, VideoRequestDTO request) {
+        validateMediaUrls(request);
+
         Video video = findVideoById(id);
 
         if (!isBlank(request.title()))       video.setTitle(request.title());
@@ -162,5 +171,43 @@ public class VideoService {
 
     private boolean isBlank(String field) {
         return field == null || field.isBlank();
+    }
+
+    private void validateMediaUrls(VideoRequestDTO request) {
+        List<FieldMessage> errors = new ArrayList<>();
+
+        validatePublicHttpUrl("url", request.url(), errors);
+        validatePublicHttpUrl("cover", request.cover(), errors);
+
+        if (!errors.isEmpty()) {
+            throw new ValidationException("Video and cover must use public HTTP(S) URLs.", errors);
+        }
+    }
+
+    private void validatePublicHttpUrl(String fieldName, String value, List<FieldMessage> errors) {
+        if (isBlank(value)) {
+            return;
+        }
+
+        try {
+            URI uri = new URI(value.trim());
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+
+            if (scheme == null
+                    || host == null
+                    || "localhost".equalsIgnoreCase(host)
+                    || (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme))) {
+                errors.add(new FieldMessage(
+                        fieldName,
+                        "Use a public HTTP(S) URL. Local files, blob URLs and data URLs are not supported."
+                ));
+            }
+        } catch (URISyntaxException e) {
+            errors.add(new FieldMessage(
+                    fieldName,
+                    "Use a valid public HTTP(S) URL."
+            ));
+        }
     }
 }

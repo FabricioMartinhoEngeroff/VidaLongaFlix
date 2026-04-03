@@ -989,11 +989,11 @@ Esta é a distinção mais importante e mais ignorada em operações:
 | 7 — Dashboards | ✅ | `golden-signals.json`, `jvm-backend.json`, `sli-disponibilidade.json` carregados |
 | 8 — Alertas | ⚠️ | Provisionados mas com **nome errado de métrica**: OTLP usa `_milliseconds`, regras usam `_seconds` — ver fix abaixo |
 | 9 — Config prod | ✅ | `application-prod.properties` + `docker-compose.eb.yml` prontos |
-| **10 — Grafana Cloud** | ⏳ | Criar conta + obter endpoint OTLP + gerar token |
-| **11 — Env vars no EB** | ⏳ | Adicionar `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER` |
-| **12 — Validar prod** | ⏳ | Confirmar dados chegando no Grafana Cloud |
+| **10 — Grafana Cloud** | ✅ | Conta criada (stack `vidalongaflix.grafana.net`, Instance ID `1577558`) + token gerado |
+| **11 — Env vars no EB** | ✅ | `OTLP_ENDPOINT` + `OTLP_AUTH_HEADER` no EB; código renomeado para coincidir; Flyway 10 + PostgreSQL 17 corrigido (`flyway-database-postgresql`) |
+| **12 — Validar prod** | ⏳ | Confirmar dados chegando no Grafana Cloud (métricas, traces, logs) |
 | **13 — SLIs/SLOs formais** | ⏳ | Criar no Grafana Cloud SLO plugin |
-| **14 — Frontend Angular** | ⏳ | Implementar `tracing.ts` + ativar sidecar no EB |
+| **14 — Frontend Angular** | ✅ | `src/tracing.ts` criado + `main.ts` importando; sidecar ativo no EB via `docker-compose.yml` |
 
 ---
 
@@ -1525,11 +1525,12 @@ Além dos Golden Signals, acompanhar a saúde da automação em si:
   - Endpoint: `https://otlp-gateway-prod-sa-east-1.grafana.net/otlp`
   - Instance ID: `1577558`
   - Token criado: `vidalongaflix-otel-prod` (scopes: metrics/logs/traces write, no expiry)
-- [x] **Passo 11 parcial**: Vars adicionadas no Elastic Beanstalk + upgrade de instância
-  - `GRAFANA_OTLP_ENDPOINT` e `GRAFANA_AUTH_HEADER` adicionados ao EB
-  - Instância upgradeada de `t3.micro` (1 GB) → `t3.small` (2 GB) para suportar sidecar
-  - `docker-compose.yml` criado (cópia de `docker-compose.eb.yml`) e commitado
-  - `docker.yml` corrigido: expressão `secrets.*` removida de `if` conditions (incompatível com `workflow_call`)
+- [x] **Passo 11 completo**: App subindo em produção no Elastic Beanstalk
+  - Vars `OTLP_ENDPOINT` e `OTLP_AUTH_HEADER` definidas no EB
+  - `application-prod.properties` renomeado de `OTLP_HTTP_ENDPOINT` → `OTLP_ENDPOINT` (unificação de nomenclatura)
+  - `docker-compose.yml` atualizado para reutilizar as mesmas variáveis
+  - Instância upgradeada de `t3.micro` → `t3.small` para suportar o sidecar OTel Collector
+  - **Flyway + PostgreSQL 17.6**: adicionado `flyway-database-postgresql` ao `pom.xml` — Flyway 10.x exige módulo separado para cada banco
 - [x] **Passo 14**: `src/tracing.ts` no repo Angular
   - `src/tracing.ts` criado com WebTracerProvider + OTLPTraceExporter + BatchSpanProcessor + auto-instrumentation fetch/XHR
   - `src/telemetry.ts` mantido como re-export (`import './tracing'`) para não quebrar referências antigas
@@ -1546,21 +1547,6 @@ Além dos Golden Signals, acompanhar a saúde da automação em si:
   - Label de rota: `http_route` → `uri` (label correto no OTLP push do Micrometer)
 
 ### Próximos passos ⏳
-
-#### Passo 11 — Completar configuração do Elastic Beanstalk 🔴
-
-O app em produção crasha no startup com `PlaceholderResolutionException: Could not resolve placeholder 'OTLP_HTTP_ENDPOINT'` porque o EB foi configurado com nomes errados.
-
-**Ação**: No EB → Configuration → Software → Environment properties, adicionar:
-
-| Variável | Valor |
-|---|---|
-| `OTLP_HTTP_ENDPOINT` | `https://otlp-gateway-prod-sa-east-1.grafana.net/otlp` |
-| `OTLP_AUTH_HEADER` | `<base64(1577558:glc_TOKEN)>` (mesmo valor de `GRAFANA_AUTH_HEADER`) |
-
-> `GRAFANA_OTLP_ENDPOINT` e `GRAFANA_AUTH_HEADER` são usadas apenas pelo container `otel-collector`. O Spring Boot usa `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER`.
-
----
 
 #### Passo 12 — Validar dados no Grafana Cloud ⏳
 
@@ -1724,8 +1710,8 @@ O ciclo de observabilidade do VidaLongaFlix está **instrumentado e configurado*
 
 ```
 INSTRUMENTAR    ✅  Spring Boot envia métricas + traces + logs via OTLP
-ALERTAR         ✅  Regras configuradas com expressões corretas (corrigido hoje)
-INVESTIGAR      ⏳  Depende de dados chegando no Grafana Cloud (Passos 11–12)
+ALERTAR         ✅  Regras configuradas com expressões corretas
+INVESTIGAR      ⏳  Depende de validar dados no Grafana Cloud (Passo 12)
 CORRIGIR        ⏳  Primeiro incidente real em produção vai calibrar os alertas
 VALIDAR         ⏳  SLOs criados no Grafana Cloud (Passo 13)
 INSTITUCIONALIZAR ⏳ Error Budget monitorado ativamente, deploys bloqueados se esgotado
@@ -1733,11 +1719,7 @@ INSTITUCIONALIZAR ⏳ Error Budget monitorado ativamente, deploys bloqueados se 
 
 #### O que falta concretamente
 
-**1. App subindo em produção (desbloqueante)**
-
-Adicionar no EB as variáveis `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER` (ver Passo 11). Sem isso, o Spring Boot crasha antes de enviar qualquer dado.
-
-**2. Confirmar que os três pilares chegam ao Grafana Cloud**
+**1. Confirmar que os três pilares chegam ao Grafana Cloud**
 
 Após o app subir, abrir o Grafana Cloud e confirmar:
 - Mimir: `http_server_requests_milliseconds_count{job="NutriLongaVidaFlix"}` retorna dados
@@ -1771,6 +1753,6 @@ for i in {1..50}; do curl -s http://api.vidalongaflix.com.br/api/videos; done
 
 Se o alerta disparar, o trace aparecer e o log correlacionar — **o ciclo está fechado**.
 O que falta para fechar o ciclo:
-- Status visual de cada etapa (✅ / ⏳)
-- 4 ações concretas em ordem: app subindo → validar 3 pilares → criar SLOs → simular falha real
-- O teste final com curl + query no Grafana para confirmar que o ciclo está realmente fechado
+- **Passo 12**: validar 3 pilares no Grafana Cloud (métricas → Mimir, traces → Tempo, logs → Loki)
+- **Passo 13**: criar 2 SLOs formais (disponibilidade 99.5% + latência P95 < 500ms)
+- **Teste final**: simular carga com curl + confirmar alerta → trace → log correlacionado
