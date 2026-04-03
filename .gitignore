@@ -35,4 +35,3 @@ build/
 ### Secrets / Local config ###
 *-local.properties
 .env
-node_modules
