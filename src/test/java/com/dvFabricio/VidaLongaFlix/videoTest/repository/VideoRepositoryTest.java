@@ -52,6 +52,7 @@ class VideoRepositoryTest {
                 .title("Video 1")
                 .description("Description 1")
                 .url("http://example.com/video1")
+                .cover("http://example.com/cover1.jpg")
                 .category(category)
                 .views(200)
                 .watchTime(120.0)
@@ -61,6 +62,7 @@ class VideoRepositoryTest {
                 .title("Video 2")
                 .description("Description 2")
                 .url("http://example.com/video2")
+                .cover("http://example.com/cover2.jpg")
                 .category(category)
                 .views(100)
                 .watchTime(80.0)
@@ -126,6 +128,29 @@ class VideoRepositoryTest {
         assertAll(
                 () -> assertTrue(topVideos.isEmpty(), "No video should be returned"),
                 () -> assertFalse(avgWatchTime.isPresent(), "No average watch time should be returned")
+        );
+    }
+
+    @Test
+    void shouldPersistGeneratedMediaUrls() {
+        Video uploadedVideo = Video.builder()
+                .title("Uploaded")
+                .description("Stored from multipart upload")
+                .url("https://vidalongaflix.com/api/media/videos/uploaded.mp4")
+                .cover("https://vidalongaflix.com/api/media/covers/uploaded.jpg")
+                .category(category)
+                .views(10)
+                .watchTime(5.0)
+                .build();
+
+        Video persisted = videoRepository.saveAndFlush(uploadedVideo);
+        entityManager.clear();
+
+        Video reloaded = videoRepository.findById(persisted.getId()).orElseThrow();
+
+        assertAll(
+                () -> assertEquals("https://vidalongaflix.com/api/media/videos/uploaded.mp4", reloaded.getUrl()),
+                () -> assertEquals("https://vidalongaflix.com/api/media/covers/uploaded.jpg", reloaded.getCover())
         );
     }
 }

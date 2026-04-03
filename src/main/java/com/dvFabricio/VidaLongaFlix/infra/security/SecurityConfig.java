@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/whatsapp/webhook").permitAll()
+                        .requestMatchers("/media/**").permitAll()
                         .requestMatchers("/videos/**").permitAll()
                         .requestMatchers("/menus/**").permitAll()
                         .requestMatchers(HttpMethod.DELETE,

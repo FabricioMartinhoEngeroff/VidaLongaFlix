@@ -142,6 +142,20 @@ class VideoServiceTest {
     }
 
     @Test
+    void shouldRejectBothUrlsWhenTheyAreNotPublic() {
+        VideoRequestDTO request = new VideoRequestDTO(
+                "Title", "Desc", "http://localhost:8090/video.mp4", "blob:https://vidalongaflix.com/cover",
+                categoryId, null, null, null, null, null, null);
+
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> videoService.create(request));
+
+        assertEquals(2, exception.getFieldMessages().size());
+        then(videoRepository).should(never()).save(any());
+        then(notificationService).shouldHaveNoInteractions();
+    }
+
+    @Test
     void shouldUpdateVideo() {
         VideoRequestDTO request = new VideoRequestDTO(
                 "Updated Title", "Updated Desc",
@@ -167,6 +181,22 @@ class VideoServiceTest {
 
         assertEquals("cover", exception.getFieldMessages().get(0).fieldName());
         then(videoRepository).should(never()).save(any());
+    }
+
+    @Test
+    void shouldAcceptBackendGeneratedMediaUrlsOnUpdate() {
+        VideoRequestDTO request = new VideoRequestDTO(
+                "Updated Title", "Updated Desc",
+                "https://vidalongaflix.com/api/media/videos/generated.mp4",
+                "https://vidalongaflix.com/api/media/covers/generated.jpg",
+                null, null, null, null, null, null, null);
+
+        given(videoRepository.findById(videoId)).willReturn(Optional.of(video));
+
+        assertDoesNotThrow(() -> videoService.update(videoId, request));
+        assertEquals("https://vidalongaflix.com/api/media/videos/generated.mp4", video.getUrl());
+        assertEquals("https://vidalongaflix.com/api/media/covers/generated.jpg", video.getCover());
+        then(videoRepository).should().save(video);
     }
 
     @Test
