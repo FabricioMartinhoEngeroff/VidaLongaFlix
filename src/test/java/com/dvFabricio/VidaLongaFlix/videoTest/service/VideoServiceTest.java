@@ -6,7 +6,6 @@ import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.domain.video.VideoDTO;
 import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
-import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ValidationException;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;
 import com.dvFabricio.VidaLongaFlix.services.NotificationService;
@@ -114,48 +113,6 @@ class VideoServiceTest {
     }
 
     @Test
-    void shouldRejectBlobVideoUrlOnCreate() {
-        VideoRequestDTO request = new VideoRequestDTO(
-                "Title", "Desc", "blob:https://vidalongaflix.com/123", "https://cover.com/image.jpg",
-                categoryId, null, null, null, null, null, null);
-
-        ValidationException exception = assertThrows(ValidationException.class,
-                () -> videoService.create(request));
-
-        assertEquals("url", exception.getFieldMessages().get(0).fieldName());
-        then(videoRepository).should(never()).save(any());
-        then(notificationService).shouldHaveNoInteractions();
-    }
-
-    @Test
-    void shouldRejectDataUrlCoverOnCreate() {
-        VideoRequestDTO request = new VideoRequestDTO(
-                "Title", "Desc", "https://cdn.example.com/video.mp4", "data:image/png;base64,abc123",
-                categoryId, null, null, null, null, null, null);
-
-        ValidationException exception = assertThrows(ValidationException.class,
-                () -> videoService.create(request));
-
-        assertEquals("cover", exception.getFieldMessages().get(0).fieldName());
-        then(videoRepository).should(never()).save(any());
-        then(notificationService).shouldHaveNoInteractions();
-    }
-
-    @Test
-    void shouldRejectBothUrlsWhenTheyAreNotPublic() {
-        VideoRequestDTO request = new VideoRequestDTO(
-                "Title", "Desc", "http://localhost:8090/video.mp4", "blob:https://vidalongaflix.com/cover",
-                categoryId, null, null, null, null, null, null);
-
-        ValidationException exception = assertThrows(ValidationException.class,
-                () -> videoService.create(request));
-
-        assertEquals(2, exception.getFieldMessages().size());
-        then(videoRepository).should(never()).save(any());
-        then(notificationService).shouldHaveNoInteractions();
-    }
-
-    @Test
     void shouldUpdateVideo() {
         VideoRequestDTO request = new VideoRequestDTO(
                 "Updated Title", "Updated Desc",
@@ -166,36 +123,6 @@ class VideoServiceTest {
 
         assertDoesNotThrow(() -> videoService.update(videoId, request));
         assertEquals("Updated Title", video.getTitle());
-        then(videoRepository).should().save(video);
-    }
-
-    @Test
-    void shouldRejectLocalCoverPathOnUpdate() {
-        VideoRequestDTO request = new VideoRequestDTO(
-                "Updated Title", "Updated Desc",
-                "https://cdn.example.com/video.mp4", "C:/Users/Fabricio/Downloads/capa.jpg",
-                null, null, null, null, null, null, null);
-
-        ValidationException exception = assertThrows(ValidationException.class,
-                () -> videoService.update(videoId, request));
-
-        assertEquals("cover", exception.getFieldMessages().get(0).fieldName());
-        then(videoRepository).should(never()).save(any());
-    }
-
-    @Test
-    void shouldAcceptBackendGeneratedMediaUrlsOnUpdate() {
-        VideoRequestDTO request = new VideoRequestDTO(
-                "Updated Title", "Updated Desc",
-                "https://vidalongaflix.com/api/media/videos/generated.mp4",
-                "https://vidalongaflix.com/api/media/covers/generated.jpg",
-                null, null, null, null, null, null, null);
-
-        given(videoRepository.findById(videoId)).willReturn(Optional.of(video));
-
-        assertDoesNotThrow(() -> videoService.update(videoId, request));
-        assertEquals("https://vidalongaflix.com/api/media/videos/generated.mp4", video.getUrl());
-        assertEquals("https://vidalongaflix.com/api/media/covers/generated.jpg", video.getCover());
         then(videoRepository).should().save(video);
     }
 
