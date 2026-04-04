@@ -35,3 +35,7 @@ build/
 ### Secrets / Local config ###
 *-local.properties
 .env
+
+### Deploy bundles ###
+deploy.zip
+dockerrun.zip
