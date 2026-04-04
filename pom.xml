@@ -211,6 +211,13 @@
             <artifactId>junit-platform-suite-api</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- AWS SDK v2 S3 — armazenamento de mídia em produção -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.20.162</version>
+        </dependency>
     </dependencies>
 
     <build>

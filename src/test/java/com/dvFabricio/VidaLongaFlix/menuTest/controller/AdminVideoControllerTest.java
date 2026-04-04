@@ -7,6 +7,7 @@ import com.dvFabricio.VidaLongaFlix.domain.video.VideoDTO;
 import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
+import com.dvFabricio.VidaLongaFlix.services.MediaStorageService;
 import com.dvFabricio.VidaLongaFlix.services.VideoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -36,6 +38,7 @@ class AdminVideoControllerTest {
 
     @InjectMocks private AdminVideoController adminVideoController;
     @Mock private VideoService videoService;
+    @Mock private MediaStorageService mediaStorageService;
 
     private UUID videoId;
     private UUID categoryId;
@@ -89,6 +92,29 @@ class AdminVideoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldCreateVideoFromMultipartRequest() throws Exception {
+        MockMultipartFile videoFile = new MockMultipartFile(
+                "videoFile", "video.mp4", "video/mp4", "video-content".getBytes());
+        MockMultipartFile coverFile = new MockMultipartFile(
+                "coverFile", "cover.jpg", "image/jpeg", "cover-content".getBytes());
+
+        when(mediaStorageService.store(videoFile, "videos"))
+                .thenReturn("https://api.vidalongaflix.com/api/media/videos/video.mp4");
+        when(mediaStorageService.store(coverFile, "covers"))
+                .thenReturn("https://api.vidalongaflix.com/api/media/covers/cover.jpg");
+
+        mockMvc.perform(multipart("/admin/videos")
+                        .file(videoFile)
+                        .file(coverFile)
+                        .param("title", "Video 1")
+                        .param("description", "Desc 1")
+                        .param("categoryId", categoryId.toString()))
+                .andExpect(status().isCreated());
+
+        verify(videoService).create(any(VideoRequestDTO.class));
     }
 
     @Test
