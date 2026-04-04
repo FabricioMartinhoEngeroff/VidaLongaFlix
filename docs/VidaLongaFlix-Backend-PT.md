@@ -942,3 +942,201 @@ push main → test ✅ → docker ✅ → deploy ⏸ aguarda aprovacao
 | 404    | Recurso nao encontrado                        |
 | 409    | Conflito: recurso duplicado                   |
 | 500    | Erro interno do servidor                      |
+
+---
+
+## 18. Infraestrutura de Armazenamento e Upload de Midia
+
+> **Adicionado: 04/04/2026**
+> Esta secao documenta toda a infraestrutura de upload e armazenamento de midia introduzida para suportar videos e imagens de capa de forma persistente.
+
+### 18.1 Contexto do Problema
+
+A implementacao original permitia que o frontend enviasse uma URL `blob:` (gerada via `URL.createObjectURL()`) como a URL do video no corpo JSON da requisicao. URLs `blob:` sao **locais ao navegador** — existem apenas na sessao/aba que as criou e nao podem ser acessadas por nenhum outro cliente nem armazenadas de forma persistente. Como resultado, os videos pareciam ser salvos, mas nunca eram reproduzidos.
+
+A correcao exigiu tres mudancas trabalhando juntas:
+1. O **frontend** deve enviar o arquivo real via `multipart/form-data` em vez de uma URL `blob:`.
+2. O **backend** deve aceitar `multipart/form-data` e armazenar o arquivo.
+3. O **armazenamento deve ser persistente** — AWS S3 em producao, disco local como fallback de desenvolvimento.
+
+---
+
+### 18.2 Endpoint de Upload Multipart
+
+`POST /admin/videos` e `PUT /admin/videos/{id}` agora suportam dois content-types:
+
+| Content-Type | Handler | Uso |
+|---|---|---|
+| `application/json` | `create()` / `update()` | Fornece URLs publicas ja existentes para video e capa |
+| `multipart/form-data` | `createMultipart()` / `updateMultipart()` | Envia os arquivos reais; o backend os armazena e retorna a URL |
+
+**Campos aceitos no formulario:**
+
+| Campo | Tipo | Obrigatorio (POST) | Descricao |
+|---|---|---|---|
+| `title` | texto | ✅ | Titulo do video |
+| `description` | texto | ✅ | Descricao do video |
+| `categoryId` | texto (UUID) | ✅ | UUID da categoria |
+| `videoFile` / `video` / `url` / `file` | arquivo ou texto | ✅ | Arquivo de video ou URL publica existente |
+| `coverFile` / `cover` / `thumbnail` / `image` | arquivo ou texto | ✅ | Imagem de capa ou URL publica existente |
+| `recipe` | texto | ❌ | Texto da receita |
+| `protein`, `carbs`, `fat`, `fiber`, `calories` | numero | ❌ | Informacoes nutricionais |
+
+Quando um campo de arquivo e um campo de texto URL estao presentes para a mesma midia, a **URL de texto tem prioridade** (o arquivo e ignorado).
+
+---
+
+### 18.3 MediaStorageService
+
+`src/main/java/com/dvFabricio/VidaLongaFlix/services/MediaStorageService.java`
+
+Gerencia o armazenamento de arquivos em dois modos, selecionados na inicializacao:
+
+**Modo S3** (producao) — ativo quando `aws.s3.bucket` nao esta em branco:
+- Constroi um `S3Client` para a regiao configurada via `@PostConstruct`.
+- Envia com `PutObjectRequest` usando `RequestBody.fromInputStream`.
+- Retorna URL CloudFront (`CDN_BASE_URL/{key}`) se configurado, caso contrario URL direta do S3 (`https://{bucket}.s3.{region}.amazonaws.com/{key}`).
+
+**Modo local** (dev/fallback) — ativo quando `aws.s3.bucket` esta em branco:
+- Cria diretorios `{media.storage.path}/videos/` e `{media.storage.path}/covers/`.
+- Copia o arquivo com um nome baseado em UUID.
+- Retorna uma URL construida com `ServletUriComponentsBuilder.fromCurrentContextPath()` apontando para `/media/{dir}/{filename}`.
+
+Os dois modos geram um nome de arquivo UUID aleatorio para evitar colisoes e ocultar o nome original do arquivo.
+
+---
+
+### 18.4 Servico de Midia Local (fallback dev)
+
+`src/main/java/com/dvFabricio/VidaLongaFlix/infra/config/MediaResourceConfig.java`
+
+Registra um resource handler do Spring MVC que mapeia `/api/media/**` para o diretorio de armazenamento local no disco.
+
+```java
+registry.addResourceHandler("/media/**")
+    .addResourceLocations(localStorageRoot.toUri().toString());
+```
+
+O `SecurityConfig` libera `/media/**` publicamente para que clientes nao autenticados possam fazer streaming de video.
+
+---
+
+### 18.5 Limite de Tamanho de Upload no nginx
+
+`.platform/nginx/conf.d/upload.conf`
+
+O AWS Elastic Beanstalk usa nginx como proxy reverso. Por padrao, o nginx bloqueia corpos de requisicao maiores que 1 MB. Sem este arquivo, o upload de um video retorna **413 Content Too Large** antes de a requisicao chegar ao Spring Boot.
+
+```nginx
+client_max_body_size 512M;
+proxy_connect_timeout   60s;
+proxy_read_timeout     300s;
+proxy_send_timeout     300s;
+send_timeout           300s;
+proxy_request_buffering off;
+```
+
+`proxy_request_buffering off` transmite o upload diretamente para a aplicacao em vez de armazenar o arquivo inteiro na memoria do nginx, essencial para arquivos grandes.
+
+---
+
+### 18.6 Infraestrutura AWS
+
+**Bucket S3**
+
+| Configuracao | Valor |
+|---|---|
+| Nome do bucket | `vidalongaflix-media` |
+| Regiao | `us-east-2` |
+| Acesso publico | Block Public Access: **desabilitado** |
+| Politica do bucket | Leitura publica para todos os objetos (veja abaixo) |
+
+Politica de bucket aplicada:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadGetObject",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::vidalongaflix-media/*"
+    }
+  ]
+}
+```
+
+**Politica IAM para EC2 → S3 upload**
+
+Politica inline `vidalongaflix_media_upload` adicionada ao role `aws-elasticbeanstalk-ec2-role`:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::vidalongaflix-media/*"
+    }
+  ]
+}
+```
+
+Isso permite que as instancias EC2 do EB facade upload e delete de objetos sem precisar de credenciais AWS de longo prazo na aplicacao.
+
+---
+
+### 18.7 Variaveis de Ambiente
+
+Novas variaveis necessarias no Elastic Beanstalk:
+
+| Variavel | Obrigatoria | Exemplo | Descricao |
+|---|---|---|---|
+| `AWS_S3_BUCKET` | Sim (para S3) | `vidalongaflix-media` | Habilita modo S3; deixar em branco para armazenamento local |
+| `AWS_REGION` | Nao | `us-east-2` | Regiao do bucket S3 (padrao: `us-east-2`) |
+| `CDN_BASE_URL` | Nao | `https://xxxx.cloudfront.net` | Se definido, as URLs retornadas usam CloudFront em vez do S3 direto |
+| `MEDIA_STORAGE_PATH` | Nao | `/tmp/vidalongaflix-media` | Caminho no disco para o modo fallback local |
+| `MAX_UPLOAD_FILE_SIZE` | Nao | `512MB` | Limite de tamanho por arquivo do multipart do Spring |
+| `MAX_UPLOAD_REQUEST_SIZE` | Nao | `512MB` | Limite de tamanho total da requisicao multipart do Spring |
+
+Propriedades da aplicacao (`application-prod.properties`):
+
+```properties
+aws.s3.bucket=${AWS_S3_BUCKET:}
+aws.s3.region=${AWS_REGION:us-east-2}
+aws.cdn.base-url=${CDN_BASE_URL:}
+media.storage.path=${MEDIA_STORAGE_PATH:/tmp/vidalongaflix-media}
+spring.servlet.multipart.max-file-size=${MAX_UPLOAD_FILE_SIZE:512MB}
+spring.servlet.multipart.max-request-size=${MAX_UPLOAD_REQUEST_SIZE:512MB}
+server.forward-headers-strategy=FRAMEWORK
+```
+
+`server.forward-headers-strategy=FRAMEWORK` e necessario para que o `ServletUriComponentsBuilder` use o header `X-Forwarded-Host` do nginx ao construir URLs de midia local, em vez do hostname interno da EC2.
+
+---
+
+### 18.8 Fluxo de Upload Resumido
+
+```
+Navegador (FormData)
+    │
+    ▼
+nginx (.platform/nginx/conf.d/upload.conf)
+    │  client_max_body_size 512M — permite a requisicao passar
+    ▼
+Spring Boot — AdminVideoController.createMultipart()
+    │  le campos de arquivo do MultipartHttpServletRequest
+    ▼
+MediaStorageService.store(file, "videos" | "covers")
+    │
+    ├─ AWS_S3_BUCKET definido? ──► S3Client.putObject() → retorna URL S3/CDN
+    │
+    └─ em branco ───────────────► Files.copy() para disco local → retorna URL /media/...
+    ▼
+VideoService.create(VideoRequestDTO com URL resolvida)
+    ▼
+Banco de dados — linha do video salva com URL permanente e acessivel
+```

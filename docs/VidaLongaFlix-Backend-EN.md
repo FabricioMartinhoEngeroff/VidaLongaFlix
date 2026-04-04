@@ -942,3 +942,201 @@ push main → test ✅ → docker ✅ → deploy ⏸ waiting for approval
 | 404  | Resource not found                               |
 | 409  | Conflict: duplicate resource                     |
 | 500  | Internal server error                            |
+
+---
+
+## 18. Media Storage and Video Upload Infrastructure
+
+> **Added: 2026-04-04**
+> This section documents the full media upload and storage infrastructure introduced to support persistent video and cover image files.
+
+### 18.1 Problem Context
+
+The original implementation allowed the frontend to send a `blob:` URL (created via `URL.createObjectURL()`) as the video URL in a JSON request body. `blob:` URLs are **browser-local** — they exist only in the session/tab that created them and cannot be accessed from any other client or stored persistently. As a result, videos appeared to be saved but never played back.
+
+The fix required three changes working together:
+1. The **frontend** must send the actual file via `multipart/form-data` instead of a `blob:` URL.
+2. The **backend** must accept `multipart/form-data` and store the file.
+3. **Storage must be persistent** — AWS S3 in production, local disk as dev fallback.
+
+---
+
+### 18.2 Multipart Upload Endpoint
+
+`POST /admin/videos` and `PUT /admin/videos/{id}` now support two content types:
+
+| Content-Type | Handler | Usage |
+|---|---|---|
+| `application/json` | `create()` / `update()` | Provide pre-existing public URLs for video and cover |
+| `multipart/form-data` | `createMultipart()` / `updateMultipart()` | Upload actual files; backend stores them and returns the URL |
+
+**Accepted form fields:**
+
+| Field | Type | Required (POST) | Description |
+|---|---|---|---|
+| `title` | text | ✅ | Video title |
+| `description` | text | ✅ | Video description |
+| `categoryId` | text (UUID) | ✅ | Category UUID |
+| `videoFile` / `video` / `url` / `file` | file or text | ✅ | Video file or existing public URL |
+| `coverFile` / `cover` / `thumbnail` / `image` | file or text | ✅ | Cover image file or existing public URL |
+| `recipe` | text | ❌ | Recipe text |
+| `protein`, `carbs`, `fat`, `fiber`, `calories` | number | ❌ | Nutritional info |
+
+When both a file and a URL text field are present for the same media, the **text URL takes precedence** (the file is ignored).
+
+---
+
+### 18.3 MediaStorageService
+
+`src/main/java/com/dvFabricio/VidaLongaFlix/services/MediaStorageService.java`
+
+Handles file storage in two modes selected at startup:
+
+**S3 mode** (production) — active when `aws.s3.bucket` is non-blank:
+- Builds an `S3Client` for the configured region via `@PostConstruct`.
+- Uploads with `PutObjectRequest` using `RequestBody.fromInputStream`.
+- Returns a CloudFront URL (`CDN_BASE_URL/{key}`) if configured, otherwise the S3 direct URL (`https://{bucket}.s3.{region}.amazonaws.com/{key}`).
+
+**Local mode** (dev/fallback) — active when `aws.s3.bucket` is blank:
+- Creates `{media.storage.path}/videos/` and `{media.storage.path}/covers/` directories.
+- Copies the file with a UUID-based filename.
+- Returns a URL built with `ServletUriComponentsBuilder.fromCurrentContextPath()` pointing to `/media/{dir}/{filename}`.
+
+Both modes generate a random UUID filename to avoid collisions and to hide the original filename.
+
+---
+
+### 18.4 Local Media Serving (dev fallback)
+
+`src/main/java/com/dvFabricio/VidaLongaFlix/infra/config/MediaResourceConfig.java`
+
+Registers a Spring MVC resource handler that maps `/api/media/**` to the local storage directory on disk.
+
+```java
+registry.addResourceHandler("/media/**")
+    .addResourceLocations(localStorageRoot.toUri().toString());
+```
+
+`SecurityConfig` permits `/media/**` publicly so unauthenticated clients can stream video.
+
+---
+
+### 18.5 nginx Upload Size Limit
+
+`.platform/nginx/conf.d/upload.conf`
+
+AWS Elastic Beanstalk uses nginx as a reverse proxy. By default, nginx blocks request bodies larger than 1 MB. Without this file, uploading a video returns **413 Content Too Large** before the request ever reaches Spring Boot.
+
+```nginx
+client_max_body_size 512M;
+proxy_connect_timeout   60s;
+proxy_read_timeout     300s;
+proxy_send_timeout     300s;
+send_timeout           300s;
+proxy_request_buffering off;
+```
+
+`proxy_request_buffering off` streams the upload directly to the upstream application instead of buffering the entire file in nginx memory, which is essential for large files.
+
+---
+
+### 18.6 AWS Infrastructure
+
+**S3 Bucket**
+
+| Setting | Value |
+|---|---|
+| Bucket name | `vidalongaflix-media` |
+| Region | `us-east-2` |
+| Public access | Block Public Access: **disabled** |
+| Bucket policy | Public read for all objects (see below) |
+
+Bucket policy applied:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "PublicReadGetObject",
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::vidalongaflix-media/*"
+    }
+  ]
+}
+```
+
+**IAM Policy for EC2 → S3 upload**
+
+Inline policy `vidalongaflix_media_upload` added to role `aws-elasticbeanstalk-ec2-role`:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:DeleteObject"],
+      "Resource": "arn:aws:s3:::vidalongaflix-media/*"
+    }
+  ]
+}
+```
+
+This allows the EB EC2 instances to upload and delete objects without needing long-term AWS credentials in the application.
+
+---
+
+### 18.7 Environment Variables
+
+New variables required in Elastic Beanstalk:
+
+| Variable | Required | Example | Description |
+|---|---|---|---|
+| `AWS_S3_BUCKET` | Yes (for S3) | `vidalongaflix-media` | Enables S3 mode; leave blank for local storage |
+| `AWS_REGION` | No | `us-east-2` | S3 bucket region (default: `us-east-2`) |
+| `CDN_BASE_URL` | No | `https://xxxx.cloudfront.net` | If set, returned URLs use CloudFront instead of S3 direct |
+| `MEDIA_STORAGE_PATH` | No | `/tmp/vidalongaflix-media` | Local disk path for fallback mode |
+| `MAX_UPLOAD_FILE_SIZE` | No | `512MB` | Spring multipart per-file size limit |
+| `MAX_UPLOAD_REQUEST_SIZE` | No | `512MB` | Spring multipart total request size limit |
+
+Application properties (`application-prod.properties`):
+
+```properties
+aws.s3.bucket=${AWS_S3_BUCKET:}
+aws.s3.region=${AWS_REGION:us-east-2}
+aws.cdn.base-url=${CDN_BASE_URL:}
+media.storage.path=${MEDIA_STORAGE_PATH:/tmp/vidalongaflix-media}
+spring.servlet.multipart.max-file-size=${MAX_UPLOAD_FILE_SIZE:512MB}
+spring.servlet.multipart.max-request-size=${MAX_UPLOAD_REQUEST_SIZE:512MB}
+server.forward-headers-strategy=FRAMEWORK
+```
+
+`server.forward-headers-strategy=FRAMEWORK` is required so that `ServletUriComponentsBuilder` uses the `X-Forwarded-Host` header from nginx when building local media URLs, instead of the internal EC2 hostname.
+
+---
+
+### 18.8 Upload Flow Summary
+
+```
+Browser (FormData)
+    │
+    ▼
+nginx (.platform/nginx/conf.d/upload.conf)
+    │  client_max_body_size 512M — allows the request through
+    ▼
+Spring Boot — AdminVideoController.createMultipart()
+    │  reads file fields from MultipartHttpServletRequest
+    ▼
+MediaStorageService.store(file, "videos" | "covers")
+    │
+    ├─ AWS_S3_BUCKET set? ──► S3Client.putObject() → returns S3/CDN URL
+    │
+    └─ blank ──────────────► Files.copy() to local disk → returns /media/... URL
+    ▼
+VideoService.create(VideoRequestDTO with resolved URL)
+    ▼
+Database — video row stored with a permanent, accessible URL
+```
