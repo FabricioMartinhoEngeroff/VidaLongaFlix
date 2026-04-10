@@ -8,7 +8,7 @@
 - Desenvolver dashboards e configurar alertas no Grafana para transformar métricas em ações operacionais
 - Utilizar OpenTelemetry e profiling contínuo para coletar dados e otimizar a performance de aplicações
 
---- 
+---
 
 ## Módulo 1 — Introdução à Observabilidade e Monitoramento
 
@@ -1545,56 +1545,20 @@ Além dos Golden Signals, acompanhar a saúde da automação em si:
   - Thresholds de latência: `0.5` → `500` ms e `1.0` → `1000` ms
   - Label de rota: `http_route` → `uri` (label correto no OTLP push do Micrometer)
 
-### Correções e avanços — sessão 2026-04-05
-
-#### O que foi descoberto
-
-**Arquitetura real em produção:** o CI/CD (`ci.yml`) gera um `Dockerrun.aws.json` de container único — o `docker-compose.yml` (sidecar) **não é incluído no bundle de deploy**. O Spring Boot envia métricas, traces e logs **diretamente** para o Grafana Cloud via `OTLP_ENDPOINT` do EB, sem passar pelo coletor.
-
-```
-Spring Boot (EB single container)
-    → OTLP_ENDPOINT = https://otlp-gateway-prod-sa-east-1.grafana.net/otlp
-    → métricas + traces + logs → Grafana Cloud diretamente
-```
-
-O `docker-compose.yml` (multi-container com sidecar) só entrará em uso quando o **frontend Angular** precisar enviar traces (Passo 14 completo).
-
-**Variáveis de ambiente confirmadas no EB:**
-
-| Variável | Valor | Uso |
-|---|---|---|
-| `OTLP_ENDPOINT` | `https://otlp-gateway-prod-sa-east-1.grafana.net/otlp` | Spring Boot → Grafana Cloud |
-| `OTLP_AUTH_HEADER` | base64(`1577558:glc_...`) | auth em todos os exporters |
-
-**Credenciais verificadas:** `echo $OTLP_AUTH_HEADER | base64 -d` retorna `1577558:glc_...` — formato correto.
-
-**Teste direto ao endpoint Grafana Cloud:** `curl -X POST .../v1/metrics -H "Authorization: Basic $AUTH"` → HTTP 200 ✅ — endpoint aceita dados.
-
-**Métricas confirmadas no actuator/prometheus:** `http_server_requests_seconds_count` visível em `/api/actuator/prometheus` ✅
-
-#### Correções aplicadas (commit `b225b11`)
-
-- [x] `application-prod.properties`:
-  - `management.otlp.metrics.export.enabled=true` — explícito (evita ambiguidade no boot)
-  - `management.otlp.metrics.export.step=30s` — reduz de 60s para 30s (dados no Grafana mais rápido)
-  - `headers.authorization` → `headers.Authorization` — maiúscula correta para HTTP header
-  - Comentário corrigido: `OTLP_HTTP_ENDPOINT` → `OTLP_ENDPOINT` (alinhado com EB real)
-- [x] `docker-compose.yml` — comentário de variáveis atualizado
-- [x] `docs/sre-observability.md` — Passo 7 e Passo 8 completados com queries PromQL reais, tipos de painel, YAML de alertas e canal de notificação
-
-#### Status pós-sessão
-
-| Passo | Status | Detalhe |
-|---|---|---|
-| 11 — EB vars | ✅ | `OTLP_ENDPOINT` e `OTLP_AUTH_HEADER` confirmados no EB |
-| 11 — Deploy | ✅ | Commit `b225b11` deployado — EB Green após o push |
-| 12.1 — Métricas no Grafana Cloud | ✅ | Confirmado 2026-04-09: métricas chegando (hikaricp, executor, http, JVM visíveis no Metrics Browser) |
-| 12.2 — Traces no Grafana Cloud | ⏳ | Explore → Tempo → `{ .service.name = "NutriLongaVidaFlix" }` |
-| 12.3 — Logs no Grafana Cloud | ⏳ | Explore → Loki → `{service_name="NutriLongaVidaFlix"}` |
-| 13 — SLOs | ⏳ | Depende do Passo 12 completo |
-| 14 — Angular tracing | ⏳ | `tracing.ts` criado no repo Angular — falta configurar sidecar no EB |
-
 ### Próximos passos ⏳
+
+#### Passo 11 — Completar configuração do Elastic Beanstalk 🔴
+
+O app em produção crasha no startup com `PlaceholderResolutionException: Could not resolve placeholder 'OTLP_HTTP_ENDPOINT'` porque o EB foi configurado com nomes errados.
+
+**Ação**: No EB → Configuration → Software → Environment properties, adicionar:
+
+| Variável | Valor |
+|---|---|
+| `OTLP_HTTP_ENDPOINT` | `https://otlp-gateway-prod-sa-east-1.grafana.net/otlp` |
+| `OTLP_AUTH_HEADER` | `<base64(1577558:glc_TOKEN)>` (mesmo valor de `GRAFANA_AUTH_HEADER`) |
+
+> `GRAFANA_OTLP_ENDPOINT` e `GRAFANA_AUTH_HEADER` são usadas apenas pelo container `otel-collector`. O Spring Boot usa `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER`.
 
 ---
 
@@ -1759,43 +1723,37 @@ management.endpoints.web.exposure.include=health,info,metrics,prometheus
 O ciclo de observabilidade do VidaLongaFlix está **instrumentado e configurado**, mas ainda não foi **validado ponta a ponta em produção**. Fechar o ciclo significa confirmar que cada camada está funcionando e que os alertas disparariam em uma falha real.
 
 ```
-INSTRUMENTAR      ✅  Spring Boot envia métricas + traces + logs via OTLP
-ALERTAR           ✅  Regras configuradas com expressões corretas
-INVESTIGAR        ✅  Métricas chegando no Grafana Cloud (confirmado 2026-04-09)
-                  ⏳  Falta confirmar traces (Tempo) e logs (Loki)
-CORRIGIR          ⏳  Primeiro incidente real em produção vai calibrar os alertas
-VALIDAR           ⏳  SLOs criados no Grafana Cloud (Passo 13)
-INSTITUCIONALIZAR ⏳  Error Budget monitorado ativamente, deploys bloqueados se esgotado
+INSTRUMENTAR    ✅  Spring Boot envia métricas + traces + logs via OTLP
+ALERTAR         ✅  Regras configuradas com expressões corretas (corrigido hoje)
+INVESTIGAR      ⏳  Depende de dados chegando no Grafana Cloud (Passos 11–12)
+CORRIGIR        ⏳  Primeiro incidente real em produção vai calibrar os alertas
+VALIDAR         ⏳  SLOs criados no Grafana Cloud (Passo 13)
+INSTITUCIONALIZAR ⏳ Error Budget monitorado ativamente, deploys bloqueados se esgotado
 ```
 
-#### O que falta concretamente — atualizado 2026-04-09
+#### O que falta concretamente
 
-**1. ✅ App em produção — concluído**
+**1. App subindo em produção (desbloqueante)**
 
-EB Green, Spring Boot enviando dados para o Grafana Cloud. Métricas visíveis no Metrics Browser: `hikaricp_connections`, `executor_active_threads`, `http_server_requests_*`, JVM metrics.
+Adicionar no EB as variáveis `OTLP_HTTP_ENDPOINT` e `OTLP_AUTH_HEADER` (ver Passo 11). Sem isso, o Spring Boot crasha antes de enviar qualquer dado.
 
-**2. ⏳ Confirmar traces e logs (Passos 12.2 e 12.3)**
+**2. Confirmar que os três pilares chegam ao Grafana Cloud**
 
-Abrir o Grafana Cloud e confirmar os dois pilares restantes:
+Após o app subir, abrir o Grafana Cloud e confirmar:
+- Mimir: `http_server_requests_milliseconds_count{job="NutriLongaVidaFlix"}` retorna dados
+- Tempo: `{ .service.name = "NutriLongaVidaFlix" }` mostra spans
+- Loki: `{service_name="NutriLongaVidaFlix"}` mostra logs
 
-```
-Explore → Tempo (TraceQL):
-{ .service.name = "NutriLongaVidaFlix" }
+Se qualquer um dos três estiver vazio, a pipeline está incompleta e não há observabilidade real — apenas infraestrutura instalada.
 
-Explore → Loki (LogQL):
-{service_name="NutriLongaVidaFlix"}
-```
+**3. Criar os SLOs formais (Passo 13)**
 
-Se qualquer um vier vazio, a pipeline está incompleta — verificar logs do EB para erros de exporter.
-
-**3. ⏳ Criar os SLOs formais (Passo 13)**
-
-Sem SLOs, não há Error Budget. Com SLOs:
+Sem SLOs, não há Error Budget. Sem Error Budget, a decisão de fazer deploy é baseada em intuição. Com SLOs:
 - O time sabe objetivamente se o sistema está dentro ou fora da meta
 - Deploys arriscados são bloqueados quando o budget está esgotado
 - A conversa entre Dev, SRE e Produto passa a ser baseada em dados
 
-**4. ⏳ Simular uma falha e seguir o rastro (teste final)**
+**4. Simular uma falha e seguir o rastro**
 
 O teste final do ciclo é simular um problema real e verificar se:
 1. O alerta dispara no tempo esperado
@@ -1804,15 +1762,15 @@ O teste final do ciclo é simular um problema real e verificar se:
 4. O SLO mostra consumo do Error Budget
 
 ```bash
-# Gerar tráfego e verificar no Grafana Cloud
-for i in {1..50}; do curl -s https://api.vidalongaflix.com.br/api/videos; done
+# Exemplo: forçar latência alta chamando um endpoint lento
+for i in {1..50}; do curl -s http://api.vidalongaflix.com.br/api/videos; done
 
-# Explore → Tempo:
-{ .service.name = "NutriLongaVidaFlix" && duration > 200ms }
+# Verificar no Grafana Cloud — Explore → Tempo:
+{ .service.name = "NutriLongaVidaFlix" && duration > 500ms }
 ```
 
 Se o alerta disparar, o trace aparecer e o log correlacionar — **o ciclo está fechado**.
-
-**5. ⏳ Angular tracing (Passo 14)**
-
-`tracing.ts` já existe no repo Angular. Falta ativar o sidecar no EB (docker-compose.yml multi-container) para o Collector receber traces do browser na porta 4318.
+O que falta para fechar o ciclo:
+- Status visual de cada etapa (✅ / ⏳)
+- 4 ações concretas em ordem: app subindo → validar 3 pilares → criar SLOs → simular falha real
+- O teste final com curl + query no Grafana para confirmar que o ciclo está realmente fechado
