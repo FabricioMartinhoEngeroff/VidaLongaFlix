@@ -1875,7 +1875,7 @@ O `docker-compose.yml` (multi-container com sidecar) só entrará em uso quando 
 | 11 — EB vars | ✅ | `OTLP_ENDPOINT` e `OTLP_AUTH_HEADER` confirmados no EB |
 | 11 — Deploy | ✅ | Commit `b225b11` deployado — EB Green após o push |
 | 12.1 — Métricas no Grafana Cloud | ✅ | Confirmado 2026-04-09: métricas chegando (hikaricp, executor, http, JVM visíveis no Metrics Browser) |
-| 12.2 — Traces no Grafana Cloud | ⏳ | Explore → Tempo → `{ .service.name = "NutriLongaVidaFlix" }` |
+| 12.2 — Traces no Grafana Cloud | ✅ | Confirmado 2026-04-10: spans chegando no Tempo — `NutriLongaVidaFlix` visível com latências reais (9ms–22ms) |
 | 12.3 — Logs no Grafana Cloud | ⏳ | Explore → Loki → `{service_name="NutriLongaVidaFlix"}` |
 | 13 — SLOs | ⏳ | Depende do Passo 12 completo |
 | 14 — Angular tracing | ⏳ | `tracing.ts` criado no repo Angular — falta configurar sidecar no EB |
@@ -1894,11 +1894,55 @@ Após adicionar as variáveis do Passo 11 e o EB reiniciar:
 http_server_requests_milliseconds_count{job="NutriLongaVidaFlix"}
 ```
 
-**12.2 — Traces (Tempo)**
+**12.2 — Traces (Tempo)** ✅ confirmado 2026-04-10
+
+#### Conceito: o que são traces e por que validar no Tempo?
+
+Traces rastreiam o caminho completo de uma requisição pelo sistema. Cada **span** representa uma etapa (ex: `http get /actuator/health`). O Grafana Tempo armazena esses spans e permite buscar por serviço, duração, atributos ou erros.
+
+Quando o Spring Boot envia um trace via OTLP, ele inclui o atributo de recurso `service.name` com o valor configurado em `spring.application.name`. O Tempo indexa esse atributo como `resource.service.name`, permitindo filtrar todos os spans de um serviço específico.
+
+#### Quando repetir essa validação
+
+Sempre que quiser confirmar que traces estão chegando após um deploy, uma mudança de configuração ou uma suspeita de falha no pipeline de observabilidade.
+
+#### Passo a passo no Grafana Cloud
+
+1. Acesse `https://vidalongaflix.grafana.net`
+2. Menu lateral → **Explore**
+3. No seletor de datasource (topo), escolha: `grafanacloud-vidalongaflix-traces` (tipo: Tempo)
+4. Clique na aba **TraceQL**
+5. Digite a query:
+   ```
+   { resource.service.name = "NutriLongaVidaFlix" }
+   ```
+6. Clique em **Run query**
+
+#### O que esperar
+
+- Uma tabela **"Table — Traces"** com colunas: `Trace ID`, `Start time`, `Service`, `Name`, `Duration`
+- Cada linha é um span, ex: `http get /actuator/health` com 9–22ms
+- Clicar em qualquer Trace ID abre o **flame graph** com todos os spans daquela requisição
+
+#### Gerar tráfego antes (se necessário)
+
+Se a query retornar vazio, o EB pode estar ocioso. Gera tráfego no terminal local e aguarda ~2 minutos:
+
+```bash
+for i in $(seq 1 20); do
+  curl -s -o /dev/null -w "%{http_code}\n" \
+    http://Vidalongaflix-backend-env.eba-gteu4qmf.us-east-2.elasticbeanstalk.com/api/actuator/health
+  sleep 1
+done
 ```
-# Explore → Data Source: Grafana Tempo → TraceQL
-{ .service.name = "NutriLongaVidaFlix" }
+
+#### Se continuar vazio
+
+Verificar nos logs do EB (AWS Console → Elastic Beanstalk → Logs) erros como:
 ```
+OTLP exporter failed: 401 Unauthorized
+```
+Isso indica que `OTLP_AUTH_HEADER` está incorreto ou expirado.
 
 **12.3 — Logs (Loki)**
 ```logql
@@ -2054,34 +2098,83 @@ VALIDAR           ⏳  SLOs criados no Grafana Cloud (Passo 13)
 INSTITUCIONALIZAR ⏳  Error Budget monitorado ativamente, deploys bloqueados se esgotado
 ```
 
-#### O que falta concretamente — atualizado 2026-04-09
+#### O que falta concretamente — atualizado 2026-04-10
 
 **1. ✅ App em produção — concluído**
 
-EB Green, Spring Boot enviando dados para o Grafana Cloud. Métricas visíveis no Metrics Browser: `hikaricp_connections`, `executor_active_threads`, `http_server_requests_*`, JVM metrics.
+EB Green, Spring Boot enviando dados para o Grafana Cloud.
 
-**2. ⏳ Confirmar traces e logs (Passos 12.2 e 12.3)**
+- **Métricas (12.1 ✅)**: visíveis no Metrics Browser — `hikaricp_connections`, `executor_active_threads`, `http_server_requests_*`, JVM metrics.
+- **Config corrigida (2026-04-09 20:50)**: `application-prod.properties` no `main` foi corrigido com:
+  - `management.otlp.metrics.export.enabled=true`
+  - `management.otlp.metrics.export.step=30s`
+  - Header `Authorization` em maiúscula (era `authorization` — causava 401 silencioso)
+  - Log confirmado: `Publishing metrics for OtlpMeterRegistry every 30s to https://otlp-gateway-prod-sa-east-1.grafana.net/otlp/v1/metrics`
 
-Abrir o Grafana Cloud e confirmar os dois pilares restantes:
+---
+
+**2. ✅ Passo 12.2 — Traces no Grafana Tempo — confirmado 2026-04-10**
+
+Spans de `NutriLongaVidaFlix` visíveis no Tempo com latências reais (9ms–22ms).
+Query utilizada: `{ resource.service.name = "NutriLongaVidaFlix" }`
+Ver procedimento completo e conceito em [**Passo 12.2 — Traces (Tempo)**](#122--traces-tempo--confirmado-2026-04-10) neste doc.
+
+---
+
+**3. ⏳ Passo 12.3 — Confirmar logs no Grafana Loki**
 
 ```
-Explore → Tempo (TraceQL):
-{ .service.name = "NutriLongaVidaFlix" }
-
-Explore → Loki (LogQL):
-{service_name="NutriLongaVidaFlix"}
+Grafana Cloud → Explore → Datasource: Loki
+LogQL: {service_name="NutriLongaVidaFlix"}
 ```
 
-Se qualquer um vier vazio, a pipeline está incompleta — verificar logs do EB para erros de exporter.
+Alternativa se a label não aparecer:
+```
+{exporter="OTLP"} |= "NutriLongaVidaFlix"
+```
 
-**3. ⏳ Criar os SLOs formais (Passo 13)**
+**C. Se vazio**: o `OpenTelemetryAppender` no `logback-spring.xml` pode não estar conectado ao `SdkLoggerProvider`. Verificar se `opentelemetry-logback-appender-1.0` está no classpath (`pom.xml`).
 
-Sem SLOs, não há Error Budget. Com SLOs:
-- O time sabe objetivamente se o sistema está dentro ou fora da meta
-- Deploys arriscados são bloqueados quando o budget está esgotado
-- A conversa entre Dev, SRE e Produto passa a ser baseada em dados
+---
 
-**4. ⏳ Simular uma falha e seguir o rastro (teste final)**
+**4. ⏳ Passo 13 — Criar SLOs no Grafana Cloud**
+
+> Pré-requisito: Passos 12.2 e 12.3 confirmados.
+
+Ver detalhes completos em [**Passo 13 — Definir SLIs e SLOs no Grafana Cloud**](#passo-13--definir-slis-e-slos-no-grafana-cloud) neste mesmo doc.
+
+Resumo executivo — o que fazer no Grafana Cloud:
+```
+Grafana Cloud → Alerting → SLOs → Create SLO
+
+SLO 1 — Disponibilidade:
+  Name: vidalongaflix-disponibilidade
+  Good events: sum(rate(http_server_requests_seconds_count{status=~"2.."}[5m]))
+  Total events: sum(rate(http_server_requests_seconds_count[5m]))
+  Objective: 99.5%   Rolling window: 30 days
+
+SLO 2 — Latência P95:
+  Name: vidalongaflix-latencia-p95
+  Good events: sum(rate(http_server_requests_seconds_bucket{le="0.3"}[5m]))
+  Total events: sum(rate(http_server_requests_seconds_count[5m]))
+  Objective: 99.5%   Rolling window: 30 days
+```
+
+O plugin gera automaticamente: Error Budget gauge, alertas de Burn Rate, dashboard com histórico.
+
+---
+
+**5. ⏳ Passo 12.4 — Importar dashboards no Grafana Cloud**
+
+Os JSONs dos dashboards já estão em `observability/grafana/provisioning/dashboards/`. Para importar manualmente:
+```
+Grafana Cloud → Dashboards → New → Import → Upload JSON file
+```
+Selecionar cada arquivo `.json` da pasta acima.
+
+---
+
+**6. ⏳ Teste final — simular falha e seguir o rastro**
 
 O teste final do ciclo é simular um problema real e verificar se:
 1. O alerta dispara no tempo esperado
@@ -2094,11 +2187,13 @@ O teste final do ciclo é simular um problema real e verificar se:
 for i in {1..50}; do curl -s https://api.vidalongaflix.com.br/api/videos; done
 
 # Explore → Tempo:
-{ .service.name = "NutriLongaVidaFlix" && duration > 200ms }
+{ resource.service.name = "NutriLongaVidaFlix" && duration > 200ms }
 ```
 
 Se o alerta disparar, o trace aparecer e o log correlacionar — **o ciclo está fechado**.
 
-**5. ⏳ Angular tracing (Passo 14)**
+---
+
+**7. ⏳ Angular tracing (Passo 14)**
 
 `tracing.ts` já existe no repo Angular. Falta ativar o sidecar no EB (docker-compose.yml multi-container) para o Collector receber traces do browser na porta 4318.
