@@ -167,12 +167,12 @@
 
         <!-- Appender Logback → OTel SDK: liga logs do Logback ao SdkLoggerProvider -->
         <!-- Versão alinhada com opentelemetry-api 1.49.0 (Spring Boot 3.5.12 BOM) -->
-        <!-- Sem isso, OtlpHttpLogRecordExporter existe mas não recebe nenhum log -->
+        <!-- Escopo compile (não runtime) para que ObservabilityConfig possa chamar -->
+        <!-- OpenTelemetryAppender.install(openTelemetry) no startup -->
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-logback-appender-1.0</artifactId>
             <version>2.15.0-alpha</version>
-            <scope>runtime</scope>
         </dependency>
 
         <!-- SpringDoc OpenAPI -->
