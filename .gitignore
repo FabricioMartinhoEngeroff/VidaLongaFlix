@@ -39,3 +39,7 @@ build/
 ### Deploy bundles ###
 deploy.zip
 dockerrun.zip
+
+### Docs privados ###
+docs/security*.md
+docs/security/

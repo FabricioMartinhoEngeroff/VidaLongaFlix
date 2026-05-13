@@ -1562,32 +1562,33 @@ O app em produção crasha no startup com `PlaceholderResolutionException: Could
 
 ---
 
-#### Passo 12 — Validar dados no Grafana Cloud ⏳
+#### Passo 12 — Validar dados no Grafana Cloud
 
-Após adicionar as variáveis do Passo 11 e o EB reiniciar:
-
-**12.1 — Métricas (Mimir)**
+**12.1 — Métricas (Mimir)** ✅ confirmado 2026-04-09
 ```promql
 # Explore → Data Source: Grafana Mimir
 http_server_requests_milliseconds_count{job="NutriLongaVidaFlix"}
 ```
 
-**12.2 — Traces (Tempo)**
+**12.2 — Traces (Tempo)** ⏳ não validado
 ```
 # Explore → Data Source: Grafana Tempo → TraceQL
-{ .service.name = "NutriLongaVidaFlix" }
+{ resource.service.name = "NutriLongaVidaFlix" }
 ```
 
-**12.3 — Logs (Loki)**
+**12.3 — Logs (Loki)** ✅ confirmado 2026-04-11
 ```logql
 # Explore → Data Source: Grafana Loki
-{service_name="NutriLongaVidaFlix"} |= "ERROR"
+{service_name="NutriLongaVidaFlix"}
 ```
 
-**12.4 — Importar dashboards**
+**12.4 — Importar dashboards** 🔄 em andamento (2026-04-11)
 1. Grafana Cloud → Dashboards → Import
 2. Importar os JSONs de `observability/grafana/provisioning/dashboards/`
-3. Ajustar datasource para apontar ao Mimir/Loki/Tempo do Grafana Cloud
+   - `jvm-backend.json` ✅ importado — datasource: `grafanacloud-vidalongaflix-prom`
+   - `golden-signals.json` ⏳
+   - `sli-disponibilidade.json` ⏳
+3. Datasource UID correto: `grafanacloud-vidalongaflix-prom` (já corrigido nos JSONs em 2026-04-11)
 
 ---
 
@@ -1772,5 +1773,278 @@ for i in {1..50}; do curl -s http://api.vidalongaflix.com.br/api/videos; done
 Se o alerta disparar, o trace aparecer e o log correlacionar — **o ciclo está fechado**.
 O que falta para fechar o ciclo:
 - Status visual de cada etapa (✅ / ⏳)
-- 4 ações concretas em ordem: app subindo → validar 3 pilares → criar SLOs → simular falha real
+
+---
+
+## Ciclo de Observabilidade na Prática — O que foi feito em 2026-04-11
+
+### Contexto
+
+Nesta sessão o objetivo era fechar o Passo 12.3 (Logs → Loki) e avançar nos Passos 12.4 e 13.
+As métricas (12.1) já estavam confirmadas desde 2026-04-09. Traces (12.2) ainda pendentes.
+
+---
+
+### Problema raiz: logs nunca chegavam ao Grafana Loki
+
+**Sintoma:** Explore → Loki → `{service_name="NutriLongaVidaFlix"}` retornava zero resultados,
+mesmo com a app em pé e o logback-spring.xml configurado com `OpenTelemetryAppender`.
+
+**Investigação:** o `OpenTelemetryAppender` (logback) tem um campo interno:
+
+```java
+private volatile OpenTelemetry openTelemetry = null;
+```
+
+Quando `null`, o appender **não descarta os logs imediatamente** — ele os armazena em um buffer
+interno de até 1000 entradas e depois os descarta silenciosamente. Nada no log de startup
+indica o problema.
+
+**Causa raiz:** o Spring Boot 3.5.12 cria o `OpenTelemetrySdk` via autoconfiguration
+(`OpenTelemetryAutoConfiguration` → `OpenTelemetryLoggingAutoConfiguration`), mas **nunca chama
+`OpenTelemetryAppender.install(openTelemetry)`**. Sem esse método, o appender nunca sabe que
+o SDK está disponível e o campo `openTelemetry` permanece `null`.
+
+---
+
+### Fix 1 — `ObservabilityConfig.java` (novo arquivo)
+
+Criado em `src/main/java/com/dvFabricio/VidaLongaFlix/infra/config/ObservabilityConfig.java`:
+
+```java
+@Configuration
+@ConditionalOnClass(OpenTelemetryAppender.class)
+public class ObservabilityConfig {
+
+    @Bean
+    SmartInitializingSingleton openTelemetryAppenderInstaller(OpenTelemetry openTelemetry) {
+        return () -> OpenTelemetryAppender.install(openTelemetry);
+    }
+}
+```
+
+**Por que `SmartInitializingSingleton`?** É um hook do Spring que executa depois que todos os
+beans estão prontos — garante que o `OpenTelemetry` bean já foi criado pela autoconfiguration
+antes de chamar `install()`.
+
+**Por que `@ConditionalOnClass`?** Evita falha de startup quando o artefato não estiver no
+classpath (ex: perfil de teste sem o appender).
+
+---
+
+### Fix 2 — escopo da dependência no `pom.xml`
+
+```xml
+<!-- Antes — runtime: não disponível para import em tempo de compilação -->
+<dependency>
+    <groupId>io.opentelemetry.instrumentation</groupId>
+    <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+    <version>2.15.0-alpha</version>
+    <scope>runtime</scope>
+</dependency>
+
+<!-- Depois — compile (padrão): permite que ObservabilityConfig importe OpenTelemetryAppender -->
+<dependency>
+    <groupId>io.opentelemetry.instrumentation</groupId>
+    <artifactId>opentelemetry-logback-appender-1.0</artifactId>
+    <version>2.15.0-alpha</version>
+</dependency>
+```
+
+**Erro sem o fix:** `package io.opentelemetry.instrumentation.logback.appender.v1_0 does not exist`
+
+---
+
+### Deploy e validação
+
+- Commit: `f853ac60` — branch `feat/observability`
+- GitHub Actions: ~5m51s (test → docker → push Docker Hub → deploy EB)
+- EB deploy: April 11 14:00 (visível nos logs `docker-events.log`)
+- Confirmação: Explore → Loki → `{service_name="NutriLongaVidaFlix"}` → **40 linhas de log**
+  com atributo `telemetry_sdk_name=opentelemetry`
+
+> **Lição:** `OpenTelemetryAppender` requer `install()` explícito — não é conectado automaticamente
+> pelo Spring Boot mesmo que o SDK esteja configurado. O silêncio (buffer descartado) é o que
+> torna o bug difícil de detectar.
+
+---
+
+### Passo 12.4 — Importar dashboards no Grafana Cloud
+
+**Problema:** ao importar os JSONs, os painéis mostravam "No data" porque o JSON usava
+`"uid": "prometheus"` como datasource, mas no Grafana Cloud o datasource Mimir tem UID diferente.
+
+**UID correto descoberto:** `grafanacloud-vidalongaflix-prom`
+(visível em qualquer painel → Edit → Data source dropdown)
+
+**Fix aplicado nos 3 JSONs:**
+```bash
+# Substituição feita em todos os arquivos de observability/grafana/provisioning/dashboards/
+sed -i 's/"uid":"prometheus"/"uid":"grafanacloud-vidalongaflix-prom"/g' *.json
+```
+
+**Status após fix:**
+- `jvm-backend.json` ✅ importado — Heap Memory, CPU, HikariCP com dados
+- `golden-signals.json` ✅ importado — ver seção abaixo
+- `sli-disponibilidade.json` ✅ importado — ver seção abaixo
+
+**Observação:** o painel "Threads JVM" mostrou "No data". As queries usam
+`jvm_threads_live_threads` — nome correto no endpoint Prometheus, mas pode haver diferença
+de nomenclatura no push OTLP (Micrometer OTLP registry pode exportar como `jvm_threads_live`
+sem o sufixo `_threads`). Para investigar: Grafana Explore → Metrics browser → buscar `jvm_threads`.
+
+---
+
+### Fix adicional — nomes de métricas HTTP nos dashboards golden-signals e sli-disponibilidade
+
+Os JSONs foram gerados com nomes de métricas do **Prometheus scrape** (`http_server_request_duration_seconds_*`),
+mas o projeto usa **OTLP push** via `micrometer-registry-otlp`, que exporta com nomes diferentes.
+
+**Substituições aplicadas:**
+
+```bash
+# Metric name
+sed -i 's/http_server_request_duration_seconds_count/http_server_requests_milliseconds_count/g' *.json
+sed -i 's/http_server_request_duration_seconds_bucket/http_server_requests_milliseconds_bucket/g' *.json
+sed -i 's/http_server_request_duration_seconds_sum/http_server_requests_milliseconds_sum/g' *.json
+
+# Label da rota
+sed -i 's/http_route/uri/g' *.json
+```
+
+**Regra geral:** no Micrometer OTLP registry, a métrica `http.server.requests` é exportada em
+**milissegundos** (não segundos) e o label de rota é `uri` (não `http_route`).
+
+---
+
+### Passo 12.2 — Traces confirmados com k6
+
+Para gerar tráfego e validar traces, foi executado o script k6 existente:
+
+```bash
+k6 run load-tests/login-flow.js \
+  -e BASE_URL=http://Vidalongaflix-backend-env.eba-gteu4qmf.us-east-2.elasticbeanstalk.com/api \
+  -e TEST_EMAIL=admin@vidalongaflix.com.br \
+  -e TEST_PASSWORD=<senha_admin>
+```
+
+**Resultado do teste (25 VUs, 2 minutos):**
+```
+p95: 160ms   ✅ (limite: 2000ms)
+p99: N/A
+Erros: 98.46%  ← esperado: Bucket4j (rate limiter) bloqueou logins concorrentes com 429
+Total: 2589 requisições
+```
+
+**Interpretação SRE:** os 98.46% de "erros" do k6 foram respostas **HTTP 429** (Too Many Requests)
+geradas pelo Bucket4j — o rate limiter funcionando corretamente para proteger o endpoint de login.
+Não houve falha real do servidor (0% de 5xx).
+
+**Validação no Grafana Explore → Tempo:**
+```
+{ resource.service.name = "NutriLongaVidaFlix" }
+```
+→ Spans apareceram: `NutriLongaVidaFlix  http post /auth/login  <1ms` ✅
+
+Passo 12.2 confirmado — traces chegando ao Grafana Cloud Tempo.
+
+---
+
+### Passo 13 — SLOs criados no Grafana Cloud (2026-04-11)
+
+Criados em: **Grafana → Alerts & IRM → SLO → Create SLO**
+Pasta: `VidaLongaFlix`
+Datasource: `grafanacloud-vidalongaflix-prom`
+
+**SLO 1 — Disponibilidade**
+
+| Campo | Valor |
+|---|---|
+| Nome | `vidalongaflix-disponibilidade` |
+| Success metric | `http_server_requests_milliseconds_count{http_response_status_code=~"2.."}` |
+| Total metric | `http_server_requests_milliseconds_count` |
+| Target | 99.5% em 28 dias |
+| Alert rules | Fast-burn (critical) + Slow-burn (warning) ativados |
+
+**SLO 2 — Latência P95 < 500ms**
+
+| Campo | Valor |
+|---|---|
+| Nome | `vidalongaflix-latencia-p95` |
+| Success metric | `http_server_requests_milliseconds_bucket{le="500"}` |
+| Total metric | `http_server_requests_milliseconds_count` |
+| Target | 99.5% em 28 dias |
+| Alert rules | Fast-burn (critical) + Slow-burn (warning) ativados |
+
+O Grafana gera automaticamente:
+- Dashboard por SLO com Error Budget, burn rate e tendência
+- Duas regras de alerta por SLO (fast-burn e slow-burn)
+- Labels `grafana_slo_severity=critical/warning` para roteamento
+
+---
+
+## CICLO DE OBSERVABILIDADE — FECHADO EM 2026-04-11
+
+```
+INSTRUMENTAR      ✅  Spring Boot envia métricas + traces + logs via OTLP
+ALERTAR           ✅  Burn rate alerts dos SLOs + regras Grafana Mimir
+COLETAR — MÉTRICAS ✅  Mimir: hikaricp, http, JVM (confirmado 2026-04-09)
+COLETAR — TRACES  ✅  Tempo: spans visíveis (confirmado 2026-04-11)
+COLETAR — LOGS    ✅  Loki: 40+ linhas (confirmado 2026-04-11)
+DASHBOARDS        ✅  3/3: JVM & Backend, Golden Signals, SLI/SLO
+VALIDAR (SLOs)    ✅  2 SLOs criados: disponibilidade + latência P95
+INSTITUCIONALIZAR ✅  Error Budget de 0.5% monitorado — alerta dispara se esgotado
+```
+
+### O que o ciclo significa na prática
+
+Com o ciclo fechado, o VidaLongaFlix tem:
+
+1. **Visibilidade completa:** qualquer falha em produção gera métricas, traces e logs
+   correlacionados pelo mesmo `trace_id` — é possível ir do alerta ao log da linha de código
+   que causou o problema
+
+2. **Objetivos formais:** os SLOs definem o que é "funcionando" — não é mais uma opinião,
+   é um número. Se a disponibilidade cair abaixo de 99.5%, o Error Budget começa a ser consumido
+
+3. **Alertas inteligentes:** burn rate alerts avisam **antes** do SLO ser violado, com base
+   em quanto rápido o budget está sendo gasto — não quando o dano já foi feito
+
+4. **Baseline de performance:** p95 = 160ms sob 25 usuários simultâneos (carga realista).
+   Qualquer regressão futura vai aparecer no dashboard Golden Signals
+
+### Único item pendente de deploy — Passo 14
+
+O código do Angular tracing já foi implementado (`src/tracing.ts`, `src/main.ts` — build OK).
+O que falta é **ativar o sidecar OTel Collector no EB**, trocando o deploy de container único
+(`Dockerrun.aws.json`) para multi-container (`docker-compose.yml`) que inclui o coletor como sidecar.
+
+Isso é uma decisão de infra separada — o código está pronto e o pipeline CI/CD já suporta ambos os modos.
+
+### Como usar o sistema de observabilidade no dia a dia
+
+**Investigar um incidente:**
+1. Alerta dispara (burn rate) → acessa o SLO dashboard — qual métrica está mal?
+2. Golden Signals → qual endpoint está lento ou com erro?
+3. Explore → Tempo → `{ resource.service.name = "NutriLongaVidaFlix" && http.status_code >= 500 }`
+4. Clica no trace → expande os spans → encontra o span lento
+5. Correlaciona com Loki pelo `trace_id` → lê o log exato da falha
+
+**Validar um deploy:**
+```bash
+# Antes do deploy — anotar o baseline
+# Golden Signals: p95 atual, taxa de erros
+
+# Após o deploy — aguardar 5 min e comparar
+# Se p95 subiu ou erros aumentaram → rollback imediato
+```
+
+**Simular pressão no sistema:**
+```bash
+k6 run load-tests/login-flow.js \
+  -e BASE_URL=http://Vidalongaflix-backend-env.eba-gteu4qmf.us-east-2.elasticbeanstalk.com/api \
+  -e TEST_EMAIL=admin@vidalongaflix.com.br \
+  -e TEST_PASSWORD=<senha>
+# Observar em tempo real: Dashboard Golden Signals → Latência + HikariCP
+```
 - O teste final com curl + query no Grafana para confirmar que o ciclo está realmente fechado

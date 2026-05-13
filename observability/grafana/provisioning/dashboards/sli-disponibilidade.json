@@ -24,7 +24,7 @@
       "type": "stat",
       "title": "Disponibilidade (SLI)",
       "description": "% de requisições com sucesso (2xx). SLO alvo: 99.5%. Abaixo disso: error budget está sendo consumido.",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
       "gridPos": { "h": 6, "w": 6, "x": 0, "y": 1 },
       "fieldConfig": {
         "defaults": {
@@ -51,8 +51,8 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"2..\"}[24h])) / sum(rate(http_server_request_duration_seconds_count[24h]))",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "sum(rate(http_server_requests_milliseconds_count{http_response_status_code=~\"2..\"}[24h])) / sum(rate(http_server_requests_milliseconds_count[24h]))",
           "legendFormat": "Disponibilidade",
           "refId": "A"
         }
@@ -64,7 +64,7 @@
       "type": "stat",
       "title": "Latência P95 (SLI)",
       "description": "SLO alvo: P95 < 300ms. Acima de 500ms = usuário percebe lentidão.",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
       "gridPos": { "h": 6, "w": 6, "x": 6, "y": 1 },
       "fieldConfig": {
         "defaults": {
@@ -90,8 +90,8 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "histogram_quantile(0.95, sum by(le) (rate(http_server_request_duration_seconds_bucket[5m])))",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "histogram_quantile(0.95, sum by(le) (rate(http_server_requests_milliseconds_bucket[5m])))",
           "legendFormat": "P95",
           "refId": "A"
         }
@@ -103,7 +103,7 @@
       "type": "stat",
       "title": "Taxa de Erro (SLI)",
       "description": "SLO alvo: < 0.5% de erros. Qualquer 5xx afeta o error budget.",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
       "gridPos": { "h": 6, "w": 6, "x": 12, "y": 1 },
       "fieldConfig": {
         "defaults": {
@@ -129,8 +129,8 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[5m])) / sum(rate(http_server_request_duration_seconds_count[5m]))",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "sum(rate(http_server_requests_milliseconds_count{http_response_status_code=~\"5..\"}[5m])) / sum(rate(http_server_requests_milliseconds_count[5m]))",
           "legendFormat": "Taxa de Erro",
           "refId": "A"
         }
@@ -142,7 +142,7 @@
       "type": "stat",
       "title": "Throughput (SLI)",
       "description": "Volume de requisições/segundo. Contexto para interpretar os outros SLIs — latência alta com tráfego baixo é diferente de latência alta com tráfego alto.",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
       "gridPos": { "h": 6, "w": 6, "x": 18, "y": 1 },
       "fieldConfig": {
         "defaults": {
@@ -163,8 +163,8 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(rate(http_server_request_duration_seconds_count[5m]))",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "sum(rate(http_server_requests_milliseconds_count[5m]))",
           "legendFormat": "req/s",
           "refId": "A"
         }
@@ -185,7 +185,7 @@
       "type": "gauge",
       "title": "Error Budget Restante (últimas 24h)",
       "description": "100% = nenhum erro. 0% = SLO violado. Abaixo de 50%: parar deploys arriscados.",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
       "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
       "fieldConfig": {
         "defaults": {
@@ -208,8 +208,8 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "1 - (sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[24h])) / sum(rate(http_server_request_duration_seconds_count[24h])) / 0.005)",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "1 - (sum(rate(http_server_requests_milliseconds_count{http_response_status_code=~\"5..\"}[24h])) / sum(rate(http_server_requests_milliseconds_count[24h])) / 0.005)",
           "legendFormat": "Budget restante",
           "refId": "A"
         }
@@ -221,7 +221,7 @@
       "type": "timeseries",
       "title": "Disponibilidade ao Longo do Tempo (últimas 24h)",
       "description": "Linha vermelha tracejada = SLO de 99.5%. Qualquer queda abaixo = error budget sendo consumido.",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
       "gridPos": { "h": 8, "w": 16, "x": 8, "y": 8 },
       "fieldConfig": {
         "defaults": {
@@ -243,13 +243,13 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"2..\"}[5m])) / sum(rate(http_server_request_duration_seconds_count[5m]))",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "sum(rate(http_server_requests_milliseconds_count{http_response_status_code=~\"2..\"}[5m])) / sum(rate(http_server_requests_milliseconds_count[5m]))",
           "legendFormat": "Disponibilidade real",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
           "expr": "vector(0.995)",
           "legendFormat": "SLO — meta 99.5%",
           "refId": "B"
@@ -270,7 +270,7 @@
       "id": 10,
       "type": "timeseries",
       "title": "Throughput — Requisições por Segundo",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
       "fieldConfig": {
         "defaults": {
@@ -284,14 +284,14 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(rate(http_server_request_duration_seconds_count[5m]))",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "sum(rate(http_server_requests_milliseconds_count[5m]))",
           "legendFormat": "Total req/s",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum by(http_response_status_code) (rate(http_server_request_duration_seconds_count[5m]))",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "sum by(http_response_status_code) (rate(http_server_requests_milliseconds_count[5m]))",
           "legendFormat": "HTTP {{ http_response_status_code }}",
           "refId": "B"
         }
@@ -303,7 +303,7 @@
       "type": "timeseries",
       "title": "Latência P50 vs P95 vs P99",
       "description": "P50 = usuário mediano. P95 = usuários lentos. P99 = casos extremos. Todos importam.",
-      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 17 },
       "fieldConfig": {
         "defaults": {
@@ -317,20 +317,20 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "histogram_quantile(0.50, sum by(le) (rate(http_server_request_duration_seconds_bucket[5m])))",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "histogram_quantile(0.50, sum by(le) (rate(http_server_requests_milliseconds_bucket[5m])))",
           "legendFormat": "P50 (mediana)",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "histogram_quantile(0.95, sum by(le) (rate(http_server_request_duration_seconds_bucket[5m])))",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "histogram_quantile(0.95, sum by(le) (rate(http_server_requests_milliseconds_bucket[5m])))",
           "legendFormat": "P95",
           "refId": "B"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "histogram_quantile(0.99, sum by(le) (rate(http_server_request_duration_seconds_bucket[5m])))",
+          "datasource": { "type": "prometheus", "uid": "grafanacloud-vidalongaflix-prom" },
+          "expr": "histogram_quantile(0.99, sum by(le) (rate(http_server_requests_milliseconds_bucket[5m])))",
           "legendFormat": "P99",
           "refId": "C"
         }
