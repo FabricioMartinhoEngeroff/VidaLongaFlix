@@ -10,6 +10,10 @@
 | 08/03/2026 | Adicao de CD automatico: job deploy GitHub Actions -> Elastic Beanstalk      | Fabricio    | -                            |
 | 08/03/2026 | GitHub Environment "production" com aprovacao manual antes do deploy         | Fabricio    | -                            |
 | 09/03/2026 | Limite de usuarios ativos, fila de espera (waitlist) e endpoints administrativos | Fabricio | Backend implementado; frontend deve tratar respostas `201/202` no cadastro |
+| 16/05/2026 | Imagens de capa locais adicionadas para videos e cardapios (36 PNGs em `static/assets/covers/`) | Fabricio | - |
+| 16/05/2026 | Videos divididos em 3 categorias: Bolos Classicos, Bolos Especiais, Receitas Proteicas | Fabricio | Requer reset do banco em producao para reaplicar o seed |
+| 16/05/2026 | Correcao: `/assets/**` liberado publicamente no SecurityConfig (resolvia erro 403 nas capas) | Fabricio | - |
+| 16/05/2026 | Correcao (frontend): resolucao de URL relativa de capas em VideoService e MenuService via `resolveUrl()` | Fabricio | - |
 
 ---
 
@@ -523,6 +527,16 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 | Parametro | Tipo         | Descricao                                |
 |-----------|--------------|------------------------------------------|
 | type      | CategoryType | Filtra por VIDEO ou MENU (obrigatorio)   |
+
+**Categorias de video criadas no seed:**
+
+| Nome               | Tipo  | Conteudo                                                         |
+|--------------------|-------|------------------------------------------------------------------|
+| Bolos Classicos    | VIDEO | Bolo de Cenoura, Chocolate, Laranja, Limao (5 videos)            |
+| Bolos Especiais    | VIDEO | Milho com Goiabada, Bolocuca, Cuca de Uva e Banana, Cupcake (4 videos) |
+| Receitas Proteicas | VIDEO | Bolo de Pote, Brownie no Pote, Brownie Proteico (3 videos)       |
+
+Cada categoria renderiza um carrossel horizontal independente no frontend.
 
 ---
 
@@ -1115,6 +1129,26 @@ server.forward-headers-strategy=FRAMEWORK
 ```
 
 `server.forward-headers-strategy=FRAMEWORK` e necessario para que o `ServletUriComponentsBuilder` use o header `X-Forwarded-Host` do nginx ao construir URLs de midia local, em vez do hostname interno da EC2.
+
+---
+
+### 18.9 Assets Estaticos de Capa (seed data)
+
+`src/main/resources/static/assets/covers/`
+
+Imagens de capa dos dados de seed sao armazenadas como recursos estaticos dentro do JAR do Spring Boot. O Spring serve automaticamente todo o conteudo de `src/main/resources/static/` sob o context-path da aplicacao.
+
+| Detalhe | Valor |
+|---|---|
+| Caminho fisico | `src/main/resources/static/assets/covers/` |
+| URL publica (dev) | `http://localhost:8090/api/assets/covers/{nome}.png` |
+| URL publica (prod) | `https://api.vidalongaflix.com/api/assets/covers/{nome}.png` |
+| Total de imagens | 36 PNGs (12 capas de video + 24 capas de cardapio) |
+| Seguranca | `/assets/**` liberado via `permitAll()` no `SecurityConfig` |
+
+O frontend resolve caminhos relativos (ex: `assets/covers/X.png`) para URL absoluta prefixando `environment.apiUrl` no `VideoService` e `MenuService` via metodo `resolveUrl()`. URLs absolutas (S3/CloudFront) sao retornadas sem alteracao.
+
+> **Observacao:** Esta abordagem e adequada para dados de seed e demonstracao. Para uploads em producao, o `MediaStorageService` continua usando S3 + CloudFront, retornando URLs absolutas diretamente.
 
 ---
 

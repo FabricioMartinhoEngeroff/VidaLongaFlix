@@ -10,6 +10,10 @@
 | 03/08/2026 | Automated CD pipeline: GitHub Actions deploy job to Elastic Beanstalk        | Fabricio| -                 |
 | 03/08/2026 | GitHub Environment "production" with manual approval gate before deploy       | Fabricio| -                 |
 | 03/09/2026 | Active user limit, waitlist support, and waitlist admin endpoints            | Fabricio| Backend implemented; frontend must handle `201/202` registration responses |
+| 05/16/2026 | Local cover images added for videos and menus (36 PNGs in `static/assets/covers/`) | Fabricio | - |
+| 05/16/2026 | Videos split into 3 categories: Bolos Clássicos, Bolos Especiais, Receitas Proteicas | Fabricio | Requires DB reset in production to re-apply seed |
+| 05/16/2026 | Fix: `/assets/**` publicly permitted in SecurityConfig (resolved 403 on cover images) | Fabricio | - |
+| 05/16/2026 | Fix (frontend): relative cover URL resolution added to VideoService and MenuService via `resolveUrl()` | Fabricio | - |
 
 ---
 
@@ -523,6 +527,16 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 | Parameter | Type         | Description                         |
 |-----------|--------------|-------------------------------------|
 | type      | CategoryType | Filters by VIDEO or MENU (required) |
+
+**Seed video categories:**
+
+| Name               | Type  | Content                                                              |
+|--------------------|-------|----------------------------------------------------------------------|
+| Bolos Clássicos    | VIDEO | Cenoura, Chocolate, Laranja, Limão (5 videos)                        |
+| Bolos Especiais    | VIDEO | Milho com Goiabada, Bolocuca, Cuca de Uva e Banana, Cupcake (4 videos)|
+| Receitas Proteicas | VIDEO | Bolo de Pote, Brownie no Pote, Brownie Proteico (3 videos)           |
+
+Each category renders an independent horizontal carousel in the frontend.
 
 ---
 
@@ -1115,6 +1129,26 @@ server.forward-headers-strategy=FRAMEWORK
 ```
 
 `server.forward-headers-strategy=FRAMEWORK` is required so that `ServletUriComponentsBuilder` uses the `X-Forwarded-Host` header from nginx when building local media URLs, instead of the internal EC2 hostname.
+
+---
+
+### 18.9 Static Cover Assets (seed data)
+
+`src/main/resources/static/assets/covers/`
+
+Seed cover images are stored as static resources inside the Spring Boot JAR. Spring automatically serves all content from `src/main/resources/static/` under the application context-path.
+
+| Detail | Value |
+|---|---|
+| Physical path | `src/main/resources/static/assets/covers/` |
+| Public URL (dev) | `http://localhost:8090/api/assets/covers/{name}.png` |
+| Public URL (prod) | `https://api.vidalongaflix.com/api/assets/covers/{name}.png` |
+| Total images | 36 PNGs (12 video covers + 24 menu covers) |
+| Security | `/assets/**` permitted via `permitAll()` in `SecurityConfig` |
+
+The frontend resolves relative paths (e.g. `assets/covers/X.png`) to absolute URLs by prefixing `environment.apiUrl` in `VideoService` and `MenuService` via the `resolveUrl()` method. Absolute URLs (S3/CloudFront) are returned unchanged.
+
+> **Note:** This approach is appropriate for seed and demo data. For production uploads, `MediaStorageService` continues to use S3 + CloudFront and returns absolute URLs directly.
 
 ---
 
