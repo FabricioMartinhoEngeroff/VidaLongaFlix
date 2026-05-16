@@ -1,4 +1,4 @@
-# VidaLong Flix — Backend
+# VidaLongaFlix — Backend
 
 API REST da plataforma de streaming focada em saúde e longevidade.  
 Responsável por autenticação, gerenciamento de conteúdo, armazenamento de mídia e observabilidade em produção.
