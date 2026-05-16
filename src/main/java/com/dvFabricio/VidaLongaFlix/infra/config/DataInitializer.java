@@ -69,8 +69,10 @@ public class DataInitializer implements ApplicationRunner {
     // ── Categories ─────────────────────────────────────────────────────────────
 
     private void seedCategories() {
-        cat("Receitas",      CategoryType.VIDEO);
-        cat("Almoço",        CategoryType.MENU);
+        cat("Bolos Clássicos",    CategoryType.VIDEO);
+        cat("Bolos Especiais",    CategoryType.VIDEO);
+        cat("Receitas Proteicas", CategoryType.VIDEO);
+        cat("Almoço",             CategoryType.MENU);
         cat("Lanche",        CategoryType.MENU);
         cat("Jantar",        CategoryType.MENU);
         cat("Café da manhã", CategoryType.MENU);
@@ -87,80 +89,85 @@ public class DataInitializer implements ApplicationRunner {
 
     private void seedVideos() {
         if (videoRepository.count() > 0) return;
-        Category c = cat("Receitas", CategoryType.VIDEO);
+        Category classicos  = cat("Bolos Clássicos",    CategoryType.VIDEO);
+        Category especiais  = cat("Bolos Especiais",    CategoryType.VIDEO);
+        Category proteicas  = cat("Receitas Proteicas", CategoryType.VIDEO);
         videoRepository.saveAll(List.of(
-            v(c, "Bolo de Cenoura Fácil",
+            // ── Bolos Clássicos ───────────────────────────────────────────────
+            v(classicos, "Bolo de Cenoura Fácil",
                 "Aprenda a fazer um bolo de cenoura simples e delicioso.",
                 "assets/videos/Bolo-de-Cenoura-Facil.mp4",
                 "assets/covers/Bolo-de-Cenoura-Facil.png",
                 3.7, 21.2, 4.9, 1.6, 142.0,
                 "Bata cenoura, ovo e óleo no liquidificador. Adicione açúcar, farinha e fermento. Asse a 180°C por 35 min."),
-            v(c, "Bolo de Cenoura",
+            v(classicos, "Bolo de Cenoura",
                 "Receita tradicional de bolo de cenoura com cobertura.",
                 "assets/videos/Bolo-de-Cenoura.mp4",
                 "assets/covers/Bolo-de-Cenoura.png",
                 4.4, 22.4, 5.8, 2.2, 165.0,
                 "Prepare a massa tradicional e finalize com cobertura de chocolate."),
-            v(c, "Bolo de Chocolate",
+            v(classicos, "Bolo de Chocolate",
                 "Um bolo de chocolate super fofo e saboroso.",
                 "assets/videos/Bolo-de-Chocolate.mp4",
                 "assets/covers/Bolo-de-Chocolate.png",
                 5.1, 23.6, 6.7, 1.0, 183.0,
                 "Misture cacau, farinha, ovos e leite. Asse e cubra com ganache."),
-            v(c, "Bolo de Laranja",
+            v(classicos, "Bolo de Laranja",
                 "Delicioso bolo de laranja com sabor cítrico marcante.",
                 "assets/videos/Bolo-de-Laranja.mp4",
                 "assets/covers/Bolo-de-Laranja.png",
                 5.8, 24.8, 4.0, 1.6, 168.0,
                 "Bata suco de laranja com ovos e óleo. Adicione farinha e fermento. Asse a 180°C."),
-            v(c, "Bolo de Limão",
+            v(classicos, "Bolo de Limão",
                 "Receita leve de bolo de limão com um toque cítrico.",
                 "assets/videos/Bolo-de-Limao.mp4",
                 "assets/covers/Bolo-de-Limao.png",
                 3.0, 26.0, 4.9, 2.2, 161.0,
                 "Misture raspas de limão, ovos e iogurte. Asse e finalize com calda de limão."),
-            v(c, "Bolo de Milho com Goiabada",
+            // ── Bolos Especiais ───────────────────────────────────────────────
+            v(especiais, "Bolo de Milho com Goiabada",
                 "Bolo delicioso de milho com pedaços de goiabada.",
                 "assets/videos/Bolo-de-Milho-com-Goibada.mp4",
                 "assets/covers/Bolo-de-Milho-com-Goiabada.png",
                 3.7, 20.0, 5.8, 1.0, 148.0,
                 "Bata milho verde, ovos e margarina. Adicione fubá, farinha e fermento. Recheie com goiabada."),
-            v(c, "Bolo de Pote Proteico",
-                "Uma opção saudável e prática de bolo proteico.",
-                "assets/videos/Bolo-de-pote-proteico.mp4",
-                "assets/covers/Bolo-de-Pote-Proteico.png",
-                4.4, 21.2, 6.7, 1.6, 166.0,
-                "Monte camadas de bolo, creme proteico e frutas em potes individuais."),
-            v(c, "Bolocuca de Banana",
+            v(especiais, "Bolocuca de Banana",
                 "Uma cuca deliciosa feita com bananas maduras.",
                 "assets/videos/Bolocuca-de-banana.mp4",
                 "assets/covers/Bolocuca-de-Banana.png",
                 5.1, 22.4, 4.0, 2.2, 151.0,
                 "Amasse bananas maduras e misture com farinha, ovos e canela. Adicione farofa por cima."),
-            v(c, "Brownie no Pote",
-                "Delicioso brownie no pote para sobremesa ou presente.",
-                "assets/videos/Brownie-no-Pote.mp4",
-                "assets/covers/Brownie-no-Pote.png",
-                5.8, 23.6, 4.9, 1.0, 163.0,
-                "Prepare a massa de brownie e sirva em camadas com sorvete em potes."),
-            v(c, "Brownie Proteico",
-                "Uma versão saudável e deliciosa do brownie clássico.",
-                "assets/videos/Brownie-proteico.mp4",
-                "assets/covers/Brownie-Proteico.png",
-                3.0, 24.8, 5.8, 1.6, 161.0,
-                "Substitua farinha por proteína whey e açúcar por adoçante. Asse a 180°C por 20 min."),
-            v(c, "Cupcake de Banana",
+            v(especiais, "Cuca de Uva e Banana",
+                "Receita tradicional de cuca com uva e banana.",
+                "assets/videos/Cuca-de-Uva-e-Banana.mp4",
+                "assets/covers/Cuca-de-Uva-e-Banana.png",
+                4.4, 20.0, 4.0, 1.0, 140.0,
+                "Prepare a massa de cuca, cubra com uva e banana. Faça a farofa e espalhe por cima."),
+            v(especiais, "Cupcake de Banana",
                 "Cupcake fofinho de banana para o lanche da tarde.",
                 "assets/videos/Cupcake-de-Banana.mp4",
                 "assets/covers/Cupcake-de-Banana.png",
                 3.7, 26.0, 6.7, 2.2, 178.0,
                 "Amasse banana, misture com farinha e ovos. Asse em forminhas e decore com cream cheese."),
-            v(c, "Cuca de Uva e Banana",
-                "Receita tradicional de cuca com uva e banana.",
-                "assets/videos/Cuca-de-Uva-e-Banana.mp4",
-                "assets/covers/Cuca-de-Uva-e-Banana.png",
-                4.4, 20.0, 4.0, 1.0, 140.0,
-                "Prepare a massa de cuca, cubra com uva e banana. Faça a farofa e espalhe por cima.")
+            // ── Receitas Proteicas ────────────────────────────────────────────
+            v(proteicas, "Bolo de Pote Proteico",
+                "Uma opção saudável e prática de bolo proteico.",
+                "assets/videos/Bolo-de-pote-proteico.mp4",
+                "assets/covers/Bolo-de-Pote-Proteico.png",
+                4.4, 21.2, 6.7, 1.6, 166.0,
+                "Monte camadas de bolo, creme proteico e frutas em potes individuais."),
+            v(proteicas, "Brownie no Pote",
+                "Delicioso brownie no pote para sobremesa ou presente.",
+                "assets/videos/Brownie-no-Pote.mp4",
+                "assets/covers/Brownie-no-Pote.png",
+                5.8, 23.6, 4.9, 1.0, 163.0,
+                "Prepare a massa de brownie e sirva em camadas com sorvete em potes."),
+            v(proteicas, "Brownie Proteico",
+                "Uma versão saudável e deliciosa do brownie clássico.",
+                "assets/videos/Brownie-proteico.mp4",
+                "assets/covers/Brownie-Proteico.png",
+                3.0, 24.8, 5.8, 1.6, 161.0,
+                "Substitua farinha por proteína whey e açúcar por adoçante. Asse a 180°C por 20 min.")
         ));
     }
 
