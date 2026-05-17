@@ -219,30 +219,30 @@ push → GitHub Actions → build → test → Docker build → push Docker Hub 
 
 ## Próximas features e melhorias
 
-As evoluções planejadas para o projeto estão documentadas em detalhes na pasta [`docs/`](docs/).
+As evoluções planejadas para o projeto estão documentadas em detalhes na pasta [`docs/`](Especificação_Fucnional_docs/).
 Cada documento descreve o problema, a solução escolhida, sprints de implementação e os critérios de aceite.
 
 ### Segurança
 
 | Documento | O que cobre |
 |---|---|
-| [Fundamentos AppSec](docs/security/security_foundation/security-1.0.md) | SSDLC, Threat Modeling STRIDE, OWASP Top 10 aplicado ao projeto |
-| [OWASP Top 10](docs/security/security_top10_OWASP/security_top10_OWASP-1.0.md) | Análise das 10 vulnerabilidades com exemplos Java e Angular |
-| [CORS · CSRF · SSRF](docs/security/security_foundation/security-1.5.md) | Vulnerabilidades identificadas no código atual + roadmap de correção |
-| [Segurança de APIs](docs/security/security_APIs/security_apis-1.0.md) | Autenticação, autorização e boas práticas de API |
-| [Gestão de Secrets](docs/security/security_menage_secrets/menage_secrets.md) | AWS Secrets Manager, rotação automática, eliminar vars em texto plano |
-| [Segurança de Rede](docs/security/security_network/security_network.md) | WAF, VPC, grupos de segurança, NACLs |
-| [SAST com SonarCloud](docs/security/security_ci_cd/security_ci_cd-1.0.md) | Análise estática no CI — 7 sprints planejados para zero Blocker/Critical |
-| [Container Security](docs/container-security-docker-scout.md) | Docker Scout, CVEs na imagem, hardening do Dockerfile |
+| [Fundamentos AppSec](Especificação_Fucnional_docs/security/security_foundation/security-1.0.md) | SSDLC, Threat Modeling STRIDE, OWASP Top 10 aplicado ao projeto |
+| [OWASP Top 10](Especificação_Fucnional_docs/security/security_top10_OWASP/security_top10_OWASP-1.0.md) | Análise das 10 vulnerabilidades com exemplos Java e Angular |
+| [CORS · CSRF · SSRF](Especificação_Fucnional_docs/security/security_foundation/security-1.5.md) | Vulnerabilidades identificadas no código atual + roadmap de correção |
+| [Segurança de APIs](Especificação_Fucnional_docs/security/security_APIs/security_apis-1.0.md) | Autenticação, autorização e boas práticas de API |
+| [Gestão de Secrets](Especificação_Fucnional_docs/security/security_menage_secrets/menage_secrets.md) | AWS Secrets Manager, rotação automática, eliminar vars em texto plano |
+| [Segurança de Rede](Especificação_Fucnional_docs/security/security_network/security_network.md) | WAF, VPC, grupos de segurança, NACLs |
+| [SAST com SonarCloud](Especificação_Fucnional_docs/security/security_ci_cd/security_ci_cd-1.0.md) | Análise estática no CI — 7 sprints planejados para zero Blocker/Critical |
+| [Container Security](Especificação_Fucnional_docs/container-security-docker-scout.md) | Docker Scout, CVEs na imagem, hardening do Dockerfile |
 
 ### Infraestrutura e SRE
 
 | Documento | O que cobre |
 |---|---|
-| [Observabilidade](docs/sre-observability.md) | OpenTelemetry, Grafana Cloud, SLOs e burn rate alerts |
-| [Terraform](docs/sre-observability-2-terraform.md) | Infraestrutura como código para o ambiente AWS |
-| [DevOps](docs/devops-infrastructure.md) | Pipeline CI/CD, estratégias de deploy, rollback |
-| [Monitoramento de Rede](docs/network-and-system-monitoring.md) | Monitoramento de sistema operacional e rede |
+| [Observabilidade](Especificação_Fucnional_docs/sre-observability.md) | OpenTelemetry, Grafana Cloud, SLOs e burn rate alerts |
+| [Terraform](Especificação_Fucnional_docs/sre-observability-2-terraform.md) | Infraestrutura como código para o ambiente AWS |
+| [DevOps](Especificação_Fucnional_docs/devops-infrastructure.md) | Pipeline CI/CD, estratégias de deploy, rollback |
+| [Monitoramento de Rede](Especificação_Fucnional_docs/network-and-system-monitoring.md) | Monitoramento de sistema operacional e rede |
 
 ---
 

@@ -41,5 +41,5 @@ deploy.zip
 dockerrun.zip
 
 ### Docs privados ###
-docs/security*.md
-docs/security/
+Especificação_Fucnional_docs/security*.md
+Especificação_Fucnional_docs/security/

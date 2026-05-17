@@ -6,6 +6,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,6 +19,7 @@ import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final SecurityFilter securityFilter;
@@ -42,18 +44,18 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/whatsapp/webhook").permitAll()
-                        .requestMatchers("/videos/**").permitAll()
-                        .requestMatchers("/menus/**").permitAll()
-                        .requestMatchers(HttpMethod.DELETE,
-                                "/comments/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/videos/**").permitAll()
+                        .requestMatchers(HttpMethod.PATCH, "/videos/*/view").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/menus/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/comments/**").hasRole("ADMIN")
                         .requestMatchers("/comments/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,
-                                "/categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/categories/**").permitAll()
                         .requestMatchers("/categories/**").hasRole("ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/notifications/**").authenticated()
-                        .requestMatchers(HttpMethod.OPTIONS,
-                                "/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.disable())

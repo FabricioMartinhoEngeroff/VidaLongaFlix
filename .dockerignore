@@ -3,7 +3,7 @@ target
 .github
 .idea
 logs
-docs
+Especificação_Fucnional_docs
 *.iml
 *.log
 
