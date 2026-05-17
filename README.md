@@ -7,8 +7,7 @@
 ![CI/CD](https://img.shields.io/github/actions/workflow/status/FabricioMartinhoEngeroff/VidaLongaFlix/ci.yml?label=CI%2FCD&logo=githubactions)
 ![License](https://img.shields.io/badge/license-Private-red)
 
-API REST da **VidaLongaFlix**, plataforma de streaming focada em saúde e longevidade.
-Usuários assistem a vídeos de receitas saudáveis e exploram cardápios nutricionais.
+API REST da VidaLongaFlix link:https://vidalongaflix.com/authorization , plataforma de streaming focada em saúde e longevidade. Usuários assistem a vídeos de receitas saudáveis e exploram cardápios nutricionais.
 Construída com **Java 17 + Spring Boot 3.5**, implantada na **AWS** com observabilidade completa via **Grafana Cloud**.
 
 ---
