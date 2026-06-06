@@ -1,7 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.services;
 
 import com.dvFabricio.VidaLongaFlix.domain.email.EmailMessage;
-import com.dvFabricio.VidaLongaFlix.domain.message.Message;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,39 +13,48 @@ public class WaitlistNotificationService {
     private static final String PLATFORM_URL = "https://vidalongaflix.com";
 
     private final EmailService emailService;
-    private final WhatsAppService whatsAppService;
 
-    public WaitlistNotificationService(EmailService emailService, WhatsAppService whatsAppService) {
+    public WaitlistNotificationService(EmailService emailService) {
         this.emailService = emailService;
-        this.whatsAppService = whatsAppService;
     }
 
     public void notifyQueued(User user) {
-        emailService.send(new EmailMessage(
-                user.getEmail(),
-                "VidaLongaFlix - Fila de espera",
-                buildQueuedEmailBody(user)
-        ));
-        logger.info("Queue notification sent for user {} at position {}", user.getEmail(), user.getQueuePosition());
+        try {
+            emailService.send(new EmailMessage(
+                    user.getEmail(),
+                    "VidaLongaFlix - Fila de espera",
+                    buildQueuedEmailBody(user)
+            ));
+            logger.info("Queue notification sent for user {} at position {}", user.getEmail(), user.getQueuePosition());
+        } catch (Exception e) {
+            logger.error("Queue notification not sent for user {}: {}", user.getEmail(), e.getMessage());
+        }
     }
 
     public void notifyActivated(User user) {
-        emailService.send(new EmailMessage(
-                user.getEmail(),
-                "VidaLongaFlix - Conta ativada",
-                buildActivatedEmailBody(user)
-        ));
-        logger.info("Activation notification sent for user {}", user.getEmail());
-        whatsAppService.send(new Message(user.getPhone(), "account_activated_template"));
+        try {
+            emailService.send(new EmailMessage(
+                    user.getEmail(),
+                    "VidaLongaFlix - Conta ativada",
+                    buildActivatedEmailBody(user)
+            ));
+            logger.info("Activation notification sent for user {}", user.getEmail());
+        } catch (Exception e) {
+            logger.error("Activation notification not sent for user {}: {}", user.getEmail(), e.getMessage());
+        }
     }
 
     public void notifyRemoved(User user) {
-        emailService.send(new EmailMessage(
-                user.getEmail(),
-                "VidaLongaFlix - Saida da fila de espera",
-                buildRemovedEmailBody(user)
-        ));
-        logger.info("Removal notification sent for user {}", user.getEmail());
+        try {
+            emailService.send(new EmailMessage(
+                    user.getEmail(),
+                    "VidaLongaFlix - Saida da fila de espera",
+                    buildRemovedEmailBody(user)
+            ));
+            logger.info("Removal notification sent for user {}", user.getEmail());
+        } catch (Exception e) {
+            logger.error("Removal notification not sent for user {}: {}", user.getEmail(), e.getMessage());
+        }
     }
 
     private String buildQueuedEmailBody(User user) {

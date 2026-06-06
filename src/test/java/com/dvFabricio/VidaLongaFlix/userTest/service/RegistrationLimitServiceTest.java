@@ -109,7 +109,7 @@ class RegistrationLimitServiceTest {
         assertNull(savedUser.getQueuePosition());
         assertEquals("encoded-password", savedUser.getPassword());
 
-        then(welcomeService).should().sendWelcomeMessage("Usuario Teste", "(11) 98765-4321");
+        then(welcomeService).should().sendWelcomeMessage("Usuario Teste", "usuario@test.com");
         then(waitlistNotificationService).should(never()).notifyQueued(any(User.class));
     }
 

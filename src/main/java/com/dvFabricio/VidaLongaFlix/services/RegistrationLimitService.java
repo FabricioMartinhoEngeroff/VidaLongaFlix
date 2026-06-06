@@ -282,9 +282,9 @@ public class RegistrationLimitService {
 
     private void sendWelcomeBestEffort(User user) {
         try {
-            welcomeService.sendWelcomeMessage(user.getName(), user.getPhone());
+            welcomeService.sendWelcomeMessage(user.getName(), user.getEmail());
         } catch (Exception e) {
-            System.err.println("WhatsApp nao enviado: " + e.getMessage());
+            System.err.println("Welcome email nao enviado: " + e.getMessage());
         }
     }
 

@@ -45,7 +45,6 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/actuator/**").hasRole("ADMIN")
-                        .requestMatchers("/whatsapp/webhook").permitAll()
                         .requestMatchers(HttpMethod.GET, "/videos/**").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/videos/*/view").permitAll()
                         .requestMatchers(HttpMethod.GET, "/menus/**").permitAll()

@@ -80,7 +80,7 @@ public class UserService {
 
         user = userRepository.save(user);
 
-        welcomeService.sendWelcomeMessage(user.getName(), user.getPhone());
+        welcomeService.sendWelcomeMessage(user.getName(), user.getEmail());
 
         return new UserDTO(user);
     }

@@ -105,7 +105,7 @@ class UserServiceTest {
         assertNotNull(result);
         assertEquals("joao@example.com", result.email());
         then(userRepository).should().save(any(User.class));
-        then(welcomeService).should().sendWelcomeMessage("João Silva", "(11) 99999-9999");
+        then(welcomeService).should().sendWelcomeMessage("João Silva", "joao@example.com");
     }
 
     @Test
