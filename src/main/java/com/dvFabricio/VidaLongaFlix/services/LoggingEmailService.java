@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
-@Profile("!prod")
+@Profile("!prod & !prod-h2")
 public class LoggingEmailService implements EmailService {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingEmailService.class);
