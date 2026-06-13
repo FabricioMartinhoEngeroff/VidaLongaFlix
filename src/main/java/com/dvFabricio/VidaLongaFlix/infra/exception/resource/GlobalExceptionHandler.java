@@ -146,4 +146,16 @@ public class GlobalExceptionHandler {
                 HttpStatus.UNAUTHORIZED, "Unauthorized", e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(err);
     }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<StandardError> tokenExpired(TokenExpiredException e, HttpServletRequest request) {
+        StandardError err = buildStandardError(
+                HttpStatus.GONE,
+                "Token expirado ou já utilizado",
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.GONE).body(err);
+    }
+
 }
