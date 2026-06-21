@@ -14,6 +14,7 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
+import jakarta.servlet.http.Cookie;
 
 import java.io.IOException;
 import java.util.List;
@@ -52,6 +53,25 @@ class SecurityFilterTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer token.valido.aqui");
+
+        when(tokenService.getUserIdFromToken("token.valido.aqui")).thenReturn(userId);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        securityFilter.doFilter(request, new MockHttpServletResponse(), new MockFilterChain());
+
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        assertSame(user, principal);
+    }
+
+    @Test
+    void shouldAuthenticateUserWhenCookieTokenIsValid() throws ServletException, IOException {
+        UUID userId = UUID.randomUUID();
+        User user = new User("João Silva", "joao@example.com", "encodedPassword", "(11) 99999-9999");
+        user.setId(userId);
+        user.setRoles(List.of(new Role("ROLE_USER")));
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setCookies(new Cookie("token", "token.valido.aqui"));
 
         when(tokenService.getUserIdFromToken("token.valido.aqui")).thenReturn(userId);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));

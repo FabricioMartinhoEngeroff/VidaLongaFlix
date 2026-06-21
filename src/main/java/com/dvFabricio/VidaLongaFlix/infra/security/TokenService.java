@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -78,7 +79,11 @@ public class TokenService {
         }
     }
 
+    public Duration getExpiration() {
+        return Duration.ofHours(expirationHours);
+    }
+
     private Instant generateExpirationDate() {
-        return Instant.now().plusSeconds((long) expirationHours * 3600);
+        return Instant.now().plus(getExpiration());
     }
 }

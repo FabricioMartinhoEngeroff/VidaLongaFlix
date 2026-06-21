@@ -11,19 +11,24 @@ O documento de 290 cenários mistura:
 
 Os cenários abaixo existem no sistema e possuem cobertura automatizada relevante:
 
-- `B6` login com sucesso
-- `B8` erros de login
+- `B6` login com sucesso (inclui verificação de `Set-Cookie: token` com `HttpOnly`, `Secure`, `Max-Age`)
+- `B8` erros de login (credenciais inválidas, usuário QUEUED, usuário DISABLED)
 - `B12` renderização não se aplica, mas os contratos de registro existem no backend
 - `B13` validações de `RegisterRequestDTO`
-- `B18` registro com sucesso
+- `B18` registro com sucesso (inclui cookie para usuário ACTIVE; sem cookie para QUEUED)
 - `B20` erros de registro
 - `B34` proteção de rotas autenticadas no backend
 - `B35` proteção de rotas admin no backend
+- `B36` autenticação por cookie httpOnly (SecurityFilter aceita token no cookie `token` em vez de header Bearer)
+- `B37` autenticação por Bearer header (SecurityFilter aceita ambas as formas)
+- `B38` logout via `POST /auth/logout` expira o cookie no servidor (`Max-Age=0`)
+- `B39` `keepLoggedIn=true` → cookie persistente com `Max-Age`; `keepLoggedIn=false` → cookie de sessão sem `Max-Age`
 - `B50` conversão do telefone para envio WhatsApp
 
 Arquivos principais de teste:
 
 - `src/test/java/com/dvFabricio/VidaLongaFlix/userTest/controller/AuthControllerTest.java`
+- `src/test/java/com/dvFabricio/VidaLongaFlix/infra/security/SecurityFilterTest.java`
 - `src/test/java/com/dvFabricio/VidaLongaFlix/integration/auth/AuthIntegrationTest.java`
 - `src/test/java/com/dvFabricio/VidaLongaFlix/integration/security/SecurityAccessIntegrationTest.java`
 - `src/test/java/com/dvFabricio/VidaLongaFlix/welcome/whatsappTest/whatsappTest.java`
@@ -71,6 +76,15 @@ Para alinhar os testes ao comportamento real do backend atual, foram adicionados
 - JSON malformado em login e registro
 - falha de registro quando `ROLE_USER` não existe
 - comportamento real de `/auth/me` com token inválido
+
+**Rodada 2 (21/06/2026) — migração para cookie httpOnly:**
+
+- cookie `token` presente na resposta de login com `HttpOnly`, `Secure`, `SameSite=None`
+- `keepLoggedIn=false` gera cookie de sessão (`Max-Age=-1`); `keepLoggedIn=true` (padrão) gera cookie persistente
+- registro de usuário ACTIVE inclui cookie; usuário QUEUED não recebe cookie
+- `POST /auth/logout` expira o cookie com `Max-Age=0`
+- `SecurityFilter` autentica via cookie (sem header Authorization) — `shouldAuthenticateUserWhenCookieTokenIsValid`
+- `SecurityFilter` ainda aceita Bearer header para compatibilidade
 
 ## Próximo passo recomendado
 

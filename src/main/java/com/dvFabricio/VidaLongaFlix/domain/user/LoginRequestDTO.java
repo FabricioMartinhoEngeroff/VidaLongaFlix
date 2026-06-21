@@ -11,5 +11,11 @@ public record LoginRequestDTO(
 
         @NotBlank(message = "Senha não pode estar vazia")
         @Size(min = 8, message = "Senha deve ter pelo menos 8 caracteres")
-        String password
-) {}
+        String password,
+
+        Boolean keepLoggedIn
+) {
+        public LoginRequestDTO(String email, String password) {
+                this(email, password, true);
+        }
+}

@@ -17,10 +17,14 @@ import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import com.dvFabricio.VidaLongaFlix.services.RegistrationLimitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import java.time.Duration;
 
 @RestController
 @RequestMapping("/auth")
@@ -32,8 +36,6 @@ public class AuthController {
     private final TokenService tokenService;
     private final RegistrationLimitService registrationLimitService;
 
-    // @AuthenticationPrincipal injeta o usuário já autenticado pelo SecurityFilter
-    // Não precisa mais extrair token manualmente — o Spring já fez isso
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> me(
             @AuthenticationPrincipal User user) {
@@ -67,7 +69,12 @@ public class AuthController {
         }
 
         String token = tokenService.generateToken(user);
-        return ResponseEntity.ok(new AuthResponseDTO(token, new UserResponseDTO(user)));
+        boolean keepLoggedIn = body.keepLoggedIn() == null || body.keepLoggedIn();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, buildAuthCookie(token, keepLoggedIn).toString())
+                .body(new AuthResponseDTO(token, new UserResponseDTO(user)));
+
     }
 
     @PostMapping("/register")
@@ -75,7 +82,25 @@ public class AuthController {
             @RequestBody @Valid RegisterRequestDTO body) {
         RegistrationResponseDTO response = registrationLimitService.register(body);
         HttpStatus status = response.queued() ? HttpStatus.ACCEPTED : HttpStatus.CREATED;
-        return ResponseEntity.status(status).body(response);
+
+        ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(status);
+        if (!response.queued()) {
+            responseBuilder.header(HttpHeaders.SET_COOKIE, buildAuthCookie(response.token(), true).toString());
+        }
+        return responseBuilder.body(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        ResponseCookie expiredCookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(0)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/registration-status")
@@ -87,5 +112,19 @@ public class AuthController {
     public ResponseEntity<WaitlistMessageDTO> cancelWaitlistEntry(
             @RequestParam String email) {
         return ResponseEntity.ok(registrationLimitService.removeQueuedUserByEmail(email));
+    }
+
+    private ResponseCookie buildAuthCookie(String token, boolean persistent) {
+        ResponseCookie.ResponseCookieBuilder builder = ResponseCookie.from("token", token)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/");
+
+        if (persistent) {
+            builder.maxAge(tokenService.getExpiration());
+        }
+
+        return builder.build();
     }
 }

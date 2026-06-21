@@ -14,6 +14,7 @@
 | 05/16/2026 | Videos split into 3 categories: Bolos Clássicos, Bolos Especiais, Receitas Proteicas | Fabricio | Requires DB reset in production to re-apply seed |
 | 05/16/2026 | Fix: `/assets/**` publicly permitted in SecurityConfig (resolved 403 on cover images) | Fabricio | - |
 | 05/16/2026 | Fix (frontend): relative cover URL resolution added to VideoService and MenuService via `resolveUrl()` | Fabricio | - |
+| 06/21/2026 | Auth migration to httpOnly cookie: login/register/logout now set `Set-Cookie: token=…; HttpOnly; Secure; SameSite=None`. Field `keepLoggedIn` added to login. Endpoint `POST /auth/logout` created. `SecurityFilter` accepts token via Bearer header OR cookie. | Fabricio | Frontend must use `withCredentials: true` on all API requests |
 
 ---
 
@@ -41,7 +42,7 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 ## 4. General Rules
 
-**GR01** - Authentication uses JWT (JSON Web Token) with a 2-hour validity period. The token must be sent in the `Authorization: Bearer {token}` header on all requests requiring authentication.
+**GR01** - Authentication uses JWT (JSON Web Token) with a configurable validity period (default 2 hours). The token is transmitted in two equivalent ways: via the `Authorization: Bearer {token}` header OR via the httpOnly cookie `token` (set automatically by the backend on login, registration, and cleared on logout). The `SecurityFilter` accepts both. In production the frontend uses `withCredentials: true` and the cookie is the primary channel.
 
 **GR02** - Passwords must contain at least 8 characters, including: an uppercase letter, a lowercase letter, a number, and a special character.
 
@@ -79,17 +80,24 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 **Input fields (LoginRequestDTO):**
 
-| Field    | Type   | Required | Validation               |
-|----------|--------|----------|--------------------------|
-| email    | String | Yes      | Valid email format       |
-| password | String | Yes      | Minimum 8 characters     |
+| Field        | Type    | Required | Validation               |
+|--------------|---------|----------|--------------------------|
+| email        | String  | Yes      | Valid email format       |
+| password     | String  | Yes      | Minimum 8 characters     |
+| keepLoggedIn | Boolean | No       | `true` (default) = persistent cookie with `Max-Age`; `false` = session cookie without `Max-Age`, deleted when the browser closes |
 
 **Response (AuthResponseDTO):**
 
 | Field | Type            | Description             |
 |-------|-----------------|-------------------------|
-| token | String          | JWT token               |
+| token | String          | JWT token (transitional — kept in the body during cookie migration to support clients not yet using the cookie) |
 | user  | UserResponseDTO | Data of the logged user |
+
+**Response headers:**
+
+| Header     | Example value                                              |
+|------------|------------------------------------------------------------|
+| Set-Cookie | `token=<jwt>; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=7200` |
 
 **Rules:**
 
@@ -97,11 +105,13 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 **BR-AUTH-02** - The password is checked against the stored BCrypt hash. Incorrect passwords return HTTP 401.
 
-**BR-AUTH-03** - The generated token is valid for 2 hours from the login moment.
+**BR-AUTH-03** - The generated token has a configurable validity period (default 2 hours). When `keepLoggedIn = true`, the cookie receives a `Max-Age` equal to that value; when `false`, the cookie is a session cookie (no `Max-Age`).
 
 **BR-AUTH-04** - If the user status is `QUEUED`, the system returns HTTP 403 with `error = ACCOUNT_QUEUED`, a user-facing message, and `queuePosition`.
 
 **BR-AUTH-05** - If the user status is `DISABLED`, the system returns HTTP 403 with `error = ACCOUNT_DISABLED`.
+
+**BR-AUTH-06** - The cookie is configured with `HttpOnly=true` (inaccessible via JavaScript), `Secure=true` (HTTPS only), and `SameSite=None` (required because the frontend and backend are on different eTLD+1 domains — `.com` vs `.com.br`).
 
 ---
 
@@ -142,9 +152,9 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 **BR-REG-04** - The phone number is normalized to the international standard with country code 55 (Brazil) before sending.
 
-**BR-REG-05** - If `count(status = ACTIVE) < MAX_ACTIVE_USERS`, the system saves the user as `ACTIVE`, generates a JWT token, and returns HTTP 201.
+**BR-REG-05** - If `count(status = ACTIVE) < MAX_ACTIVE_USERS`, the system saves the user as `ACTIVE`, generates a JWT token, sets a persistent httpOnly cookie (`keepLoggedIn=true` fixed for registration), and returns HTTP 201.
 
-**BR-REG-06** - If `count(status = ACTIVE) >= MAX_ACTIVE_USERS`, the system saves the user as `QUEUED`, assigns `queuePosition`, does not generate a token, and returns HTTP 202.
+**BR-REG-06** - If `count(status = ACTIVE) >= MAX_ACTIVE_USERS`, the system saves the user as `QUEUED`, assigns `queuePosition`, does not generate a token, does not set a cookie, and returns HTTP 202.
 
 **BR-REG-07** - If the email already exists with status `QUEUED`, the system returns HTTP 409 and informs the current waitlist position in the error message.
 
@@ -221,7 +231,31 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 ---
 
-### 5.5 Authenticated User Data
+### 5.5 Logout
+
+**Endpoint:** `POST /auth/logout`
+
+**Description:** Ends the user session. The backend expires the httpOnly cookie server-side by responding with `Set-Cookie: token=; Max-Age=0`, forcing the browser to delete the cookie immediately.
+
+**Access:** Public (no token required — the expired cookie is discarded by the browser after the response).
+
+**Response:** HTTP 200, no body.
+
+**Response headers:**
+
+| Header     | Value                                          |
+|------------|------------------------------------------------|
+| Set-Cookie | `token=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0` |
+
+**Rules:**
+
+**BR-LOGOUT-01** - The endpoint does not validate whether the user was authenticated. Any call will expire the cookie in the browser.
+
+**BR-LOGOUT-02** - Because the system is stateless (JWT), the token itself remains cryptographically valid until its natural expiration. The actual protection is the removal of the cookie from the browser — without it, the browser stops sending the token on subsequent requests.
+
+---
+
+### 5.6 Authenticated User Data
 
 **Endpoint:** `GET /auth/me`
 
@@ -233,7 +267,7 @@ VidaLongaFlix is a video and meal plan streaming platform focused on health and 
 
 ---
 
-## 5.6 Waitlist Administration
+## 5.7 Waitlist Administration
 
 **Base endpoint:** `/admin`
 

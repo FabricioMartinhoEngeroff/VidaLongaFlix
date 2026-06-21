@@ -30,7 +30,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 
+
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -82,6 +85,7 @@ class AuthControllerTest {
         when(repository.findByEmail("joao@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("Password1@", "encodedPassword")).thenReturn(true);
         when(tokenService.generateToken(user)).thenReturn("mockToken");
+        when(tokenService.getExpiration()).thenReturn(Duration.ofHours(2));
 
         LoginRequestDTO request = new LoginRequestDTO("joao@example.com", "Password1@");
 
@@ -90,7 +94,11 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("mockToken"))
-                .andExpect(jsonPath("$.user.email").value("joao@example.com"));
+                .andExpect(jsonPath("$.user.email").value("joao@example.com"))
+                .andExpect(cookie().exists("token"))
+                .andExpect(cookie().value("token", "mockToken"))
+                .andExpect(cookie().path("token", "/"))
+                .andExpect(cookie().maxAge("token", 7200));
     }
 
     @Test
@@ -214,7 +222,10 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.queued").value(false))
-                .andExpect(jsonPath("$.token").value("mockToken"));
+                .andExpect(jsonPath("$.token").value("mockToken"))
+                .andExpect(cookie().exists("token"))
+                .andExpect(cookie().value("token", "mockToken"))
+                .andExpect(cookie().httpOnly("token", true));
     }
 
     @Test
@@ -241,7 +252,8 @@ class AuthControllerTest {
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.queued").value(true))
                 .andExpect(jsonPath("$.queuePosition").value(5))
-                .andExpect(jsonPath("$.token").doesNotExist());
+                .andExpect(jsonPath("$.token").doesNotExist())
+                .andExpect(cookie().doesNotExist("token"));
     }
 
     @Test
@@ -265,5 +277,29 @@ class AuthControllerTest {
                         .param("email", "joao@example.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Voce foi removido da fila de espera."));
+    }
+
+    @Test
+    void shouldSetSessionCookieWhenKeepLoggedInIsFalse() throws Exception {
+        when(repository.findByEmail("joao@example.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("Password1@", "encodedPassword")).thenReturn(true);
+        when(tokenService.generateToken(user)).thenReturn("mockToken");
+
+        LoginRequestDTO request = new LoginRequestDTO("joao@example.com", "Password1@", false);
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(cookie().exists("token"))
+                .andExpect(cookie().maxAge("token", -1)); // -1 = cookie de sessão, sem Max-Age
+    }
+
+    @Test
+    void shouldExpireCookieOnLogout() throws Exception {
+        mockMvc.perform(post("/auth/logout"))
+                .andExpect(status().isOk())
+                .andExpect(cookie().exists("token"))
+                .andExpect(cookie().maxAge("token", 0));
     }
 }

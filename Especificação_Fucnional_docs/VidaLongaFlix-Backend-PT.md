@@ -14,6 +14,7 @@
 | 16/05/2026 | Videos divididos em 3 categorias: Bolos Classicos, Bolos Especiais, Receitas Proteicas | Fabricio | Requer reset do banco em producao para reaplicar o seed |
 | 16/05/2026 | Correcao: `/assets/**` liberado publicamente no SecurityConfig (resolvia erro 403 nas capas) | Fabricio | - |
 | 16/05/2026 | Correcao (frontend): resolucao de URL relativa de capas em VideoService e MenuService via `resolveUrl()` | Fabricio | - |
+| 21/06/2026 | Migracao de autenticacao para httpOnly cookie: login/register/logout passam a setar `Set-Cookie: token=…; HttpOnly; Secure; SameSite=None`. Campo `keepLoggedIn` adicionado ao login. Endpoint `POST /auth/logout` criado. `SecurityFilter` aceita token por header Bearer OU por cookie. | Fabricio | Frontend deve usar `withCredentials: true` em todas as requisicoes para a API |
 
 ---
 
@@ -41,7 +42,7 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 ## 4. Regras Gerais
 
-**RG01** - A autenticacao utiliza JWT (JSON Web Token) com validade de 2 horas. O token deve ser enviado no cabecalho `Authorization: Bearer {token}` em todas as requisicoes que exigem autenticacao.
+**RG01** - A autenticacao utiliza JWT (JSON Web Token) com validade configuravel (padrao 2 horas). O token e transmitido de duas formas equivalentes: via cabecalho `Authorization: Bearer {token}` OU via cookie httpOnly `token` (setado automaticamente pelo backend no login, registro e removido no logout). O `SecurityFilter` aceita ambas. Em producao o frontend usa `withCredentials: true` e o cookie é o canal principal.
 
 **RG02** - Senhas devem conter no minimo 8 caracteres, incluindo: letra maiuscula, letra minuscula, numero e caractere especial.
 
@@ -79,17 +80,24 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 **Campos de entrada (LoginRequestDTO):**
 
-| Campo    | Tipo   | Obrigatorio | Validacao               |
-|----------|--------|-------------|--------------------------|
-| email    | String | Sim         | Formato de e-mail valido |
-| password | String | Sim         | Minimo 8 caracteres      |
+| Campo        | Tipo    | Obrigatorio | Validacao               |
+|--------------|---------|-------------|--------------------------|
+| email        | String  | Sim         | Formato de e-mail valido |
+| password     | String  | Sim         | Minimo 8 caracteres      |
+| keepLoggedIn | Boolean | Nao         | `true` (padrao) = cookie persistente com `Max-Age`; `false` = cookie de sessao sem `Max-Age`, apagado ao fechar o browser |
 
 **Retorno (AuthResponseDTO):**
 
 | Campo | Tipo            | Descricao               |
 |-------|-----------------|--------------------------|
-| token | String          | Token JWT                |
+| token | String          | Token JWT (transitorio — mantido no body durante a migracao para permitir clientes que ainda nao usam cookie) |
 | user  | UserResponseDTO | Dados do usuario logado  |
+
+**Headers de resposta:**
+
+| Header     | Valor exemplo                                              |
+|------------|------------------------------------------------------------|
+| Set-Cookie | `token=<jwt>; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=7200` |
 
 **Regras:**
 
@@ -97,11 +105,13 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 **RG-AUTH-02** - A senha e verificada contra o hash BCrypt armazenado. Senhas incorretas retornam HTTP 401.
 
-**RG-AUTH-03** - O token gerado tem validade de 2 horas a partir do momento do login.
+**RG-AUTH-03** - O token gerado tem validade configuravel (padrao 2 horas). Quando `keepLoggedIn = true`, o cookie recebe `Max-Age` igual a esse valor; quando `false`, o cookie e de sessao (sem `Max-Age`).
 
 **RG-AUTH-04** - Se o usuario estiver com status `QUEUED`, o sistema retorna HTTP 403 com `error = ACCOUNT_QUEUED`, mensagem explicativa e `queuePosition`.
 
 **RG-AUTH-05** - Se o usuario estiver com status `DISABLED`, o sistema retorna HTTP 403 com `error = ACCOUNT_DISABLED`.
+
+**RG-AUTH-06** - O cookie e configurado com `HttpOnly=true` (inacessivel via JavaScript), `Secure=true` (apenas HTTPS) e `SameSite=None` (necessario porque frontend e backend estao em dominios de eTLD+1 distintos — `.com` vs `.com.br`).
 
 ---
 
@@ -142,9 +152,9 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 **RG-REG-04** - O numero de telefone e normalizado para o padrao internacional com codigo do pais 55 (Brasil) antes do envio.
 
-**RG-REG-05** - Se `count(status = ACTIVE) < MAX_ACTIVE_USERS`, o sistema salva o usuario com status `ACTIVE`, gera o token JWT e retorna HTTP 201.
+**RG-REG-05** - Se `count(status = ACTIVE) < MAX_ACTIVE_USERS`, o sistema salva o usuario com status `ACTIVE`, gera o token JWT, seta o cookie httpOnly persistente (`keepLoggedIn=true` fixo no registro) e retorna HTTP 201.
 
-**RG-REG-06** - Se `count(status = ACTIVE) >= MAX_ACTIVE_USERS`, o sistema salva o usuario com status `QUEUED`, define `queuePosition`, nao gera token e retorna HTTP 202.
+**RG-REG-06** - Se `count(status = ACTIVE) >= MAX_ACTIVE_USERS`, o sistema salva o usuario com status `QUEUED`, define `queuePosition`, nao gera token, nao seta cookie e retorna HTTP 202.
 
 **RG-REG-07** - Se o e-mail ja estiver cadastrado com status `QUEUED`, o sistema retorna HTTP 409 informando que o usuario ja esta na fila de espera e inclui a posicao atual na mensagem.
 
@@ -221,7 +231,31 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 ---
 
-### 5.5 Dados do Usuario Autenticado
+### 5.5 Logout
+
+**Endpoint:** `POST /auth/logout`
+
+**Descricao:** Encerra a sessao do usuario. O backend expira o cookie httpOnly no servidor retornando `Set-Cookie: token=; Max-Age=0`, forcando o browser a apagar o cookie imediatamente.
+
+**Acesso:** Publico (nao requer token — o cookie invalido e descartado pelo browser apos a resposta).
+
+**Retorno:** HTTP 200 sem body.
+
+**Headers de resposta:**
+
+| Header     | Valor                                          |
+|------------|------------------------------------------------|
+| Set-Cookie | `token=; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=0` |
+
+**Regras:**
+
+**RG-LOGOUT-01** - O endpoint nao valida se o usuario estava autenticado. Qualquer chamada expira o cookie no browser.
+
+**RG-LOGOUT-02** - Por ser stateless (JWT), o token em si continua valido ate sua expiracao natural. A protecao real e a remocao do cookie do browser — sem o cookie, o browser nao envia mais o token nas proximas requisicoes.
+
+---
+
+### 5.6 Dados do Usuario Autenticado
 
 **Endpoint:** `GET /auth/me`
 
@@ -233,7 +267,7 @@ O VidaLongaFlix e uma plataforma de streaming de videos e cardapios voltada para
 
 ---
 
-## 5.6 Administracao da Fila de Espera
+## 5.7 Administracao da Fila de Espera
 
 **Endpoint base:** `/admin`
 

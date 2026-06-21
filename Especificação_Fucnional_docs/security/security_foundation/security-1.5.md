@@ -77,7 +77,9 @@ Abordagem client-side recomendada para aplicações **stateless** (como microsse
 |---|---|
 | `Strict` | Cookie enviado apenas em navegações same-origin. Máxima proteção CSRF. Pode quebrar redirects legítimos de links externos. |
 | `Lax` | Cookie enviado em navegações top-level (clicar em link), mas não em sub-recursos (imagens, `fetch` de fundo). Padrão em browsers modernos. |
-| `None` | Sem restrição cross-origin. Exige `Secure`. Necessário para widgets embarcados — nunca usar para cookies de sessão. |
+| `None` | Sem restrição cross-origin. Exige `Secure`. Requerido quando frontend e backend estão em eTLD+1 distintos (ex: `vidalongaflix.com` e `api.vidalongaflix.com.br`). Nesse cenário cross-domain é a única opção viável. |
+
+> **Nota do projeto (21/06/2026):** O VidaLongaFlix usa `SameSite=None` nos cookies de sessão JWT porque o frontend (`vidalongaflix.com`) e o backend (`api.vidalongaflix.com.br`) pertencem a domínios de eTLD+1 diferentes — `.com` e `.com.br` são TLDs distintos na Public Suffix List. `Strict` ou `Lax` bloqueariam o cookie em toda requisição AJAX do Angular. `SameSite=None; Secure` é, portanto, obrigatório nessa arquitetura, não uma concessão de segurança. A proteção CSRF nesse cenário virá via CSRF token (Sprint CSRF-2 do roadmap).
 
 **Limitação importante:** `SameSite` **não protege cookies armazenados no LocalStorage**. Se o token JWT estiver no LocalStorage, configurar SameSite não tem efeito nenhum sobre ele.
 
@@ -262,16 +264,16 @@ xhr.send();
 
 ## Vulnerabilidades Reais Identificadas no Projeto
 
-| # | Arquivo | Linha | Problema | Tipo de risco |
-|---|---|---|---|---|
-| V1 | `SecurityConfig.java` | 34 | `csrf.disable()` — correto para JWT Bearer stateless, mas **não documentado**. Ao migrar para HttpOnly cookie (security-1.3, Sprint 7), CSRF deve ser reabilitado ou protegido via DBS | CSRF latente — risco ativado na migração para cookie |
-| V2 | `CorsConfig.java` | 19 | `allowedHeaders("*")` — aceita qualquer header customizado de origens permitidas | Exfiltração de headers sensíveis via CORS misconfiguration |
-| V3 | `SecurityConfig.java` | 58 | `headers.disable()` (já identificado em security-1.4) — remove `Vary: Origin` do CORS, que pode causar cache poisoning cross-origin | Cache poisoning + CORS bypass via CDN |
-| V4 | `SecurityConfig.java` | 43 | `/actuator/**` exposto sem autenticação — endpoints como `/actuator/env`, `/actuator/beans`, `/actuator/mappings` revelam a estrutura interna | SSRF interno via Actuator + fingerprinting |
-| V5 | `WhatsAppService.java` | 49 | `String url = "https://graph.facebook.com/" + apiVersion + "/" + phoneNumberId + "/messages"` — URL construída com variáveis de configuração, **não com input do usuário**. Positivo. | ✅ URL não é controlada pelo usuário — sem vetor SSRF direto |
-| V6 | `WhatsAppService.java` | 63 | `new RestTemplate()` criado por chamada — sem connection timeout, sem pool de conexões, sem limites | DoS por thread blocking em falha da API do WhatsApp |
-| V7 | `CorsConfig.java` | 21 | `allowCredentials(true)` — permite envio de cookies cross-origin. Com `allowedOrigins` restrito via env var, é aceitável. Mas se a env var for mal configurada (ex: `*`), combinar `allowCredentials(true)` com wildcard gera erro e fallback inseguro | CSRF + cookie exfiltration se origens estiverem mal configuradas |
-| V8 | (futuro) | — | Se qualquer endpoint vier a aceitar uma URL como parâmetro de input do usuário (ex: thumbnail URL para import, webhook URL para notificações), SSRF passa a ser um vetor real | SSRF — preparar `SsrfProtectionService` antes de qualquer feature de URL-fetch |
+| # | Arquivo | Linha | Problema | Tipo de risco | Status |
+|---|---|---|---|---|---|
+| V1 | `SecurityConfig.java` | 37 | `csrf.disable()` — correto para JWT Bearer stateless. **Migração para cookie iniciada em 21/06/2026**: login/register/logout agora setam httpOnly cookie. CSRF protection deve ser habilitado na próxima fase (Sprint CSRF-2) | CSRF ativo — cookie está sendo enviado pelo browser em todas as requisições | ⚠️ Em andamento — cookie em produção, CSRF token pendente |
+| V2 | `CorsConfig.java` | 19 | ~~`allowedHeaders("*")`~~ — **corrigido**: substituído por lista explícita (`Authorization`, `Content-Type`, `Accept`, `X-Requested-With`) | ~~Exfiltração de headers sensíveis via CORS misconfiguration~~ | ✅ Resolvido (21/06/2026) |
+| V3 | `SecurityConfig.java` | — | `headers.disable()` (já identificado em security-1.4) — remove `Vary: Origin` do CORS, que pode causar cache poisoning cross-origin | Cache poisoning + CORS bypass via CDN | 🔴 Aberto |
+| V4 | `SecurityConfig.java` | 46-47 | `/actuator/health` e `/actuator/info` são públicos; demais endpoints exigem `ROLE_ADMIN`. **Parcialmente resolvido**: as linhas corretas já estão no `SecurityConfig` atual | SSRF interno via Actuator + fingerprinting | ✅ Resolvido |
+| V5 | `WhatsAppService.java` | 49 | `String url = "https://graph.facebook.com/" + apiVersion + "/" + phoneNumberId + "/messages"` — URL construída com variáveis de configuração, **não com input do usuário**. Positivo. | ✅ URL não é controlada pelo usuário — sem vetor SSRF direto | ✅ N/A |
+| V6 | `WhatsAppService.java` | 63 | `new RestTemplate()` criado por chamada — sem connection timeout, sem pool de conexões, sem limites | DoS por thread blocking em falha da API do WhatsApp | 🔴 Aberto |
+| V7 | `CorsConfig.java` | 21 | `allowCredentials(true)` — obrigatório agora que o frontend usa `withCredentials: true` com cookies. Com `allowedOrigins` restrito via env var, é seguro. Nenhum endpoint público combina `allowCredentials(true)` com wildcard origin | Aceitável com a configuração atual | ✅ Aceitável |
+| V8 | (futuro) | — | Se qualquer endpoint vier a aceitar uma URL como parâmetro de input do usuário (ex: thumbnail URL para import, webhook URL para notificações), SSRF passa a ser um vetor real | SSRF — preparar `SsrfProtectionService` antes de qualquer feature de URL-fetch | ⏳ Preventivo |
 
 ---
 
@@ -401,16 +403,16 @@ xhr.send();
 
 ---
 
-#### Cenário F1 — Interceptor envia token apenas para a API própria (proteção CSRF implícita)
+#### Cenário F1 — Interceptor envia `withCredentials: true` apenas para a API própria
 
-**Contexto:** O `auth.interceptor.ts` deve adicionar `Authorization: Bearer` somente para URLs da própria API, não para serviços externos.
+**Contexto (atualizado 21/06/2026):** Com a migração para httpOnly cookie, o `auth.interceptor.ts` não lê mais token do storage. Agora adiciona apenas `withCredentials: true` em chamadas para a API própria, para que o browser inclua o cookie httpOnly automaticamente. Chamadas externas (CDN, Google, etc.) não recebem `withCredentials`.
 
 | Tipo | Situação | Resultado Esperado |
 |---|---|---|
-| ✅ Positivo | Requisição para `https://api.vidalongaflix.com.br/api/videos` | Header `Authorization: Bearer {token}` presente |
-| ✅ Positivo | Requisição para `https://fonts.googleapis.com` | Header `Authorization` **ausente** — token não vaza para terceiros |
-| ❌ Negativo | Interceptor sem filtro de URL envia token para qualquer requisição | Token JWT enviado para CDNs, analytics, terceiros — exfiltração |
-| ❌ Negativo | Formulário HTML externo tenta replicar a requisição POST | Não consegue incluir o header `Authorization: Bearer` — CSRF bloqueado pela arquitetura |
+| ✅ Positivo | Requisição para `https://api.vidalongaflix.com.br/api/videos` | `withCredentials: true` — browser envia o cookie httpOnly automaticamente |
+| ✅ Positivo | Requisição para `https://fonts.googleapis.com` | `withCredentials` **ausente** — cookie não é enviado para terceiros |
+| ✅ Positivo | Header `Authorization` ausente em todas as requisições | Nenhum token legado do localStorage é enviado para nenhuma origem |
+| ❌ Negativo | Formulário HTML externo tenta replicar requisição POST com o cookie | SameSite=None + CORS allowedOrigins restrito bloqueiam a leitura da resposta — mitigado, mas exige CSRF token como próxima camada |
 
 ---
 
@@ -427,14 +429,16 @@ xhr.send();
 
 ---
 
-#### Cenário F3 — Sem `withCredentials: true` enquanto usar Bearer token
+#### Cenário F3 — `withCredentials: true` restrito à API própria (cookie httpOnly)
 
-**Contexto:** `withCredentials: true` é necessário somente quando usar cookies de sessão. Com Bearer token, não deve estar habilitado globalmente.
+**Contexto (atualizado 21/06/2026):** Com a migração para httpOnly cookie, `withCredentials: true` é agora **obrigatório** nas chamadas para a API. O interceptor Angular o adiciona condicionalmente — somente para URLs que começam com `environment.apiUrl`, nunca para terceiros.
 
 | Tipo | Situação | Resultado Esperado |
 |---|---|---|
-| ✅ Positivo | `HttpClient` sem `withCredentials: true` global | Cookies não são enviados para a API — cada requisição é autenticada apenas pelo header Bearer |
-| ❌ Negativo | `withCredentials: true` habilitado globalmente com Bearer token | Cookies de terceiros (analytics, tracking) podem ser enviados desnecessariamente para a API |
+| ✅ Positivo | `HttpClient` para a API com `withCredentials: true` | Cookie httpOnly é enviado — autenticação funciona sem token no storage |
+| ✅ Positivo | `HttpClient` para URL externa sem `withCredentials` | Cookie não é enviado para terceiros — sem vazamento de sessão |
+| ❌ Negativo | `withCredentials: true` ausente na chamada para a API | Browser não inclui o cookie — 401 em todas as requisições autenticadas |
+| ❌ Negativo | `withCredentials: true` habilitado globalmente (sem filtro de URL) | Cookie seria enviado para CDNs e analytics se eles estiverem no mesmo domínio |
 
 ---
 
@@ -808,12 +812,15 @@ provideHttpClient(
 
 ## Resumo — Estado do Projeto Após os Sprints
 
-| Vulnerabilidade | Antes | Depois |
-|---|---|---|
-| `allowedHeaders("*")` no CORS | Qualquer header aceito de origens permitidas | Lista explícita: Authorization, Content-Type, Accept e headers CORS padrão |
-| `/actuator/**` público | Variáveis de ambiente, beans e mappings expostos sem autenticação | Apenas `/actuator/health` público — demais exigem ROLE_ADMIN |
-| `RestTemplate` sem timeout no WhatsApp | Thread pode bloquear indefinidamente em falha da API externa | Timeout de 5s/10s + injeção de dependência (não instanciado por chamada) |
-| Sem proteção SSRF | Nenhum serviço valida URLs de entrada (risco latente) | `SsrfProtectionService` criado como padrão obrigatório para features futuras |
-| CSRF documentação | Justificativa do `csrf.disable()` não documentada | Documentado: correto para JWT Bearer; DBS preparado para migração de cookies |
-| Interceptor sem filtro de URL | Risco de token vazar para serviços externos se interceptor for mal implementado | `auth.interceptor.ts` filtrado por `environment.apiUrl` + spec que confirma |
-| CORS em produção não verificado | Possível misconfiguration silenciosa | Verificação manual com curl + confirmação de que `evil.com` não recebe CORS headers |
+| Vulnerabilidade | Antes | Depois | Status |
+|---|---|---|---|
+| `allowedHeaders("*")` no CORS | Qualquer header aceito de origens permitidas | Lista explícita: Authorization, Content-Type, Accept, X-Requested-With | ✅ Resolvido |
+| `/actuator/**` público | Variáveis de ambiente expostas sem autenticação | Apenas `/actuator/health` e `/actuator/info` públicos — demais exigem ROLE_ADMIN | ✅ Resolvido |
+| `RestTemplate` sem timeout no WhatsApp | Thread pode bloquear indefinidamente em falha da API externa | Timeout de 5s/10s + injeção de dependência (não instanciado por chamada) | 🔴 Pendente (Sprint 3) |
+| Sem proteção SSRF | Nenhum serviço valida URLs de entrada (risco latente) | `SsrfProtectionService` criado como padrão obrigatório para features futuras | 🔴 Pendente (Sprint 4) |
+| Cookie de sessão com `SameSite=Strict` | Quebraria auth em produção (cross-domain) | `SameSite=None; Secure` — obrigatório para arquitetura `.com` + `.com.br` | ✅ Resolvido (21/06/2026) |
+| CSRF — ausência de proteção com cookies | JWT Bearer protege implicitamente; com cookie, proteção some | Cookie httpOnly em produção; CSRF token (DBS) pendente para próxima fase | ⚠️ Em andamento |
+| Token JWT no localStorage | Exposto a XSS — JavaScript consegue ler e exfiltrar | Removido do localStorage; auth via httpOnly cookie (inacessível a JS) | ✅ Resolvido (21/06/2026) |
+| Logout sem expirar cookie no servidor | Cookie continuava válido até 2h após logout | `POST /auth/logout` envia `Max-Age=0` — browser apaga o cookie imediatamente | ✅ Resolvido (21/06/2026) |
+| Interceptor com leitura de token | `getToken()` lia localStorage — código morto após migração | Interceptor simplificado: só adiciona `withCredentials: true` para a API | ✅ Resolvido (21/06/2026) |
+| CORS em produção não verificado | Possível misconfiguration silenciosa | Verificação manual com curl + confirmação de que `evil.com` não recebe CORS headers | ⏳ Pendente (Sprint 7) |

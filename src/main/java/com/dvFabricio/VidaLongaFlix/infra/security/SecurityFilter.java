@@ -10,11 +10,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import jakarta.servlet.http.Cookie;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,8 +45,25 @@ public class SecurityFilter extends OncePerRequestFilter {
     }
 
     private String extractToken(HttpServletRequest request) {
+        String token = extractFromHeader(request);
+        return token != null ? token : extractFromCookie(request);
+    }
+
+    private String extractFromHeader(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         return (authHeader != null && authHeader.startsWith("Bearer ")) ? authHeader.substring(7) : null;
+    }
+
+    private String extractFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        return Arrays.stream(cookies)
+                .filter(c -> "token".equals(c.getName()))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
     }
 
     private void authenticateWithToken(String token) {
