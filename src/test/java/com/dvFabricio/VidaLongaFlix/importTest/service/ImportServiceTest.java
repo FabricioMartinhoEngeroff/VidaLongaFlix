@@ -8,7 +8,7 @@ import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.repositories.CategoryRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.MenuRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;
-import com.dvFabricio.VidaLongaFlix.services.ImportService;
+import com.dvFabricio.VidaLongaFlix.services.media.ImportService;
 import com.opencsv.exceptions.CsvValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,9 +1,9 @@
 package com.dvFabricio.VidaLongaFlix.importTest.controller;
 
-import com.dvFabricio.VidaLongaFlix.controllers.ImportController;
+import com.dvFabricio.VidaLongaFlix.controllers.imports.ImportController;
 import com.dvFabricio.VidaLongaFlix.domain.imports.ImportResultDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
-import com.dvFabricio.VidaLongaFlix.services.ImportService;
+import com.dvFabricio.VidaLongaFlix.services.media.ImportService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

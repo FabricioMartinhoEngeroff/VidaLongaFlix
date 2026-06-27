@@ -1,10 +1,10 @@
 package com.dvFabricio.VidaLongaFlix.passwordResetTest.controller;
 
-import com.dvFabricio.VidaLongaFlix.controllers.PasswordResetController;
+import com.dvFabricio.VidaLongaFlix.controllers.auth.PasswordResetController;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.TokenExpiredException;
-import com.dvFabricio.VidaLongaFlix.services.PasswordResetService;
+import com.dvFabricio.VidaLongaFlix.services.password.PasswordResetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

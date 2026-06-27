@@ -1,7 +1,7 @@
 package com.dvFabricio.VidaLongaFlix.emailTest.service;
 
 import com.dvFabricio.VidaLongaFlix.domain.email.EmailMessage;
-import com.dvFabricio.VidaLongaFlix.services.SmtpEmailService;
+import com.dvFabricio.VidaLongaFlix.services.email.SmtpEmailService;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

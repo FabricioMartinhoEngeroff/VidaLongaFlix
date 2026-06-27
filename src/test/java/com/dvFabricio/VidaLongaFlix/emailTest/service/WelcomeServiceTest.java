@@ -1,8 +1,8 @@
 package com.dvFabricio.VidaLongaFlix.emailTest.service;
 
 import com.dvFabricio.VidaLongaFlix.domain.email.EmailMessage;
-import com.dvFabricio.VidaLongaFlix.services.EmailService;
-import com.dvFabricio.VidaLongaFlix.services.WelcomeService;
+import com.dvFabricio.VidaLongaFlix.services.email.EmailService;
+import com.dvFabricio.VidaLongaFlix.services.email.WelcomeService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

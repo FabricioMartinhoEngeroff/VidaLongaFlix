@@ -1,12 +1,12 @@
 package com.dvFabricio.VidaLongaFlix.categoryTest.controller;
 
-import com.dvFabricio.VidaLongaFlix.controllers.CategoryController;
+import com.dvFabricio.VidaLongaFlix.controllers.content.CategoryController;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
-import com.dvFabricio.VidaLongaFlix.services.CategoryService;
+import com.dvFabricio.VidaLongaFlix.services.content.CategoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

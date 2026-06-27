@@ -8,9 +8,9 @@ import com.dvFabricio.VidaLongaFlix.infra.exception.database.MissingRequiredFiel
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.DuplicateResourceException;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
-import com.dvFabricio.VidaLongaFlix.services.RegistrationLimitService;
-import com.dvFabricio.VidaLongaFlix.services.UserService;
-import com.dvFabricio.VidaLongaFlix.services.WelcomeService;
+import com.dvFabricio.VidaLongaFlix.services.auth.RegistrationLimitService;
+import com.dvFabricio.VidaLongaFlix.services.auth.UserService;
+import com.dvFabricio.VidaLongaFlix.services.email.WelcomeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

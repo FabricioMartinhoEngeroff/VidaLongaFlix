@@ -7,8 +7,8 @@ import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExc
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.TokenExpiredException;
 import com.dvFabricio.VidaLongaFlix.repositories.PasswordResetTokenRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
-import com.dvFabricio.VidaLongaFlix.services.PasswordResetEmailService;
-import com.dvFabricio.VidaLongaFlix.services.PasswordResetService;
+import com.dvFabricio.VidaLongaFlix.services.password.PasswordResetEmailService;
+import com.dvFabricio.VidaLongaFlix.services.password.PasswordResetService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

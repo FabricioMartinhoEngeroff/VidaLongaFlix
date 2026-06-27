@@ -1,11 +1,11 @@
 package com.dvFabricio.VidaLongaFlix.commentTest.controller;
 
-import com.dvFabricio.VidaLongaFlix.controllers.CommentController;
+import com.dvFabricio.VidaLongaFlix.controllers.interaction.CommentController;
 import com.dvFabricio.VidaLongaFlix.domain.comment.CreateCommentDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
-import com.dvFabricio.VidaLongaFlix.services.CommentService;
+import com.dvFabricio.VidaLongaFlix.services.interaction.CommentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

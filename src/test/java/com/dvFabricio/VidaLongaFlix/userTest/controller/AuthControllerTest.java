@@ -1,6 +1,6 @@
 package com.dvFabricio.VidaLongaFlix.userTest.controller;
 
-import com.dvFabricio.VidaLongaFlix.controllers.AuthController;
+import com.dvFabricio.VidaLongaFlix.controllers.auth.AuthController;
 import com.dvFabricio.VidaLongaFlix.domain.auth.QueueLoginErrorDTO;
 import com.dvFabricio.VidaLongaFlix.domain.auth.RegistrationResponseDTO;
 import com.dvFabricio.VidaLongaFlix.domain.auth.RegistrationStatusDTO;
@@ -14,7 +14,7 @@ import com.dvFabricio.VidaLongaFlix.domain.waitlist.WaitlistMessageDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
-import com.dvFabricio.VidaLongaFlix.services.RegistrationLimitService;
+import com.dvFabricio.VidaLongaFlix.services.auth.RegistrationLimitService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

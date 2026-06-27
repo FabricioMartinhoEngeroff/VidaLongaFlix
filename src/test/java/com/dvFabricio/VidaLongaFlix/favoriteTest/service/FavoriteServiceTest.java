@@ -7,7 +7,7 @@ import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.repositories.FavoriteRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
-import com.dvFabricio.VidaLongaFlix.services.FavoriteService;
+import com.dvFabricio.VidaLongaFlix.services.interaction.FavoriteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

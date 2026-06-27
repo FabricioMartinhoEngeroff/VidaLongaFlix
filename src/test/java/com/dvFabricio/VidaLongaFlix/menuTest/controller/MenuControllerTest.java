@@ -1,12 +1,12 @@
 package com.dvFabricio.VidaLongaFlix.menuTest.controller;
 
-import com.dvFabricio.VidaLongaFlix.controllers.MenuController;
+import com.dvFabricio.VidaLongaFlix.controllers.content.MenuController;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.domain.menu.MenuDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
-import com.dvFabricio.VidaLongaFlix.services.MenuService;
+import com.dvFabricio.VidaLongaFlix.services.content.MenuService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

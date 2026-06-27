@@ -2,8 +2,8 @@ package com.dvFabricio.VidaLongaFlix.userTest.service;
 
 import com.dvFabricio.VidaLongaFlix.domain.email.EmailMessage;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
-import com.dvFabricio.VidaLongaFlix.services.EmailService;
-import com.dvFabricio.VidaLongaFlix.services.WaitlistNotificationService;
+import com.dvFabricio.VidaLongaFlix.services.email.EmailService;
+import com.dvFabricio.VidaLongaFlix.services.email.WaitlistNotificationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

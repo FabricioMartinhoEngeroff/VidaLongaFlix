@@ -7,7 +7,7 @@ import com.dvFabricio.VidaLongaFlix.domain.video.Video;
 import com.dvFabricio.VidaLongaFlix.repositories.CommentRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.UserRepository;
 import com.dvFabricio.VidaLongaFlix.repositories.VideoRepository;
-import com.dvFabricio.VidaLongaFlix.services.CommentService;
+import com.dvFabricio.VidaLongaFlix.services.interaction.CommentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

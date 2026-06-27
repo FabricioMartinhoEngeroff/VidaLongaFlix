@@ -582,9 +582,81 @@ DISABLED → não consegue fazer login; conta desativada
 
 ---
 
-## 10. Histórico de Revisões
+## 10. Estrutura de Pacotes
+
+O projeto segue uma organização por **domínio funcional**, espelhando a mesma estrutura nos testes. Cada camada (`controllers`, `services`, `domain`) é subdividida pelos mesmos nomes de domínio — facilitando navegar, adicionar e testar funcionalidades.
+
+```
+src/main/java/.../VidaLongaFlix/
+│
+├── controllers/
+│   ├── auth/          Autenticação, registro, logout, recuperação de senha
+│   ├── admin/         CRUD de vídeos e cardápios, gestão da fila de espera
+│   ├── analytics/     Relatórios de visualizações e comentários (somente ADMIN)
+│   ├── content/       Endpoints públicos de vídeos, cardápios e categorias
+│   ├── user/          Perfil do usuário autenticado
+│   ├── interaction/   Comentários, favoritos e notificações
+│   └── imports/       Importação em massa de conteúdo via JSON
+│
+├── services/
+│   ├── auth/          Regras de negócio de usuário e controle de limite de vagas
+│   ├── content/       Lógica de vídeos, cardápios e categorias
+│   ├── interaction/   Lógica de comentários, favoritos e notificações
+│   ├── email/         Interface EmailService + implementações (SMTP, log, boas-vindas, fila)
+│   ├── password/      Geração de token, validação e envio de e-mail de reset
+│   └── media/         Upload para S3 e importação de conteúdo
+│
+├── repositories/      Interfaces JPA — mantidas planas (10 repositórios, sem subpastas)
+│
+├── domain/            Entidades JPA e DTOs organizados por contexto:
+│   ├── address/       Endereço e enum de Estado
+│   ├── auth/          DTOs de login, registro e resposta de autenticação
+│   ├── category/      Entidade Category, enum CategoryType e DTOs
+│   ├── comment/       Entidade Comment e DTOs
+│   ├── config/        AppConfig (configurações dinâmicas, ex.: limite de usuários)
+│   ├── email/         EmailMessage (modelo de e-mail transacional)
+│   ├── favorite/      Entidade UserFavorite, enum FavoriteContentType e DTOs
+│   ├── imports/       DTO de resultado de importação em massa
+│   ├── menu/          Entidade Menu e DTOs
+│   ├── message/       Message e enum DeliveryStatus (histórico de envios)
+│   ├── notification/  Entidade Notification, enum NotificationType e DTOs
+│   ├── passwordreset/ Entidade PasswordResetToken e DTOs de reset
+│   ├── payment/       Entidade Payment e enum PaymentStatus (reservado para fase futura)
+│   ├── user/          Entidade User, enum Role, enum UserStatus e DTOs
+│   ├── video/         Entidade Video e DTOs
+│   └── waitlist/      DTOs de fila de espera e configuração de limite
+│
+└── infra/
+    ├── config/        DataInitializer, FlywayConfig, MediaResourceConfig, ObservabilityConfig
+    ├── exception/     Exceções customizadas e handlers globais (por tipo: auth, comment, db, resource)
+    └── security/      SecurityConfig, SecurityFilter, CsrfCookieFilter, TokenService, CorsConfig
+```
+
+### Regra de correspondência testes ↔ main
+
+Os testes unitários espelham exatamente o mesmo domínio:
+
+| Pacote de teste          | Corresponde a                              |
+|--------------------------|--------------------------------------------|
+| `userTest/controller`    | `controllers/auth/` + `controllers/user/`  |
+| `userTest/service`       | `services/auth/`                           |
+| `videoTest/controller`   | `controllers/content/` (vídeos)            |
+| `videoTest/service`      | `services/content/` (vídeos)              |
+| `categoryTest/*`         | `controllers/content/` + `services/content/` (categorias) |
+| `commentTest/*`          | `controllers/interaction/` + `services/interaction/` (comentários) |
+| `favoriteTest/*`         | `controllers/interaction/` + `services/interaction/` (favoritos) |
+| `menuTest/*`             | `controllers/content/` + `controllers/admin/` + `services/content/` |
+| `emailTest/service`      | `services/email/`                          |
+| `passwordResetTest/*`    | `controllers/auth/` + `services/password/` |
+| `importTest/*`           | `controllers/imports/` + `services/media/` |
+| `integration/**`         | Testes de ponta a ponta cobrindo todos os domínios |
+
+---
+
+## 11. Histórico de Revisões
 
 | Data       | Descrição                                            | Responsável |
 |------------|------------------------------------------------------|-------------|
-| 17/05/2026 | Criação do documento — cobertura completa do sistema                                             | Fabricio    |
-| 27/06/2026 | Seção 7 expandida: CSRF (Double Submit Cookie), cookie httpOnly, XSS, TDD. RN-13 a RN-18 adicionadas | Fabricio    |
+| 17/05/2026 | Criação do documento — cobertura completa do sistema                                                   | Fabricio    |
+| 27/06/2026 | Seção 7 expandida: CSRF, cookie httpOnly, XSS, TDD. RN-13 a RN-18 adicionadas                         | Fabricio    |
+| 27/06/2026 | Seção 10 adicionada: estrutura de pacotes por domínio com tabela de correspondência testes ↔ main      | Fabricio    |

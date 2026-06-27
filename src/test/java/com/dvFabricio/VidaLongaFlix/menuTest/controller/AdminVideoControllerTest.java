@@ -1,14 +1,14 @@
 package com.dvFabricio.VidaLongaFlix.menuTest.controller;
 
-import com.dvFabricio.VidaLongaFlix.controllers.AdminVideoController;
+import com.dvFabricio.VidaLongaFlix.controllers.admin.AdminVideoController;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryDTO;
 import com.dvFabricio.VidaLongaFlix.domain.category.CategoryType;
 import com.dvFabricio.VidaLongaFlix.domain.video.VideoDTO;
 import com.dvFabricio.VidaLongaFlix.domain.video.VideoRequestDTO;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
-import com.dvFabricio.VidaLongaFlix.services.MediaStorageService;
-import com.dvFabricio.VidaLongaFlix.services.VideoService;
+import com.dvFabricio.VidaLongaFlix.services.media.MediaStorageService;
+import com.dvFabricio.VidaLongaFlix.services.content.VideoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -1,13 +1,13 @@
 package com.dvFabricio.VidaLongaFlix.userTest.controller;
 
-import com.dvFabricio.VidaLongaFlix.controllers.UserController;
+import com.dvFabricio.VidaLongaFlix.controllers.user.UserController;
 import com.dvFabricio.VidaLongaFlix.domain.user.UserDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.domain.user.UserStatus;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.ResourceNotFoundExceptions;
 import com.dvFabricio.VidaLongaFlix.infra.security.TokenService;
-import com.dvFabricio.VidaLongaFlix.services.UserService;
+import com.dvFabricio.VidaLongaFlix.services.auth.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

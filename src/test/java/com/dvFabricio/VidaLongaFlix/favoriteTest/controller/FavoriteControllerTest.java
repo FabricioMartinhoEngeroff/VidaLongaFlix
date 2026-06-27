@@ -1,11 +1,11 @@
 package com.dvFabricio.VidaLongaFlix.favoriteTest.controller;
 
-import com.dvFabricio.VidaLongaFlix.controllers.FavoriteController;
+import com.dvFabricio.VidaLongaFlix.controllers.interaction.FavoriteController;
 import com.dvFabricio.VidaLongaFlix.domain.favorite.FavoriteContentType;
 import com.dvFabricio.VidaLongaFlix.domain.favorite.FavoriteDTO;
 import com.dvFabricio.VidaLongaFlix.domain.user.User;
 import com.dvFabricio.VidaLongaFlix.infra.exception.resource.GlobalExceptionHandler;
-import com.dvFabricio.VidaLongaFlix.services.FavoriteService;
+import com.dvFabricio.VidaLongaFlix.services.interaction.FavoriteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

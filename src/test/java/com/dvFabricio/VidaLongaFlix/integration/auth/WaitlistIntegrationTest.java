@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 
 import java.util.List;
 
-import static com.dvFabricio.VidaLongaFlix.services.RegistrationLimitService.MAX_ACTIVE_USERS_KEY;
+import static com.dvFabricio.VidaLongaFlix.services.auth.RegistrationLimitService.MAX_ACTIVE_USERS_KEY;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
