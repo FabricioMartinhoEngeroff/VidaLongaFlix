@@ -17,13 +17,20 @@ Usuário (navegador)
     │
     ▼
 Angular SPA (CloudFront / S3)
-    │  HTTP + JWT Bearer
+    │  HTTPS
+    │  ├── Requisições autenticadas:  Authorization: Bearer {jwt}
+    │  ├── Requisições sem Bearer:    cookie XSRF-TOKEN + header X-XSRF-TOKEN (CSRF)
+    │  └── Sessão persistida:         cookie httpOnly "token" (JWT, inacessível ao JS)
     ▼
 Spring Boot API (Elastic Beanstalk — porta 8090, context /api)
+    │  Spring Security:
+    │  ├── SecurityFilter: lê JWT do header Bearer ou do cookie "token"
+    │  ├── CsrfFilter: valida Double Submit Cookie (isenta requisições Bearer)
+    │  └── CsrfCookieFilter: escreve XSRF-TOKEN na resposta de cada request
     │
     ├── PostgreSQL (RDS — produção)
     ├── S3 (mídia — vídeos e imagens)
-    └── WhatsApp Business API (Meta — notificações de boas-vindas)
+    └── SMTP (notificações de boas-vindas e recuperação de senha)
 ```
 
 ---
@@ -338,7 +345,9 @@ Tela exibe: limite atual, quantidade de usuários ativos e lista da fila por pos
 
 ---
 
-## 7. Segurança no Frontend
+## 7. Segurança
+
+### 7.1 Controles no Frontend
 
 | Situação                                          | Comportamento esperado                              |
 |---------------------------------------------------|-----------------------------------------------------|
@@ -349,7 +358,184 @@ Tela exibe: limite atual, quantidade de usuários ativos e lista da fila por pos
 | Botão de excluir comentário                       | Visível **somente** para ROLE_ADMIN                 |
 | Botão de favorito (❤️)                            | Visível **somente** para usuários autenticados      |
 | Campo de comentário                               | Habilitado **somente** para usuários autenticados   |
-| Todas as requisições autenticadas                 | Header `Authorization: Bearer {token}` via interceptor Angular |
+| Requisições autenticadas                          | Header `Authorization: Bearer {token}` via `auth.interceptor.ts` |
+| POST / PATCH / DELETE sem Bearer                  | Angular inclui header `X-XSRF-TOKEN` automaticamente via `withXsrfConfiguration()` |
+| Abertura do app com token legado no localStorage  | `loadSession()` apaga o token imediatamente (proteção contra XSS pré-migração) |
+| Logout                                            | Chama `POST /auth/logout` (backend apaga cookie httpOnly) + limpa localStorage |
+
+---
+
+### 7.2 Controles no Backend (Spring Security)
+
+| Camada                   | Mecanismo                                                              |
+|--------------------------|------------------------------------------------------------------------|
+| Autenticação             | JWT validado pelo `SecurityFilter` — lê do header `Authorization: Bearer` ou do cookie `token` |
+| Proteção CSRF            | `CookieCsrfTokenRepository` — padrão Double Submit Cookie              |
+| Isenção CSRF             | Requisições com header `Authorization: Bearer` são automaticamente isentas |
+| Cookie de sessão         | `token` — `httpOnly=true`, `secure=true`, `sameSite=None`, `path=/`   |
+| Cookie CSRF              | `XSRF-TOKEN` — `httpOnly=false` (Angular precisa ler via JS), `sameSite=Strict` |
+| Senhas                   | BCrypt                                                                 |
+| CORS                     | Origens restritas às configuradas em `CORS_ALLOWED_ORIGINS`            |
+| Headers HTTP             | `X-Frame-Options: DENY`, `X-Content-Type-Options`, `HSTS 1 ano`, `Referrer-Policy` |
+| Actuator                 | `/health` e `/info` públicos; demais endpoints exigem `ROLE_ADMIN`     |
+
+---
+
+### 7.3 Proteção CSRF — Como Funciona (Double Submit Cookie)
+
+**O problema que o CSRF resolve:**
+
+Sem proteção CSRF, um site malicioso pode forçar o navegador da vítima a disparar uma requisição para a API enquanto o cookie de sessão é enviado automaticamente pelo browser:
+
+```
+site-malicioso.com → <form action="https://api.vidalongaflix.com.br/api/auth/logout" method="POST">
+navegador da vítima envia o cookie token automaticamente → logout executado sem o usuário saber
+```
+
+**A solução implementada — Double Submit Cookie:**
+
+```
+1. Angular faz qualquer GET  →  backend seta cookie XSRF-TOKEN (JS pode ler)
+2. Angular faz POST/PATCH/DELETE  →  envia:
+      cookie:  XSRF-TOKEN=abc123   (browser envia automaticamente)
+      header:  X-XSRF-TOKEN: abc123  (Angular lê o cookie e copia no header)
+3. Backend compara cookie == header
+      ✅ iguais  → requisição autorizada
+      ❌ diferentes ou header ausente → 403 Forbidden
+```
+
+O site malicioso consegue forçar o browser a enviar o cookie, mas **não consegue ler o cookie XSRF-TOKEN** (política Same-Origin do browser) e portanto não consegue incluir o header `X-XSRF-TOKEN` com o valor correto.
+
+**Implementação no backend (`SecurityConfig.java`):**
+
+```java
+.csrf(csrf -> csrf
+    .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // XSRF-TOKEN legível pelo JS
+    .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+    .ignoringRequestMatchers(request -> {
+        String auth = request.getHeader("Authorization");
+        return auth != null && auth.startsWith("Bearer ");  // Bearer já é seguro, isenta CSRF
+    })
+)
+.addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class) // força escrita do cookie na resposta
+```
+
+**Implementação no frontend (`app.config.ts`):**
+
+```typescript
+provideHttpClient(
+  withInterceptors([authInterceptor]),
+  withXsrfConfiguration({
+    cookieName: 'XSRF-TOKEN',    // mesmo nome configurado no backend
+    headerName: 'X-XSRF-TOKEN'  // mesmo header que o backend valida
+  })
+)
+```
+
+O Angular lê o cookie `XSRF-TOKEN` e inclui o header `X-XSRF-TOKEN` automaticamente em todo POST/PATCH/PUT/DELETE.
+
+---
+
+### 7.4 Proteção XSS — Migração do localStorage para Cookie httpOnly
+
+**O problema que existia:**
+
+Antes da migração, o token JWT ficava em `localStorage`. Qualquer script rodando na página conseguia lê-lo:
+
+```javascript
+// Ataque XSS: script injetado na página
+localStorage.getItem('token') // → 'eyJhbGci...' (token real do usuário)
+// atacante envia para seu servidor e assume a sessão da vítima
+```
+
+**A solução: cookie httpOnly**
+
+O backend (`AuthController.java`) passa a retornar o token em cookie marcado como `httpOnly`:
+
+```java
+ResponseCookie.from("token", token)
+    .httpOnly(true)   // JavaScript não consegue ler — XSS não roubar o token
+    .secure(true)     // apenas HTTPS
+    .sameSite("None") // necessário para cross-origin (frontend no CloudFront, backend no EB)
+    .path("/")
+    .build()
+```
+
+O backend ainda retorna o `token` no corpo JSON para manter compatibilidade com o fluxo Bearer existente. O `SecurityFilter` aceita JWT tanto do header `Authorization: Bearer` quanto do cookie `token`.
+
+**Limpeza de token legado no startup (`auth.service.ts`):**
+
+Usuários que fizeram login antes da migração podiam ainda ter o JWT no `localStorage`. A correção garante que ao abrir o app, qualquer token legado é removido imediatamente — sem esperar login ou logout:
+
+```typescript
+private loadSession() {
+    // Remove tokens legados do localStorage (migração para cookie httpOnly)
+    localStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
+    // ... restante da lógica de sessão
+}
+```
+
+**Logout real (`auth.service.ts`):**
+
+O logout agora chama o endpoint do backend para que o servidor apague o cookie httpOnly (JavaScript não consegue apagar um cookie `httpOnly` diretamente):
+
+```typescript
+logout() {
+    await firstValueFrom(this.http.post(`${this.api.baseURL}/auth/logout`, {}));
+    this.clearSession();
+    this.router.navigate(['/authorization']);
+}
+```
+
+O backend (`AuthController.java`) apaga o cookie setando `maxAge(0)`:
+
+```java
+@PostMapping("/logout")
+public ResponseEntity<Void> logout(HttpServletResponse response) {
+    ResponseCookie expired = ResponseCookie.from("token", "")
+        .httpOnly(true).secure(true).sameSite("None").path("/").maxAge(0).build();
+    response.addHeader(HttpHeaders.SET_COOKIE, expired.toString());
+    return ResponseEntity.ok().build();
+}
+```
+
+---
+
+### 7.5 Ciclo TDD Aplicado às Mudanças de Segurança
+
+As mudanças de segurança foram desenvolvidas seguindo TDD (Test-Driven Development):
+
+**Sequência:**
+1. Escrever teste → teste **falha** (vermelho)
+2. Escrever o mínimo de código para passar → teste **passa** (verde)
+3. Refatorar se necessário
+
+**Testes criados para CSRF (`CsrfProtectionIntegrationTest.java` — backend):**
+
+| Teste | O que verifica |
+|-------|---------------|
+| `shouldSetCsrfCookieOnGetRequest` | GET retorna cookie `XSRF-TOKEN` sem `httpOnly` |
+| `shouldAllowGetRequestWithoutCsrfToken` | GET não precisa de CSRF |
+| `shouldRejectPostWithoutCsrfToken` | POST sem token → 403 |
+| `shouldRejectPostWithMismatchedCsrfToken` | Cookie ≠ header → 403 |
+| `shouldAllowPostWithValidCsrfToken` | Cookie = header → 200 |
+
+> `@DirtiesContext(BEFORE_CLASS)` foi necessário porque `with(csrf())` do Spring Security Test usa reflexão para substituir o `CsrfTokenRepository` no contexto compartilhado — o contexto fresco garante o `CookieCsrfTokenRepository` original.
+
+**Testes criados para CSRF (`auth.interceptor.spec.ts` — frontend):**
+
+| Teste | O que verifica |
+|-------|---------------|
+| `#195 POST para API com cookie CSRF` | Angular inclui `X-XSRF-TOKEN` automaticamente |
+| `#196 GET para API` | GET não inclui header CSRF |
+
+**Testes criados para limpeza de token legado (`auth.service.spec.ts` — frontend):**
+
+| Teste | O que verifica |
+|-------|---------------|
+| `#305 loadSession remove token legado do localStorage` | Token antigo apagado no startup |
+| `#306 loadSession remove token legado do sessionStorage` | Idem para sessionStorage |
 
 ---
 
@@ -387,6 +573,12 @@ DISABLED → não consegue fazer login; conta desativada
 | RN-10  | ROLE_USER só edita e consulta o próprio perfil. ROLE_ADMIN gerencia qualquer usuário.               |
 | RN-11  | Upload de vídeo/capa vai para S3 em produção; URL definitiva é retornada pelo backend.              |
 | RN-12  | Falha no envio de WhatsApp não bloqueia o cadastro do usuário.                                      |
+| RN-13  | CSRF protege todos os POST/PATCH/PUT/DELETE sem Bearer token via padrão Double Submit Cookie.        |
+| RN-14  | O token JWT é retornado no corpo JSON **e** em cookie `httpOnly` — backend aceita ambos.            |
+| RN-15  | Ao inicializar o app, tokens legados no localStorage/sessionStorage são apagados imediatamente.     |
+| RN-16  | Logout chama `POST /auth/logout` — somente o servidor pode apagar um cookie `httpOnly`.             |
+| RN-17  | O cookie `XSRF-TOKEN` deve ser `httpOnly=false` — Angular precisa lê-lo via JavaScript.            |
+| RN-18  | O cookie `token` (JWT) deve ser `httpOnly=true` — JavaScript nunca deve ter acesso direto.         |
 
 ---
 
@@ -394,4 +586,5 @@ DISABLED → não consegue fazer login; conta desativada
 
 | Data       | Descrição                                            | Responsável |
 |------------|------------------------------------------------------|-------------|
-| 17/05/2026 | Criação do documento — cobertura completa do sistema | Fabricio    |
+| 17/05/2026 | Criação do documento — cobertura completa do sistema                                             | Fabricio    |
+| 27/06/2026 | Seção 7 expandida: CSRF (Double Submit Cookie), cookie httpOnly, XSS, TDD. RN-13 a RN-18 adicionadas | Fabricio    |

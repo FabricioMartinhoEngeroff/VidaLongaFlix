@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -39,6 +40,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 ADMIN_EMAIL, ADMIN_PASSWORD);
 
         mockMvc.perform(post("/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -53,6 +55,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 "admin@vidalongaflix.com", "SenhaErrada@1");
 
         mockMvc.perform(post("/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
@@ -66,6 +69,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 "naoexiste@vidalongaflix.com", "Qualquer@123");
 
         mockMvc.perform(post("/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
@@ -76,6 +80,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
         String body = "{\"email\":\"\",\"password\":\"" + ADMIN_PASSWORD + "\"}";
 
         mockMvc.perform(post("/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -86,6 +91,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
         String body = "{\"email\":\"email-invalido\",\"password\":\"" + ADMIN_PASSWORD + "\"}";
 
         mockMvc.perform(post("/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -105,6 +111,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
         );
 
         mockMvc.perform(post("/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -124,6 +131,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
         );
 
         mockMvc.perform(post("/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -141,6 +149,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
         );
 
         mockMvc.perform(post("/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -156,6 +165,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
         );
 
         mockMvc.perform(post("/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
@@ -167,6 +177,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 + "\"password\":\"Senha@1234\",\"phone\":\"(11) 99999-9999\"}";
 
         mockMvc.perform(post("/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
@@ -186,6 +197,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
                 """;
 
         mockMvc.perform(post("/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest())
@@ -199,6 +211,7 @@ class AuthIntegrationTest extends BaseIntegrationTest {
     @Test
     void shouldReturnBadRequestForMalformedJsonOnRegister() throws Exception {
         mockMvc.perform(post("/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Integration User\""))
                 .andExpect(status().isBadRequest())

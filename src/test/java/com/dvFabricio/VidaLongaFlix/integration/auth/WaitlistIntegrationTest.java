@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import java.util.List;
 
 import static com.dvFabricio.VidaLongaFlix.services.RegistrationLimitService.MAX_ACTIVE_USERS_KEY;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -61,6 +62,7 @@ class WaitlistIntegrationTest extends BaseIntegrationTest {
         );
 
         mockMvc.perform(post("/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isAccepted())
@@ -78,6 +80,7 @@ class WaitlistIntegrationTest extends BaseIntegrationTest {
         LoginRequestDTO request = new LoginRequestDTO(QUEUED_EMAIL, "Senha@1234");
 
         mockMvc.perform(post("/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden())
@@ -127,6 +130,7 @@ class WaitlistIntegrationTest extends BaseIntegrationTest {
         LoginRequestDTO login = new LoginRequestDTO(QUEUED_EMAIL, "Senha@1234");
 
         mockMvc.perform(post("/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -147,6 +151,7 @@ class WaitlistIntegrationTest extends BaseIntegrationTest {
 
         LoginRequestDTO login = new LoginRequestDTO(QUEUED_EMAIL, "Senha@1234");
         mockMvc.perform(post("/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -159,11 +164,13 @@ class WaitlistIntegrationTest extends BaseIntegrationTest {
         registerQueuedUser(CANCELLED_EMAIL, "Fila Cancelar");
 
         mockMvc.perform(delete("/auth/waitlist/me")
+                        .with(csrf())
                         .param("email", CANCELLED_EMAIL))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Voce foi removido da fila de espera."));
 
         mockMvc.perform(post("/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequestDTO(CANCELLED_EMAIL, "Senha@1234"))))
                 .andExpect(status().isUnauthorized());
@@ -183,6 +190,7 @@ class WaitlistIntegrationTest extends BaseIntegrationTest {
 
     private void registerQueuedUser(String email, String name) throws Exception {
         mockMvc.perform(post("/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new RegisterRequestDTO(
                                 name,
@@ -195,6 +203,7 @@ class WaitlistIntegrationTest extends BaseIntegrationTest {
 
     private void registerActiveUser(String email, String name) throws Exception {
         mockMvc.perform(post("/auth/register")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new RegisterRequestDTO(
                                 name,

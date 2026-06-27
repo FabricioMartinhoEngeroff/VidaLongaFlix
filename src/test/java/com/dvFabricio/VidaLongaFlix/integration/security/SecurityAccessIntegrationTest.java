@@ -24,14 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Testes de integração focados nas regras de controle de acesso (segurança):
- * <p>
- * - Endpoints públicos devem retornar 200 sem token
- * - Endpoints admin devem retornar 403 sem token ou com ROLE_USER
- * - Endpoints admin devem funcionar com ROLE_ADMIN
- * - Endpoints autenticados devem retornar 403 sem token
- */
+
 class SecurityAccessIntegrationTest extends BaseIntegrationTest {
 
     @Autowired private UserRepository userRepository;

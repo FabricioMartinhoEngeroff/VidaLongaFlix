@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasItem;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -165,7 +166,8 @@ class VideoFlowIntegrationTest extends BaseIntegrationTest {
                 .findFirst().orElseThrow().getId();
 
         // Registra view (endpoint público — não precisa de token)
-        mockMvc.perform(patch("/videos/{id}/view", videoId))
+        mockMvc.perform(patch("/videos/{id}/view", videoId)
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
         // Confirma que views foi incrementado

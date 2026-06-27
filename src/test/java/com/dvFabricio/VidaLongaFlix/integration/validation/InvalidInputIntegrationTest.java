@@ -6,6 +6,7 @@ import org.springframework.http.MediaType;
 
 import java.util.UUID;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -59,6 +60,7 @@ class InvalidInputIntegrationTest extends BaseIntegrationTest {
     @Test
     void shouldReturn400ForMalformedJsonOnLogin() throws Exception {
         mockMvc.perform(post("/auth/login")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{isso nao e json valido}"))
                 .andExpect(status().isBadRequest());

@@ -16,6 +16,7 @@ import org.springframework.http.MediaType;
 
 import java.util.UUID;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -123,9 +124,10 @@ class CommentFlowIntegrationTest extends BaseIntegrationTest {
         CreateCommentDTO request = new CreateCommentDTO("Comentário sem auth", videoId);
 
         mockMvc.perform(post("/comments")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is5xxServerError()); // NullPointerException
+                .andExpect(status().is5xxServerError()); // NullPointerException: user==null, /comments é permitAll
     }
 
     // ─────────────────────────── DELETE ───────────────────────────────────

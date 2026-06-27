@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -49,15 +50,13 @@ public abstract class BaseIntegrationTest {
         return loginAs(ADMIN_EMAIL, ADMIN_PASSWORD);
     }
 
-    /**
-     * Faz login via endpoint real e retorna o Bearer token.
-     */
+
     protected String loginAs(String email, String password) throws Exception {
         LoginRequestDTO body = new LoginRequestDTO(email, password);
-        MvcResult result = mockMvc.perform(
-                        post("/auth/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(body)))
+        MvcResult result = mockMvc.perform(post("/auth/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isOk())
                 .andReturn();
         JsonNode node = objectMapper.readTree(result.getResponse().getContentAsString());

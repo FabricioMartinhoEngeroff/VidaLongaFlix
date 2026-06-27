@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 
 import java.util.UUID;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -100,7 +101,8 @@ class EndToEndFlowIntegrationTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$[?(@.title == 'E2E Vídeo de Saúde')]").exists());
 
         // 3. Registra uma visualização (endpoint é PATCH)
-        mockMvc.perform(patch("/videos/{id}/view", videoId))
+        mockMvc.perform(patch("/videos/{id}/view", videoId)
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
         // Verifica views incrementado
